@@ -1,0 +1,19 @@
+{
+    "name": "@repo/shared",
+    "version": "0.0.0",
+    "private": true,
+    "type": "module",
+    "exports": {
+        ".": "./src/index.ts",
+        "./constants/*": "./src/constants/*.ts",
+        "./schemas/*": "./src/schemas/*.ts",
+        "./types": "./src/types/index.ts"
+    },
+    "dependencies": {
+        "zod": "^4.4.3"
+    },
+    "devDependencies": {
+        "@repo/typescript-config": "*",
+        "typescript": "5.9.2"
+    }
+}
