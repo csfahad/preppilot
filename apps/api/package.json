@@ -1,0 +1,45 @@
+{
+    "name": "api",
+    "module": "src/index.ts",
+    "type": "module",
+    "private": true,
+    "scripts": {
+        "dev": "bun run --hot src/index.ts",
+        "build": "bun build src/index.ts --outdir ./dist --target node",
+        "db:generate": "drizzle-kit generate",
+        "db:migrate": "drizzle-kit migrate",
+        "db:push": "drizzle-kit push",
+        "db:studio": "drizzle-kit studio"
+    },
+    "dependencies": {
+        "@anthropic-ai/sdk": "^0.95.1",
+        "@aws-sdk/client-s3": "^3.1045.0",
+        "@aws-sdk/s3-request-presigner": "^3.1045.0",
+        "@deepgram/sdk": "^5.1.0",
+        "@elevenlabs/elevenlabs-js": "^2.46.0",
+        "@neondatabase/serverless": "^1.1.0",
+        "@repo/shared": "*",
+        "better-auth": "^1.6.9",
+        "bullmq": "^5.76.6",
+        "cors": "^2.8.6",
+        "dotenv": "^17.4.2",
+        "drizzle-orm": "^0.45.2",
+        "express": "^5.2.1",
+        "helmet": "^8.1.0",
+        "ioredis": "^5.10.1",
+        "razorpay": "^2.9.6",
+        "resend": "^6.12.3",
+        "ws": "^8.20.0",
+        "zod": "^4.4.3"
+    },
+    "devDependencies": {
+        "@types/bun": "latest",
+        "@types/cors": "^2.8.18",
+        "@types/express": "^5.0.6",
+        "@types/ws": "^8.18.0",
+        "drizzle-kit": "^0.31.0"
+    },
+    "peerDependencies": {
+        "typescript": "^5"
+    }
+}
