@@ -49,10 +49,8 @@
             "dependencies": {
                 "@base-ui/react": "^1.4.1",
                 "@fontsource-variable/geist": "^5.2.8",
-                "@fontsource-variable/geist-mono": "^5.2.7",
                 "@fontsource-variable/inter": "^5.2.8",
                 "@fontsource-variable/plus-jakarta-sans": "^5.2.8",
-                "@fontsource-variable/space-grotesk": "^5.2.10",
                 "@hookform/resolvers": "^5.0.0",
                 "@neondatabase/serverless": "^1.0.0",
                 "@remixicon/react": "^4.9.0",
@@ -1954,13 +1952,6 @@
             "sha512-cJ6m9e+8MQ5dCYJsLylfZrgBh6KkG4bOLckB35Tr9J/EqdkEM6QllH5PxqP1dhTvFup+HtMRPuz9xOjxXJggxw==",
         ],
 
-        "@fontsource-variable/geist-mono": [
-            "@fontsource-variable/geist-mono@5.2.7",
-            "",
-            {},
-            "sha512-ZKlZ5sjtalb2TwXKs400mAGDlt/+2ENLNySPx0wTz3bP3mWARCsUW+rpxzZc7e05d2qGch70pItt3K4qttbIYA==",
-        ],
-
         "@fontsource-variable/inter": [
             "@fontsource-variable/inter@5.2.8",
             "",
@@ -1973,13 +1964,6 @@
             "",
             {},
             "sha512-iQecBizIdZxezODNHzOn4SvvRMrZL/S8k4MEXGDynCmUrImVW0VmX+tIAMqnADwH4haXlHSXqMgU6+kcfBQJdw==",
-        ],
-
-        "@fontsource-variable/space-grotesk": [
-            "@fontsource-variable/space-grotesk@5.2.10",
-            "",
-            {},
-            "sha512-yJQO/o35/hAP3CFnpdFTwQku2yzJOae2HIpBmqkOVoxhhXJaQP3g+b6Jrz7u+eI7A5ZdCIf88uMWpBJdFiGr5w==",
         ],
 
         "@hono/node-server": [
@@ -5299,13 +5283,13 @@
         ],
 
         "@tanstack/react-router": [
-            "@tanstack/react-router@1.170.1",
+            "@tanstack/react-router@1.170.4",
             "",
             {
                 "dependencies": {
                     "@tanstack/history": "1.162.0",
                     "@tanstack/react-store": "^0.9.3",
-                    "@tanstack/router-core": "1.170.1",
+                    "@tanstack/router-core": "1.171.2",
                     "isbot": "^5.1.22",
                 },
                 "peerDependencies": {
@@ -5313,7 +5297,7 @@
                     "react-dom": ">=18.0.0 || >=19.0.0",
                 },
             },
-            "sha512-s8Nn5c4UhbSyOefxOScvG3TIWlonWJfwb1txYXJvk9BCEqM0W7b0/0bw2Y063QTVofK/Ap4vmhLdmaBlwiT1Aw==",
+            "sha512-cusL4YCTuGGJhjfsXEBm6/SmOAs/G8wRVNadeyN3ofu4OZwX69KAybBEf217buxYzI+FohdJVoigEpJV+tGzIw==",
         ],
 
         "@tanstack/react-router-devtools": [
@@ -5351,18 +5335,18 @@
         ],
 
         "@tanstack/react-start": [
-            "@tanstack/react-start@1.168.2",
+            "@tanstack/react-start@1.168.6",
             "",
             {
                 "dependencies": {
-                    "@tanstack/react-router": "1.170.1",
-                    "@tanstack/react-start-client": "1.167.1",
-                    "@tanstack/react-start-rsc": "0.1.2",
-                    "@tanstack/react-start-server": "1.167.1",
+                    "@tanstack/react-router": "1.170.4",
+                    "@tanstack/react-start-client": "1.167.4",
+                    "@tanstack/react-start-rsc": "0.1.6",
+                    "@tanstack/react-start-server": "1.167.4",
                     "@tanstack/router-utils": "1.162.0",
-                    "@tanstack/start-client-core": "1.169.1",
-                    "@tanstack/start-plugin-core": "1.170.2",
-                    "@tanstack/start-server-core": "1.168.1",
+                    "@tanstack/start-client-core": "1.169.4",
+                    "@tanstack/start-plugin-core": "1.170.6",
+                    "@tanstack/start-server-core": "1.168.4",
                     "pathe": "^2.0.3",
                 },
                 "peerDependencies": {
@@ -5373,40 +5357,40 @@
                 },
                 "optionalPeers": ["@rsbuild/core", "vite"],
             },
-            "sha512-WSlL1qXs/7YW3ZW2OWTo9IMUzm5HI5j0mm+MLDmiH1i8MAXE7VSooHXx0RGYncqvLEC5yzwe+RQ2fXpNyZVYbg==",
+            "sha512-0/vMhec98zdBvcagQB3NKuz4jZX3Z/djOXjpMLeQclYMRWqbj5XA0WBAFLCuA8p84eUoP8yiUkEDH1OUfIYf7A==",
         ],
 
         "@tanstack/react-start-client": [
-            "@tanstack/react-start-client@1.167.1",
+            "@tanstack/react-start-client@1.167.4",
             "",
             {
                 "dependencies": {
-                    "@tanstack/react-router": "1.170.1",
-                    "@tanstack/router-core": "1.170.1",
-                    "@tanstack/start-client-core": "1.169.1",
+                    "@tanstack/react-router": "1.170.4",
+                    "@tanstack/router-core": "1.171.2",
+                    "@tanstack/start-client-core": "1.169.4",
                 },
                 "peerDependencies": {
                     "react": ">=18.0.0 || >=19.0.0",
                     "react-dom": ">=18.0.0 || >=19.0.0",
                 },
             },
-            "sha512-jxF0UEBs7od0BGWnE7kUyKQSb+uD+HhfDFpGCcbK+gploaFvvR08rWgpSrGfzHSjUeFAGMVJ+yQoiVl8SCl1fw==",
+            "sha512-HYr9kbEuXjoqEVhmkuIXK9ckfrx08nHCPQ+PQbZlwHd01wghljcBsdAe/8/xujiKnbihC05owBDmXQoE3v27bQ==",
         ],
 
         "@tanstack/react-start-rsc": [
-            "@tanstack/react-start-rsc@0.1.2",
+            "@tanstack/react-start-rsc@0.1.6",
             "",
             {
                 "dependencies": {
-                    "@tanstack/react-router": "1.170.1",
-                    "@tanstack/react-start-server": "1.167.1",
-                    "@tanstack/router-core": "1.170.1",
+                    "@tanstack/react-router": "1.170.4",
+                    "@tanstack/react-start-server": "1.167.4",
+                    "@tanstack/router-core": "1.171.2",
                     "@tanstack/router-utils": "1.162.0",
-                    "@tanstack/start-client-core": "1.169.1",
+                    "@tanstack/start-client-core": "1.169.4",
                     "@tanstack/start-fn-stubs": "1.162.0",
-                    "@tanstack/start-plugin-core": "1.170.2",
-                    "@tanstack/start-server-core": "1.168.1",
-                    "@tanstack/start-storage-context": "1.167.1",
+                    "@tanstack/start-plugin-core": "1.170.6",
+                    "@tanstack/start-server-core": "1.168.4",
+                    "@tanstack/start-storage-context": "1.167.4",
                     "pathe": "^2.0.3",
                 },
                 "peerDependencies": {
@@ -5422,26 +5406,26 @@
                     "react-server-dom-rspack",
                 ],
             },
-            "sha512-eev2rhu98h1rmuT7iaGsfhejy+nDExuw1FVaU48eZvDRirw5PPmAMkeHVBAV6KlyfPB/rygfbDP10gRXZi6dHw==",
+            "sha512-EIP5Vnc4quTZm5rhhkHAqANHGaXRks+S3FomGMHcN7noTJ3OZviifJXc1nN8pYSFeP8NQ2Sqrkn1Kr/87iWXWA==",
         ],
 
         "@tanstack/react-start-server": [
-            "@tanstack/react-start-server@1.167.1",
+            "@tanstack/react-start-server@1.167.4",
             "",
             {
                 "dependencies": {
                     "@tanstack/history": "1.162.0",
-                    "@tanstack/react-router": "1.170.1",
-                    "@tanstack/router-core": "1.170.1",
-                    "@tanstack/start-client-core": "1.169.1",
-                    "@tanstack/start-server-core": "1.168.1",
+                    "@tanstack/react-router": "1.170.4",
+                    "@tanstack/router-core": "1.171.2",
+                    "@tanstack/start-client-core": "1.169.4",
+                    "@tanstack/start-server-core": "1.168.4",
                 },
                 "peerDependencies": {
                     "react": ">=18.0.0 || >=19.0.0",
                     "react-dom": ">=18.0.0 || >=19.0.0",
                 },
             },
-            "sha512-YVIFnkeGn6hROCN2bsVN0Vm4MOjQxQgCICB+4Jrfuwv2sP6YfG6ybIJC1ae0ZCs7OSDPNe58fbw4e5qr5JXE8w==",
+            "sha512-FckuV/6uQQqycU8ufTtxyQiY4hL3bGn23kq/XFsJVXWtpflY6LAtfOi23CoRL4G8eTVvUa2+WGReZhivwNGZiw==",
         ],
 
         "@tanstack/react-store": [
@@ -5461,7 +5445,7 @@
         ],
 
         "@tanstack/router-core": [
-            "@tanstack/router-core@1.170.1",
+            "@tanstack/router-core@1.171.2",
             "",
             {
                 "dependencies": {
@@ -5471,7 +5455,7 @@
                     "seroval-plugins": "^1.5.4",
                 },
             },
-            "sha512-uYxlIbdw2VY6xcEnBmLJ6lCuULV728vTQoK27BQSKPDMBB3TkV1+vkm8U24AT1iS2EbPVuHli1SNEKYd+WWGWw==",
+            "sha512-sUd+BhGYkBF64LVhmOHnYsc1AutPNch/huohEXiXL4IUgmk17Gy+RkUazvjQhptVdYW5QT+qtATrUr2cQZNHFA==",
         ],
 
         "@tanstack/router-devtools-core": [
@@ -5489,25 +5473,25 @@
         ],
 
         "@tanstack/router-generator": [
-            "@tanstack/router-generator@1.166.42",
+            "@tanstack/router-generator@1.167.5",
             "",
             {
                 "dependencies": {
                     "@babel/types": "^7.28.5",
-                    "@tanstack/router-core": "1.169.2",
-                    "@tanstack/router-utils": "1.161.8",
-                    "@tanstack/virtual-file-routes": "1.161.7",
+                    "@tanstack/router-core": "1.171.2",
+                    "@tanstack/router-utils": "1.162.0",
+                    "@tanstack/virtual-file-routes": "1.162.0",
                     "jiti": "^2.7.0",
                     "magic-string": "^0.30.21",
                     "prettier": "^3.5.0",
                     "zod": "^3.24.2",
                 },
             },
-            "sha512-2qBWC0t78r6b3vI+AbnvCZcFAvbYBDlLuWZrTjQbcjUmwG3qyeQp983tJyDuj9wb5//adG1tgAGXZkJ3aDwdBg==",
+            "sha512-S7h9qs7WjwF1IlMiOxSv+xB/bSOQ6QS84NlApM9iWLVdkbOVUn7RzTaCqw2qdDa5cPrfSiZJ2wK2a6RFDmFubA==",
         ],
 
         "@tanstack/router-plugin": [
-            "@tanstack/router-plugin@1.167.35",
+            "@tanstack/router-plugin@1.168.6",
             "",
             {
                 "dependencies": {
@@ -5517,17 +5501,17 @@
                     "@babel/template": "^7.27.2",
                     "@babel/traverse": "^7.28.5",
                     "@babel/types": "^7.28.5",
-                    "@tanstack/router-core": "1.169.2",
-                    "@tanstack/router-generator": "1.166.42",
-                    "@tanstack/router-utils": "1.161.8",
-                    "@tanstack/virtual-file-routes": "1.161.7",
+                    "@tanstack/router-core": "1.171.2",
+                    "@tanstack/router-generator": "1.167.5",
+                    "@tanstack/router-utils": "1.162.0",
+                    "@tanstack/virtual-file-routes": "1.162.0",
                     "chokidar": "^3.6.0",
                     "unplugin": "^3.0.0",
                     "zod": "^3.24.2",
                 },
                 "peerDependencies": {
                     "@rsbuild/core": ">=1.0.2 || ^2.0.0",
-                    "@tanstack/react-router": "^1.169.2",
+                    "@tanstack/react-router": "^1.170.4",
                     "vite": ">=5.0.0 || >=6.0.0 || >=7.0.0 || >=8.0.0",
                     "vite-plugin-solid": "^2.11.10 || ^3.0.0-0",
                     "webpack": ">=5.92.0",
@@ -5540,7 +5524,7 @@
                     "webpack",
                 ],
             },
-            "sha512-UAScU5VAzLYVY4FML/Cbc5S5TucT4I8Ata05yozGOe4ZfepTKRffA5xWLtD2N+ov5svdv0KTX/kqlZnYPe28mA==",
+            "sha512-u5CNtTWGyFvV8gGWKBt9LdwVGg+ISSBXG/aeeU1/d1YpEKPqlJHS6oN3tvNKOScubeV64HjpeV0tD6fqRfCpvw==",
         ],
 
         "@tanstack/router-ssr-query-core": [
@@ -5575,17 +5559,17 @@
         ],
 
         "@tanstack/start-client-core": [
-            "@tanstack/start-client-core@1.169.1",
+            "@tanstack/start-client-core@1.169.4",
             "",
             {
                 "dependencies": {
-                    "@tanstack/router-core": "1.170.1",
+                    "@tanstack/router-core": "1.171.2",
                     "@tanstack/start-fn-stubs": "1.162.0",
-                    "@tanstack/start-storage-context": "1.167.1",
+                    "@tanstack/start-storage-context": "1.167.4",
                     "seroval": "^1.5.4",
                 },
             },
-            "sha512-rdUvsS3ENBM5aujzJxTxzpBVC22rmJj64y5vtC+Huv3E82T4HLTUmzGvzmxemeyS2LNbXR0igKALp/gAWYN0Zg==",
+            "sha512-2UZ1hLCY80eXkYjRLYASLiJqDXfmlCE3kUknNARgZr7232TMk4ADPDMCp2l506zLXTLKAnI+Wu4jXL2CEadUxQ==",
         ],
 
         "@tanstack/start-fn-stubs": [
@@ -5596,7 +5580,7 @@
         ],
 
         "@tanstack/start-plugin-core": [
-            "@tanstack/start-plugin-core@1.170.2",
+            "@tanstack/start-plugin-core@1.170.6",
             "",
             {
                 "dependencies": {
@@ -5604,12 +5588,12 @@
                     "@babel/core": "^7.28.5",
                     "@babel/types": "^7.28.5",
                     "@rolldown/pluginutils": "1.0.0-beta.40",
-                    "@tanstack/router-core": "1.170.1",
-                    "@tanstack/router-generator": "1.167.2",
-                    "@tanstack/router-plugin": "1.168.2",
+                    "@tanstack/router-core": "1.171.2",
+                    "@tanstack/router-generator": "1.167.5",
+                    "@tanstack/router-plugin": "1.168.6",
                     "@tanstack/router-utils": "1.162.0",
-                    "@tanstack/start-client-core": "1.169.1",
-                    "@tanstack/start-server-core": "1.168.1",
+                    "@tanstack/start-client-core": "1.169.4",
+                    "@tanstack/start-server-core": "1.168.4",
                     "cheerio": "^1.0.0",
                     "exsolve": "^1.0.7",
                     "lightningcss": "^1.32.0",
@@ -5630,31 +5614,31 @@
                 },
                 "optionalPeers": ["@rsbuild/core", "vite"],
             },
-            "sha512-8d4flsNdFxAWr9aOrRWgxyNWOGJH3wMCL5Kjx0f58iNTPO0D/3HSbL3dXBVeYxLHEP56o4SWScsK4j2uuyh5Bg==",
+            "sha512-8XzrZwNvYODjTf6zByQhYd1286YU8O1iecZ2zMhchvkHLTLfvku8xJavjLTaz9MAMM08KiX/oqEwpRiP/aOalg==",
         ],
 
         "@tanstack/start-server-core": [
-            "@tanstack/start-server-core@1.168.1",
+            "@tanstack/start-server-core@1.168.4",
             "",
             {
                 "dependencies": {
                     "@tanstack/history": "1.162.0",
-                    "@tanstack/router-core": "1.170.1",
-                    "@tanstack/start-client-core": "1.169.1",
-                    "@tanstack/start-storage-context": "1.167.1",
+                    "@tanstack/router-core": "1.171.2",
+                    "@tanstack/start-client-core": "1.169.4",
+                    "@tanstack/start-storage-context": "1.167.4",
                     "fetchdts": "^0.1.6",
                     "h3-v2": "npm:h3@2.0.1-rc.20",
                     "seroval": "^1.5.4",
                 },
             },
-            "sha512-vMgPyXM/oJWpHR7hd+Ovhfs8tTJfarALtRvCckJnEtn+FhUiR3EC+LgBydgcn8rLfSWu7jTFGD8BG75HVIROoQ==",
+            "sha512-YF9HRjIh8SyprQxOiAB1puXkGI4PqF2/StX00CXtmLOphFTfuShYOPvmQZXl2XZp6H9vt+qY+BNXucSuLzag9g==",
         ],
 
         "@tanstack/start-storage-context": [
-            "@tanstack/start-storage-context@1.167.1",
+            "@tanstack/start-storage-context@1.167.4",
             "",
-            { "dependencies": { "@tanstack/router-core": "1.170.1" } },
-            "sha512-q9Dkm5PpBSJ9NkB5RUVOM/p5dCF+m1EGpwVdoiaiMFn9ZPO6KHSbmb+3PQ7F7o3DbCy1L7q0qKgClxts9WtK7A==",
+            { "dependencies": { "@tanstack/router-core": "1.171.2" } },
+            "sha512-hI93yABbvcaMWkCtewjxNAZOXcJIWhh7P8um7A76OHA2LmLFaR36Sm8eZ6OQHhPdFob4DMOkwDiCv9sckRvCow==",
         ],
 
         "@tanstack/store": [
@@ -5665,10 +5649,10 @@
         ],
 
         "@tanstack/virtual-file-routes": [
-            "@tanstack/virtual-file-routes@1.161.7",
+            "@tanstack/virtual-file-routes@1.162.0",
             "",
-            { "bin": { "intent": "bin/intent.js" } },
-            "sha512-olW33+Cn+bsCsZKPwEGhlkqS6w3M2slFv11JIobdnCFKMLG97oAI2kWKdx5/zsywTL8flpnoIgaZZPlQTFYhdQ==",
+            {},
+            "sha512-uhOeFyxLcU41HzvrxsGpiWdcMbScY1EDgbZ5K7DVRMYInbLYWAC0EA/kx9wXAoSM8q82bUG2hRl8+EAjE6XAbA==",
         ],
 
         "@testing-library/dom": [
@@ -13384,77 +13368,11 @@
             "sha512-sepffkT8stwnIYbsMBpoCHJuJM5l98FUF2AnE07hfvE0m/qp3R586hw4jF4uadbhvg1ooIdzuu7CsfD2jzCaNA==",
         ],
 
-        "@tanstack/router-generator/@tanstack/router-core": [
-            "@tanstack/router-core@1.169.2",
-            "",
-            {
-                "dependencies": {
-                    "@tanstack/history": "1.161.6",
-                    "cookie-es": "^3.0.0",
-                    "seroval": "^1.5.4",
-                    "seroval-plugins": "^1.5.4",
-                },
-            },
-            "sha512-5sm0DJF1A7Mz+9gy4Gz/lLovNailK3yot4vYvz9MkBUPw26uLnhQiR8hSCYxucjE0wD6Mdlc5l+Z0/XTlZ7xHw==",
-        ],
-
-        "@tanstack/router-generator/@tanstack/router-utils": [
-            "@tanstack/router-utils@1.161.8",
-            "",
-            {
-                "dependencies": {
-                    "@babel/core": "^7.28.5",
-                    "@babel/generator": "^7.28.5",
-                    "@babel/parser": "^7.28.5",
-                    "@babel/types": "^7.28.5",
-                    "ansis": "^4.1.0",
-                    "babel-dead-code-elimination": "^1.0.12",
-                    "diff": "^8.0.2",
-                    "pathe": "^2.0.3",
-                    "tinyglobby": "^0.2.15",
-                },
-            },
-            "sha512-xyiLWEKjfBAVhauDSSjXxyf7s8elU6SM+V050sbkofvGmIIvkwPFtDsX7Gvwh14kBd6iCwAT+RiPvXTxAptY0Q==",
-        ],
-
         "@tanstack/router-generator/zod": [
             "zod@3.25.76",
             "",
             {},
             "sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==",
-        ],
-
-        "@tanstack/router-plugin/@tanstack/router-core": [
-            "@tanstack/router-core@1.169.2",
-            "",
-            {
-                "dependencies": {
-                    "@tanstack/history": "1.161.6",
-                    "cookie-es": "^3.0.0",
-                    "seroval": "^1.5.4",
-                    "seroval-plugins": "^1.5.4",
-                },
-            },
-            "sha512-5sm0DJF1A7Mz+9gy4Gz/lLovNailK3yot4vYvz9MkBUPw26uLnhQiR8hSCYxucjE0wD6Mdlc5l+Z0/XTlZ7xHw==",
-        ],
-
-        "@tanstack/router-plugin/@tanstack/router-utils": [
-            "@tanstack/router-utils@1.161.8",
-            "",
-            {
-                "dependencies": {
-                    "@babel/core": "^7.28.5",
-                    "@babel/generator": "^7.28.5",
-                    "@babel/parser": "^7.28.5",
-                    "@babel/types": "^7.28.5",
-                    "ansis": "^4.1.0",
-                    "babel-dead-code-elimination": "^1.0.12",
-                    "diff": "^8.0.2",
-                    "pathe": "^2.0.3",
-                    "tinyglobby": "^0.2.15",
-                },
-            },
-            "sha512-xyiLWEKjfBAVhauDSSjXxyf7s8elU6SM+V050sbkofvGmIIvkwPFtDsX7Gvwh14kBd6iCwAT+RiPvXTxAptY0Q==",
         ],
 
         "@tanstack/router-plugin/zod": [
@@ -13482,61 +13400,6 @@
             "",
             {},
             "sha512-s3GeJKSQOwBlzdUrj4ISjJj5SfSh+aqn0wjOar4Bx95iV1ETI7F6S/5hLcfAxZ9kXDcyrAkxPlqmd1ZITttf+w==",
-        ],
-
-        "@tanstack/start-plugin-core/@tanstack/router-generator": [
-            "@tanstack/router-generator@1.167.2",
-            "",
-            {
-                "dependencies": {
-                    "@babel/types": "^7.28.5",
-                    "@tanstack/router-core": "1.170.1",
-                    "@tanstack/router-utils": "1.162.0",
-                    "@tanstack/virtual-file-routes": "1.162.0",
-                    "jiti": "^2.7.0",
-                    "magic-string": "^0.30.21",
-                    "prettier": "^3.5.0",
-                    "zod": "^3.24.2",
-                },
-            },
-            "sha512-LpXmZwlCPsZ/SRRraq3vl1y9baGCgvU7W4Re4QFS30ned1RPHq98IH1DuQ8Kwevplr7Vd3+qRPR4e5vFLaB0oA==",
-        ],
-
-        "@tanstack/start-plugin-core/@tanstack/router-plugin": [
-            "@tanstack/router-plugin@1.168.2",
-            "",
-            {
-                "dependencies": {
-                    "@babel/core": "^7.28.5",
-                    "@babel/plugin-syntax-jsx": "^7.27.1",
-                    "@babel/plugin-syntax-typescript": "^7.27.1",
-                    "@babel/template": "^7.27.2",
-                    "@babel/traverse": "^7.28.5",
-                    "@babel/types": "^7.28.5",
-                    "@tanstack/router-core": "1.170.1",
-                    "@tanstack/router-generator": "1.167.2",
-                    "@tanstack/router-utils": "1.162.0",
-                    "@tanstack/virtual-file-routes": "1.162.0",
-                    "chokidar": "^3.6.0",
-                    "unplugin": "^3.0.0",
-                    "zod": "^3.24.2",
-                },
-                "peerDependencies": {
-                    "@rsbuild/core": ">=1.0.2 || ^2.0.0",
-                    "@tanstack/react-router": "^1.170.1",
-                    "vite": ">=5.0.0 || >=6.0.0 || >=7.0.0 || >=8.0.0",
-                    "vite-plugin-solid": "^2.11.10 || ^3.0.0-0",
-                    "webpack": ">=5.92.0",
-                },
-                "optionalPeers": [
-                    "@rsbuild/core",
-                    "@tanstack/react-router",
-                    "vite",
-                    "vite-plugin-solid",
-                    "webpack",
-                ],
-            },
-            "sha512-JTdpCMN0fKDghVKtjE/u7ZY+ccpRL/jLNuC0PilqpgvCE8A4fk2gBgyuuOdzQJ/jITv0dHTcfRT+Lr71RBodIA==",
         ],
 
         "@tanstack/start-plugin-core/zod": [
@@ -14422,34 +14285,6 @@
             "",
             {},
             "sha512-NM8/P9n3XjXhIZn1lLhkFaACTOURQXjWhV4BA/RnOv8xvgqtqpAX9IO4mRQxSx1Rlo4tqzeqb0sOlruaOy3dug==",
-        ],
-
-        "@tanstack/router-generator/@tanstack/router-core/@tanstack/history": [
-            "@tanstack/history@1.161.6",
-            "",
-            {},
-            "sha512-NaOGLRrddszbQj9upGat6HG/4TKvXLvu+osAIgfxPYA+eIvYKv8GKDJOrY2D3/U9MRnKfMWD7bU4jeD4xmqyIg==",
-        ],
-
-        "@tanstack/router-plugin/@tanstack/router-core/@tanstack/history": [
-            "@tanstack/history@1.161.6",
-            "",
-            {},
-            "sha512-NaOGLRrddszbQj9upGat6HG/4TKvXLvu+osAIgfxPYA+eIvYKv8GKDJOrY2D3/U9MRnKfMWD7bU4jeD4xmqyIg==",
-        ],
-
-        "@tanstack/start-plugin-core/@tanstack/router-generator/@tanstack/virtual-file-routes": [
-            "@tanstack/virtual-file-routes@1.162.0",
-            "",
-            {},
-            "sha512-uhOeFyxLcU41HzvrxsGpiWdcMbScY1EDgbZ5K7DVRMYInbLYWAC0EA/kx9wXAoSM8q82bUG2hRl8+EAjE6XAbA==",
-        ],
-
-        "@tanstack/start-plugin-core/@tanstack/router-plugin/@tanstack/virtual-file-routes": [
-            "@tanstack/virtual-file-routes@1.162.0",
-            "",
-            {},
-            "sha512-uhOeFyxLcU41HzvrxsGpiWdcMbScY1EDgbZ5K7DVRMYInbLYWAC0EA/kx9wXAoSM8q82bUG2hRl8+EAjE6XAbA==",
         ],
 
         "@ts-morph/common/fast-glob/glob-parent": [
