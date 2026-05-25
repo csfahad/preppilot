@@ -1,5 +1,4 @@
 // Tier 1: Industries
-
 export const INDUSTRIES = [
     "Technology",
     "Finance",
@@ -21,7 +20,6 @@ export const INDUSTRIES = [
 export type Industry = (typeof INDUSTRIES)[number];
 
 // Tier 2: Functions (with sub-specializations)
-
 export const FUNCTIONS = {
     Engineering: [
         "Frontend",
@@ -76,7 +74,6 @@ export const FUNCTION_CATEGORIES = Object.keys(FUNCTIONS) as FunctionCategory[];
 export const ALL_SUBFUNCTIONS = Object.values(FUNCTIONS).flat();
 
 // Tier 3: Seniority Levels
-
 export const SENIORITY_LEVELS = [
     "Intern",
     "Junior",
@@ -92,7 +89,6 @@ export const SENIORITY_LEVELS = [
 export type SeniorityLevel = (typeof SENIORITY_LEVELS)[number];
 
 // Experience ranges mapped to seniority
-
 export const SENIORITY_EXPERIENCE_YEARS: Record<
     SeniorityLevel,
     { min: number; max: number }
@@ -110,7 +106,6 @@ export const SENIORITY_EXPERIENCE_YEARS: Record<
 
 // Voice Accent Models
 // Regional accents for the AI interviewer voice (mapped to ElevenLabs voice IDs)
-
 export const VOICE_ACCENTS = [
     { id: "american", label: "American", region: "North America" },
     { id: "british", label: "British", region: "Europe" },
@@ -123,7 +118,6 @@ export const VOICE_ACCENTS = [
 export type VoiceAccentId = (typeof VOICE_ACCENTS)[number]["id"];
 
 // Interviewer Tones
-
 export const INTERVIEWER_TONES = [
     {
         id: "friendly",
@@ -150,7 +144,6 @@ export const INTERVIEWER_TONES = [
 export type InterviewerToneId = (typeof INTERVIEWER_TONES)[number]["id"];
 
 // User Plans
-
 export const USER_PLANS = [
     "free",
     "pro_monthly",
