@@ -4,6 +4,8 @@ dist
 dist-ssr
 *.local
 .env
+.env.example
+.env*
 .nitro
 .tanstack
 .wrangler
@@ -11,3 +13,4 @@ dist-ssr
 .vinxi
 __unconfig*
 todos.json
+.vscode
