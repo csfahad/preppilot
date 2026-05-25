@@ -142,8 +142,8 @@ export interface InterviewReport {
 export interface Subscription {
     id: string;
     userId: string;
-    razorpaySubscriptionId: string;
-    razorpayPlanId: string;
+    razorpayOrderId: string;
+    razorpayPaymentId: string | null;
     plan: string;
     status: string;
     currentPeriodStart: string;

@@ -10,62 +10,75 @@ const razorpay = new Razorpay({
     key_secret: process.env.RAZORPAY_KEY_SECRET!,
 });
 
-const PLAN_MAP: Record<string, string> = {
-    pro_monthly: process.env.RAZORPAY_PLAN_PRO_MONTHLY!,
-    pro_annual: process.env.RAZORPAY_PLAN_PRO_ANNUAL!,
+const PLAN_PRICES: Record<string, { amount: number; label: string }> = {
+    pro_monthly: { amount: 49900, label: "Pro Monthly Plan" },
+    pro_annual: { amount: 399900, label: "Pro Annual Plan" },
 };
 
-export async function createSubscription(userId: string, planId: string) {
-    const razorpayPlanId = PLAN_MAP[planId];
-    if (!razorpayPlanId) throw new Error(`Unknown plan: ${planId}`);
+export async function createOrder(
+    userId: string,
+    planId: string,
+    userEmail: string,
+) {
+    const plan = PLAN_PRICES[planId];
+    if (!plan) throw new Error(`Unknown plan: ${planId}`);
 
-    // create subscription in Razorpay
-    const subscription = await razorpay.subscriptions.create({
-        plan_id: razorpayPlanId,
-        total_count: 1,
-        customer_notify: 1,
+    // create order in Razorpay
+    const order = await razorpay.orders.create({
+        amount: plan.amount,
+        currency: "INR",
+        receipt: `${planId.slice(0, 7)}_${userId.slice(-8)}_${Date.now()}`,
         notes: {
             service: "preppilot",
+            plan_id: planId,
+            user_id: userId,
+            user_email: userEmail,
         },
     });
 
-    // save pending subscription
+    // save pending subscription record
     await db.insert(subscriptions).values({
         userId,
-        razorpaySubscriptionId: subscription.id,
-        razorpayPlanId,
+        razorpayOrderId: order.id,
         plan: planId as any,
         status: "pending",
     });
 
     return {
-        subscriptionId: subscription.id,
+        orderId: order.id,
+        amount: plan.amount,
+        currency: "INR",
         razorpayKeyId: process.env.RAZORPAY_KEY_ID!,
+        userEmail,
+        planLabel: plan.label,
     };
 }
 
 export async function verifyPaymentSignature(
-    razorpaySubscriptionId: string,
+    razorpayOrderId: string,
     razorpayPaymentId: string,
     razorpaySignature: string,
 ): Promise<boolean> {
     const hmac = crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!);
-    hmac.update(`${razorpayPaymentId}|${razorpaySubscriptionId}`);
+    hmac.update(`${razorpayOrderId}|${razorpayPaymentId}`);
     const generatedSignature = hmac.digest("hex");
 
     return generatedSignature === razorpaySignature;
 }
 
-export async function activateSubscription(razorpaySubscriptionId: string) {
+export async function activateSubscription(
+    razorpayOrderId: string,
+    razorpayPaymentId: string,
+) {
     const [sub] = await db
         .select()
         .from(subscriptions)
-        .where(eq(subscriptions.razorpaySubscriptionId, razorpaySubscriptionId))
+        .where(eq(subscriptions.razorpayOrderId, razorpayOrderId))
         .limit(1);
 
     if (!sub) throw new Error("Subscription not found");
 
-    // activate subscription
+    // activate subscription with correct period
     const now = new Date();
     const periodEnd = new Date(now);
     if (sub.plan === "pro_annual") {
@@ -78,6 +91,7 @@ export async function activateSubscription(razorpaySubscriptionId: string) {
         .update(subscriptions)
         .set({
             status: "active",
+            razorpayPaymentId,
             currentPeriodStart: now,
             currentPeriodEnd: periodEnd,
             updatedAt: now,
@@ -95,46 +109,30 @@ export async function activateSubscription(razorpaySubscriptionId: string) {
 
 export async function handleWebhook(event: string, payload: any) {
     switch (event) {
-        case "subscription.charged": {
-            const subId = payload.subscription?.entity?.id;
-            if (subId) {
-                await db
-                    .update(subscriptions)
-                    .set({ status: "active", updatedAt: new Date() })
-                    .where(eq(subscriptions.razorpaySubscriptionId, subId));
-            }
-            break;
-        }
-        case "subscription.cancelled": {
-            const subId = payload.subscription?.entity?.id;
-            if (subId) {
-                await db
-                    .update(subscriptions)
-                    .set({ status: "cancelled", updatedAt: new Date() })
-                    .where(eq(subscriptions.razorpaySubscriptionId, subId));
-
-                // downgrade user to free
+        case "payment.captured": {
+            const payment = payload.payment?.entity;
+            const orderId = payment?.order_id;
+            if (orderId) {
                 const [sub] = await db
                     .select()
                     .from(subscriptions)
-                    .where(eq(subscriptions.razorpaySubscriptionId, subId));
+                    .where(eq(subscriptions.razorpayOrderId, orderId))
+                    .limit(1);
 
-                if (sub) {
-                    await db
-                        .update(users)
-                        .set({ plan: "free", updatedAt: new Date() })
-                        .where(eq(users.id, sub.userId));
+                if (sub && sub.status === "pending") {
+                    await activateSubscription(orderId, payment.id);
                 }
             }
             break;
         }
-        case "subscription.completed": {
-            const subId = payload.subscription?.entity?.id;
-            if (subId) {
+        case "payment.failed": {
+            const payment = payload.payment?.entity;
+            const orderId = payment?.order_id;
+            if (orderId) {
                 await db
                     .update(subscriptions)
-                    .set({ status: "expired", updatedAt: new Date() })
-                    .where(eq(subscriptions.razorpaySubscriptionId, subId));
+                    .set({ status: "cancelled", updatedAt: new Date() })
+                    .where(eq(subscriptions.razorpayOrderId, orderId));
             }
             break;
         }

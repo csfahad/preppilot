@@ -7,7 +7,7 @@ export const createSubscriptionSchema = z.object({
 export type CreateSubscriptionInput = z.infer<typeof createSubscriptionSchema>;
 
 export const verifyPaymentSchema = z.object({
-    razorpaySubscriptionId: z.string().min(1),
+    razorpayOrderId: z.string().min(1),
     razorpayPaymentId: z.string().min(1),
     razorpaySignature: z.string().min(1),
 });

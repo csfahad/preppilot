@@ -1,7 +1,7 @@
 import { Router, type Request } from "express";
 import { requireAuth } from "../middleware/auth.js";
 import {
-    createSubscription,
+    createOrder,
     verifyPaymentSignature,
     activateSubscription,
     handleWebhook,
@@ -11,7 +11,6 @@ import crypto from "crypto";
 
 const router = Router();
 
-// create subscription
 router.post("/create-subscription", requireAuth, async (req, res) => {
     try {
         const { planId } = req.body;
@@ -28,15 +27,15 @@ router.post("/create-subscription", requireAuth, async (req, res) => {
             return;
         }
 
-        const result = await createSubscription(req.user!.id, planId);
+        const result = await createOrder(req.user!.id, planId, req.user!.email);
         res.json({ success: true, data: result });
     } catch (error) {
-        console.error("[Payments] Error creating subscription:", error);
+        console.error("[Payments] Error creating order:", error);
         res.status(500).json({
             success: false,
             error: {
                 code: "INTERNAL_ERROR",
-                message: "Failed to create subscription",
+                message: "Failed to create order",
             },
         });
     }
@@ -45,11 +44,11 @@ router.post("/create-subscription", requireAuth, async (req, res) => {
 // verify razorpay checkout signature
 router.post("/verify", requireAuth, async (req, res) => {
     try {
-        const { razorpaySubscriptionId, razorpayPaymentId, razorpaySignature } =
+        const { razorpayOrderId, razorpayPaymentId, razorpaySignature } =
             req.body;
 
         const isValid = await verifyPaymentSignature(
-            razorpaySubscriptionId,
+            razorpayOrderId,
             razorpayPaymentId,
             razorpaySignature,
         );
@@ -65,7 +64,10 @@ router.post("/verify", requireAuth, async (req, res) => {
             return;
         }
 
-        const subscription = await activateSubscription(razorpaySubscriptionId);
+        const subscription = await activateSubscription(
+            razorpayOrderId,
+            razorpayPaymentId,
+        );
         res.json({ success: true, data: subscription });
     } catch (error) {
         console.error("[Payments] Error verifying payment:", error);

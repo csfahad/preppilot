@@ -260,10 +260,10 @@ export const subscriptions = pgTable("subscriptions", {
     userId: uuid("user_id")
         .notNull()
         .references(() => users.id, { onDelete: "cascade" }),
-    razorpaySubscriptionId: varchar("razorpay_subscription_id", {
+    razorpayOrderId: varchar("razorpay_order_id", {
         length: 255,
     }).notNull(),
-    razorpayPlanId: varchar("razorpay_plan_id", { length: 255 }).notNull(),
+    razorpayPaymentId: varchar("razorpay_payment_id", { length: 255 }),
     plan: userPlanEnum("plan").notNull(),
     status: subscriptionStatusEnum("status").notNull().default("pending"),
     currentPeriodStart: timestamp("current_period_start", {
@@ -354,8 +354,7 @@ export const subscriptionsRelations = relations(subscriptions, ({ one }) => ({
     }),
 }));
 
-// Enterprise: Teams
-
+// enterprise: Teams
 export const teamRoleEnum = pgEnum("team_role", ["owner", "admin", "member"]);
 
 export const teams = pgTable("teams", {
@@ -408,8 +407,7 @@ export const teamInvitations = pgTable("team_invitations", {
         .defaultNow(),
 });
 
-// Enterprise Relations
-
+// enterprise Relations
 export const teamsRelations = relations(teams, ({ one, many }) => ({
     owner: one(users, {
         fields: [teams.ownerId],
