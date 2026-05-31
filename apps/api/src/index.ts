@@ -13,6 +13,7 @@ import uploadRouter from "./routes/upload.js";
 import teamsRouter from "./routes/teams.js";
 
 import { auth } from "./lib/auth.js";
+import { isAllowedWebOrigin, webOrigins } from "./lib/origins.js";
 
 import { startReportWorker } from "./jobs/generate-report.js";
 import { startResumeWorker } from "./jobs/parse-resume.js";
@@ -26,10 +27,18 @@ const PORT = parseInt(process.env.PORT!);
 // middlewares
 app.use(
     cors({
-        origin: process.env.WEB_URL!,
+        origin(origin, callback) {
+            if (isAllowedWebOrigin(origin)) {
+                callback(null, true);
+                return;
+            }
+
+            callback(new Error(`CORS origin not allowed: ${origin}`));
+        },
         credentials: true,
     }),
 );
+
 app.use(helmet());
 
 // betterAuth handler
@@ -114,7 +123,7 @@ try {
 server.listen(PORT, () => {
     console.log(`\nPrepPilot API running on http://localhost:${PORT}`);
     console.log(`Environment: ${process.env.NODE_ENV}`);
-    console.log(`Frontend: ${process.env.WEB_URL}\n`);
+    console.log(`Frontends: ${webOrigins.join(", ")}\n`);
 });
 
 async function shutdown() {

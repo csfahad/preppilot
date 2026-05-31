@@ -2,6 +2,14 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "../db/index.js";
 import * as schema from "../db/schema.js";
+import { webOrigins } from "./origins.js";
+
+const apiUrl = process.env.API_URL!;
+const useCrossSiteCookies =
+    process.env.AUTH_CROSS_SITE_COOKIES === "true" ||
+    (process.env.AUTH_CROSS_SITE_COOKIES !== "false" &&
+        (process.env.NODE_ENV === "production" ||
+            apiUrl.startsWith("https://")));
 
 export const auth = betterAuth({
     database: drizzleAdapter(db, {
@@ -9,7 +17,7 @@ export const auth = betterAuth({
         schema,
     }),
     secret: process.env.BETTER_AUTH_SECRET!,
-    baseURL: process.env.API_URL!,
+    baseURL: apiUrl,
     basePath: "/api/auth",
     socialProviders: {
         google: {
@@ -29,7 +37,7 @@ export const auth = betterAuth({
             maxAge: 60 * 5,
         },
     },
-    trustedOrigins: [process.env.WEB_URL!],
+    trustedOrigins: webOrigins,
     advanced: {
         database: {
             generateId: () => crypto.randomUUID(),
@@ -38,8 +46,8 @@ export const auth = betterAuth({
             enabled: false,
         },
         defaultCookieAttributes: {
-            sameSite: "lax",
-            secure: process.env.NODE_ENV === "production",
+            sameSite: useCrossSiteCookies ? "none" : "lax",
+            secure: useCrossSiteCookies,
             path: "/",
         },
     },
