@@ -122,6 +122,10 @@ export const RADAR_CATEGORIES = [
 
 export type RadarCategory = (typeof RADAR_CATEGORIES)[number];
 
+function includesString(values: readonly string[] | undefined, value: string) {
+    return values?.includes(value) ?? false;
+}
+
 export function getApplicableInterviewTypes(
     functionCategory: string,
     seniority: string,
@@ -129,10 +133,10 @@ export function getApplicableInterviewTypes(
     return INTERVIEW_TYPES.filter((type) => {
         if (type.applicableToAll) return true;
         if ("applicableFunctions" in type && type.applicableFunctions) {
-            return type.applicableFunctions.includes(functionCategory as any);
+            return includesString(type.applicableFunctions, functionCategory);
         }
         if ("applicableSeniorities" in type && type.applicableSeniorities) {
-            return type.applicableSeniorities.includes(seniority as any);
+            return includesString(type.applicableSeniorities, seniority);
         }
         return false;
     });
