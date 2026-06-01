@@ -10,6 +10,7 @@ import {
     IconBrain,
     IconShieldCheck,
     IconWorld,
+    IconBook2,
 } from "@tabler/icons-react";
 
 export const Route = createFileRoute("/landing")({
@@ -41,6 +42,12 @@ function LandingPage() {
                         >
                             How It Works
                         </a>
+                        <Link
+                            to="/interview-questions"
+                            className="hover:text-foreground transition-colors"
+                        >
+                            Questions
+                        </Link>
                         <Link
                             to="/pricing"
                             className="hover:text-foreground transition-colors"
@@ -103,12 +110,13 @@ function LandingPage() {
                                 Start Free Interview{" "}
                                 <IconArrowRight className="w-5 h-5" />
                             </Link>
-                            <a
-                                href="#how-it-works"
+                            <Link
+                                to="/interview-questions"
                                 className="flex items-center gap-2 px-8 py-4 rounded-2xl border border-border text-foreground font-medium hover:bg-accent transition-all"
                             >
-                                See How It Works
-                            </a>
+                                <IconBook2 className="w-5 h-5" />
+                                Browse Questions
+                            </Link>
                         </div>
                         <p className="text-sm text-muted-foreground mt-6">
                             3 free interviews • No credit card required
@@ -467,6 +475,12 @@ function LandingPage() {
                                 className="hover:text-foreground transition-colors"
                             >
                                 Pricing
+                            </Link>
+                            <Link
+                                to="/interview-questions"
+                                className="hover:text-foreground transition-colors"
+                            >
+                                Questions
                             </Link>
                             <a
                                 href="/terms"
