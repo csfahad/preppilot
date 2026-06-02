@@ -10,12 +10,14 @@ import { WS_URL } from "@/lib/api-url";
 
 interface VoicePanelProps {
     interviewId: string;
+    voiceAccent?: string | null;
     onTranscript: (text: string) => void;
     disabled?: boolean;
 }
 
 export function VoicePanel({
     interviewId,
+    voiceAccent,
     onTranscript,
     disabled,
 }: VoicePanelProps) {
@@ -27,10 +29,12 @@ export function VoicePanel({
         duration,
         volume,
         transcript,
+        connectionStatus,
+        error,
         startRecording,
         stopRecording,
         togglePause,
-    } = useVoiceRecorder({ wsUrl, onTranscript });
+    } = useVoiceRecorder({ interviewId, voiceAccent, wsUrl, onTranscript });
 
     const formatDuration = (s: number) =>
         `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, "0")}`;
@@ -77,11 +81,13 @@ export function VoicePanel({
                 {!isRecording ? (
                     <button
                         onClick={startRecording}
-                        disabled={disabled}
+                        disabled={disabled || connectionStatus === "connecting"}
                         className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-primary text-primary-foreground font-medium hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
                     >
                         <IconMicrophone className="w-5 h-5" />
-                        Start Speaking
+                        {connectionStatus === "connecting"
+                            ? "Connecting..."
+                            : "Start Speaking"}
                     </button>
                 ) : (
                     <>
@@ -118,6 +124,9 @@ export function VoicePanel({
                         Recording...
                     </span>
                 </div>
+            )}
+            {error && (
+                <p className="mt-4 text-center text-xs text-red-500">{error}</p>
             )}
         </div>
     );
