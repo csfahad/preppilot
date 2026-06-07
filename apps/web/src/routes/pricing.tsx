@@ -3,6 +3,8 @@ import { useState } from "react";
 import { motion } from "motion/react";
 import { api } from "@/lib/api-client";
 import { useSession } from "@/lib/auth-client";
+import Header from "@/components/header";
+import PublicHeader from "@/components/public-header";
 import {
     IconCheck,
     IconX,
@@ -10,7 +12,6 @@ import {
     IconSparkles,
     IconMicrophone,
     IconChartBar,
-    IconArrowLeft,
 } from "@tabler/icons-react";
 
 export const Route = createFileRoute("/pricing")({
@@ -120,16 +121,10 @@ function PricingPage() {
 
     return (
         <div className="min-h-screen bg-background">
+            {session ? <Header /> : <PublicHeader />}
             <script src="https://checkout.razorpay.com/v1/checkout.js" />
 
-            <div className="max-w-5xl mx-auto px-4 py-12">
-                <Link
-                    to="/dashboard"
-                    className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8"
-                >
-                    <IconArrowLeft className="w-4 h-4" /> Back to Dashboard
-                </Link>
-
+            <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -249,7 +244,7 @@ function PricingPage() {
                         </span>
                     </div>
                 </motion.div>
-            </div>
+            </main>
         </div>
     );
 }

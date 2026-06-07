@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { useSession } from "@/lib/auth-client";
 import { useEffect } from "react";
+import Header from "@/components/header";
 
 export const Route = createFileRoute("/_authenticated")({
     component: AuthenticatedLayout,
@@ -29,5 +30,10 @@ function AuthenticatedLayout() {
 
     if (!session) return null;
 
-    return <Outlet />;
+    return (
+        <div className="min-h-screen bg-background">
+            <Header />
+            <Outlet />
+        </div>
+    );
 }

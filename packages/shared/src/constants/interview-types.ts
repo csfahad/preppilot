@@ -33,7 +33,7 @@ export const INTERVIEW_TYPES = [
     },
     {
         id: "hr_screening",
-        label: "HR / Screening",
+        label: "HR Screening",
         description: "Salary expectations, availability, motivation",
         questionCountRange: { min: 2, max: 4 },
         applicableToAll: true,

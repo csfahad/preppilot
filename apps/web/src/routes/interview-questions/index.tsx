@@ -1,6 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
 import { motion } from "motion/react";
+import { useSession } from "@/lib/auth-client";
+import Header from "@/components/header";
+import PublicHeader from "@/components/public-header";
 import {
     INDUSTRIES,
     FUNCTIONS,
@@ -113,6 +116,7 @@ function getInterviewTypeId(questionType: string): InterviewTypeId {
 }
 
 function InterviewQuestionsPage() {
+    const { data: session } = useSession();
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedCategory, setSelectedCategory] = useState<string | null>(
         null,
@@ -140,9 +144,10 @@ function InterviewQuestionsPage() {
 
     return (
         <div className="min-h-screen bg-background">
+            {session ? <Header /> : <PublicHeader />}
             {/* SEO Header */}
             <div className="border-b border-border bg-muted/30">
-                <div className="max-w-5xl mx-auto px-4 py-16 text-center">
+                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -173,7 +178,7 @@ function InterviewQuestionsPage() {
                 </div>
             </div>
 
-            <div className="max-w-5xl mx-auto px-4 py-8">
+            <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Category filters */}
                 <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-8 scrollbar-hide">
                     <button
@@ -348,7 +353,7 @@ function InterviewQuestionsPage() {
                         <IconChevronRight className="w-4 h-4" />
                     </Link>
                 </div>
-            </div>
+            </main>
         </div>
     );
 }

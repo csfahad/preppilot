@@ -197,21 +197,28 @@ function NewInterviewPage() {
     };
 
     return (
-        <div className="min-h-screen bg-background">
-            <div className="max-w-3xl mx-auto px-4 py-8">
+        <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <div className="max-w-4xl mx-auto">
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
+                    className="mb-8"
                 >
-                    <h1 className="font-heading text-3xl font-bold text-foreground mb-2">
+                    <h1 className="font-heading text-3xl font-bold text-foreground">
                         Configure Interview
                     </h1>
-                    <p className="text-muted-foreground mb-8">
+                    <p className="text-muted-foreground mt-2">
                         Set up your mock interview session
                     </p>
                 </motion.div>
 
-                <div className="space-y-8">
+                <form
+                    onSubmit={(event) => {
+                        event.preventDefault();
+                        void handleStart();
+                    }}
+                    className="bg-card border border-border rounded-2xl p-5 sm:p-8 space-y-8"
+                >
                     {search.focusQuestion && (
                         <section className="rounded-xl border border-primary/20 bg-primary/5 p-4">
                             <p className="text-xs font-semibold uppercase tracking-wide text-primary mb-2">
@@ -224,7 +231,7 @@ function NewInterviewPage() {
                     )}
 
                     {/* Role */}
-                    <section>
+                    <section className="space-y-2">
                         <label className="text-sm font-semibold text-foreground block mb-2">
                             Role Title
                         </label>
@@ -242,12 +249,13 @@ function NewInterviewPage() {
                         <label className="text-sm font-semibold text-foreground block mb-3">
                             Question Types
                         </label>
-                        <div className="grid grid-cols-2 gap-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             {INTERVIEW_TYPES.map((type) => (
                                 <button
+                                    type="button"
                                     key={type.id}
                                     onClick={() => toggleType(type.id)}
-                                    className={`p-3 rounded-xl border text-left text-sm transition-all cursor-pointer ${
+                                    className={`min-h-20 p-4 rounded-xl border text-left text-sm transition-all cursor-pointer ${
                                         selectedTypes.includes(type.id)
                                             ? "border-primary bg-primary/10 text-primary"
                                             : "border-border hover:border-primary/50"
@@ -274,8 +282,9 @@ function NewInterviewPage() {
                         <label className="text-sm font-semibold text-foreground block mb-3">
                             Interview Mode
                         </label>
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <button
+                                type="button"
                                 onClick={() => setMode("text")}
                                 className={`p-4 rounded-xl border flex items-center gap-3 transition-all cursor-pointer ${
                                     mode === "text"
@@ -296,6 +305,7 @@ function NewInterviewPage() {
                                 </div>
                             </button>
                             <button
+                                type="button"
                                 onClick={() => voiceEnabled && setMode("voice")}
                                 disabled={!voiceEnabled}
                                 className={`p-4 rounded-xl border flex items-center gap-3 transition-all ${
@@ -332,6 +342,7 @@ function NewInterviewPage() {
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                                 {VOICE_ACCENTS.map((accent) => (
                                     <button
+                                        type="button"
                                         key={accent.id}
                                         onClick={() =>
                                             selectVoiceAccent(accent.id)
@@ -364,12 +375,13 @@ function NewInterviewPage() {
                         <label className="text-sm font-semibold text-foreground block mb-3">
                             Interviewer Tone
                         </label>
-                        <div className="grid grid-cols-2 gap-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             {INTERVIEWER_TONES.map((t) => (
                                 <button
+                                    type="button"
                                     key={t.id}
                                     onClick={() => setTone(t.id)}
-                                    className={`p-3 rounded-xl border text-left text-sm transition-all cursor-pointer ${
+                                    className={`min-h-18 p-4 rounded-xl border text-left text-sm transition-all cursor-pointer ${
                                         tone === t.id
                                             ? "border-primary bg-primary/10 text-primary"
                                             : "border-border hover:border-primary/50"
@@ -385,7 +397,7 @@ function NewInterviewPage() {
                     </section>
 
                     {/* Duration & Timer */}
-                    <div className="grid grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <section>
                             <label className="text-sm font-semibold text-foreground block mb-3">
                                 Duration
@@ -393,6 +405,7 @@ function NewInterviewPage() {
                             <div className="flex gap-2">
                                 {["15", "30", "45", "60"].map((d) => (
                                     <button
+                                        type="button"
                                         key={d}
                                         onClick={() => setDuration(d)}
                                         className={`flex-1 py-2.5 rounded-lg border text-sm font-medium transition-all cursor-pointer ${
@@ -472,9 +485,9 @@ function NewInterviewPage() {
 
                     {/* Start Button */}
                     <motion.button
+                        type="submit"
                         whileHover={{ scale: 1.01 }}
                         whileTap={{ scale: 0.99 }}
-                        onClick={handleStart}
                         disabled={
                             loading || !roleTitle || selectedTypes.length === 0
                         }
@@ -492,8 +505,8 @@ function NewInterviewPage() {
                             </>
                         )}
                     </motion.button>
-                </div>
+                </form>
             </div>
-        </div>
+        </main>
     );
 }
