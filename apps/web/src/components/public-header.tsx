@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 export default function PublicHeader() {
     return (
         <nav className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
-            <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div className="max-w-full mx-auto px-4 h-16 flex items-center justify-between">
                 <Link
                     to="/landing"
                     className="font-heading text-xl font-bold tracking-tight"

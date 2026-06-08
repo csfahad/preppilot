@@ -240,7 +240,7 @@ function NewInterviewPage() {
     };
 
     return (
-        <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
             <div className="max-w-4xl mx-auto">
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}

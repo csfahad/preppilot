@@ -147,7 +147,7 @@ function InterviewRoom() {
     return (
         <main className="flex min-h-[calc(100vh-4rem)] flex-col">
             <div className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-16 z-40">
-                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <span className="text-sm font-medium text-muted-foreground">
                             Question {store.currentQuestionIndex + 1} of{" "}
@@ -181,7 +181,7 @@ function InterviewRoom() {
                 </div>
             </div>
 
-            <div className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 flex flex-col">
+            <div className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 flex flex-col">
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={currentQuestion.id}

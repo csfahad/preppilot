@@ -7,7 +7,6 @@ import {
     IconChartBar,
     IconTarget,
     IconArrowRight,
-    IconBolt,
     IconBrain,
     IconShieldCheck,
     IconWorld,
@@ -31,17 +30,13 @@ function LandingPage() {
                     <div className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-primary/8 blur-3xl" />
                 </div>
 
-                <div className="max-w-6xl mx-auto px-4 relative">
+                <div className="max-w-7xl mx-auto px-4 relative">
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.7 }}
                         className="text-center max-w-3xl mx-auto"
                     >
-                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
-                            <IconBolt className="w-4 h-4" /> AI-Powered Mock
-                            Interviews
-                        </div>
                         <h1 className="font-heading text-5xl md:text-7xl font-bold tracking-tight text-foreground leading-[1.1] mb-6">
                             Ace your next
                             <br />
@@ -138,7 +133,7 @@ function LandingPage() {
 
             {/* Social proof */}
             <section className="py-12 border-y border-border/50 bg-muted/30">
-                <div className="max-w-6xl mx-auto px-4">
+                <div className="max-w-7xl mx-auto px-4">
                     <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-4 text-sm text-muted-foreground">
                         <span>
                             <strong className="text-foreground">2,400+</strong>{" "}
@@ -165,7 +160,7 @@ function LandingPage() {
 
             {/* Features */}
             <section id="features" className="py-24">
-                <div className="max-w-6xl mx-auto px-4">
+                <div className="max-w-7xl mx-auto px-4">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -256,7 +251,7 @@ function LandingPage() {
                 id="how-it-works"
                 className="py-24 bg-muted/30 border-y border-border/50"
             >
-                <div className="max-w-6xl mx-auto px-4">
+                <div className="max-w-7xl mx-auto px-4">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -316,7 +311,7 @@ function LandingPage() {
 
             {/* Testimonials */}
             <section className="py-24">
-                <div className="max-w-6xl mx-auto px-4">
+                <div className="max-w-7xl mx-auto px-4">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -410,7 +405,7 @@ function LandingPage() {
 
             {/* Footer */}
             <footer className="py-12 border-t border-border">
-                <div className="max-w-6xl mx-auto px-4">
+                <div className="max-w-7xl mx-auto px-4">
                     <div className="flex flex-col md:flex-row items-center justify-between gap-6">
                         <div>
                             <p className="font-heading text-lg font-bold">

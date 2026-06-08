@@ -73,7 +73,7 @@ function ReportPage() {
         : [];
 
     return (
-        <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="flex items-center justify-between mb-8">
                 <div />
                 <button className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-border text-sm hover:bg-accent transition-colors cursor-pointer">
