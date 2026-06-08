@@ -22,19 +22,24 @@ export const Route = createFileRoute("/_authenticated/dashboard/")({
 
 function DashboardPage() {
     const { data: session } = useSession();
-    const { plan, interviewCount, setPlan } = useSubscriptionStore();
+    const {
+        plan,
+        interviewCount,
+        fetchPlan,
+        canStartInterview,
+        maxInterviews,
+    } = useSubscriptionStore();
     const [interviews, setInterviews] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         async function loadData() {
             try {
-                const interviewRes = await api.listInterviews();
+                const [interviewRes] = await Promise.all([
+                    api.listInterviews(),
+                    fetchPlan(),
+                ]);
                 setInterviews(interviewRes.data || []);
-
-                if (session?.user) {
-                    setPlan("free", interviewRes.data?.length || 0);
-                }
             } catch (err) {
                 console.error("Dashboard load error:", err);
             } finally {
@@ -42,7 +47,7 @@ function DashboardPage() {
             }
         }
         loadData();
-    }, [session, setPlan]);
+    }, [session, fetchPlan]);
 
     const completedInterviews = interviews.filter(
         (i: any) => i.status === "completed",
@@ -103,8 +108,12 @@ function DashboardPage() {
                         label: "Plan",
                         value:
                             plan === "free"
-                                ? `Free (${interviewCount}/3)`
-                                : "Pro",
+                                ? `Free (${interviewCount}/${maxInterviews})`
+                                : plan === "pro_monthly"
+                                  ? "Pro Monthly"
+                                  : plan === "pro_annual"
+                                    ? "Pro Annual"
+                                    : "Pro",
                         color: "text-purple-500",
                     },
                 ].map((stat, i) => (
@@ -355,7 +364,7 @@ function DashboardPage() {
                         <div>
                             <h3 className="font-heading text-lg font-semibold text-foreground flex items-center gap-2">
                                 <IconCrown className="w-5 h-5 text-primary" />
-                                {interviewCount >= 3
+                                {!canStartInterview()
                                     ? "You've used all free interviews"
                                     : "1 free interview remaining"}
                             </h3>
