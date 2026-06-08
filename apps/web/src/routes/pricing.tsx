@@ -3,6 +3,7 @@ import { useState } from "react";
 import { motion } from "motion/react";
 import { api } from "@/lib/api-client";
 import { useSession } from "@/lib/auth-client";
+import { useSubscriptionStore } from "@/stores/subscription";
 import Header from "@/components/header";
 import PublicHeader from "@/components/public-header";
 import {
@@ -78,6 +79,7 @@ const PLANS = [
 function PricingPage() {
     const { data: session } = useSession();
     const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+    const { plan: currentPlan, fetchPlan } = useSubscriptionStore();
 
     const handleSubscribe = async (planId: string) => {
         if (planId === "free") return;
@@ -105,6 +107,7 @@ function PricingPage() {
                         razorpayPaymentId: response.razorpay_payment_id,
                         razorpaySignature: response.razorpay_signature,
                     });
+                    await fetchPlan();
                     window.location.href = "/dashboard";
                 },
                 theme: { color: "#65a30d" },
@@ -205,19 +208,26 @@ function PricingPage() {
                                 onClick={() => handleSubscribe(plan.id)}
                                 disabled={
                                     plan.id === "free" ||
+                                    plan.id === currentPlan ||
+                                    (currentPlan !== "free" &&
+                                        plan.id !== "free") ||
                                     loadingPlan === plan.id
                                 }
                                 className={`w-full py-3 rounded-xl font-medium transition-all cursor-pointer ${
-                                    plan.popular
-                                        ? "bg-primary text-primary-foreground hover:opacity-90"
-                                        : plan.id === "free"
-                                          ? "bg-muted text-muted-foreground cursor-default"
-                                          : "border border-border text-foreground hover:bg-accent"
+                                    plan.id === currentPlan
+                                        ? "bg-muted text-muted-foreground cursor-default"
+                                        : plan.popular
+                                          ? "bg-primary text-primary-foreground hover:opacity-90"
+                                          : plan.id === "free"
+                                            ? "bg-muted text-muted-foreground cursor-default"
+                                            : "border border-border text-foreground hover:bg-accent"
                                 } disabled:opacity-50 disabled:cursor-not-allowed`}
                             >
                                 {loadingPlan === plan.id
                                     ? "Processing..."
-                                    : plan.cta}
+                                    : plan.id === currentPlan
+                                      ? "Current Plan"
+                                      : plan.cta}
                             </button>
                         </motion.div>
                     ))}
