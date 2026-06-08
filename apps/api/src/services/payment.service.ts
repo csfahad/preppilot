@@ -2,7 +2,7 @@ import Razorpay from "razorpay";
 import crypto from "crypto";
 import { db } from "../db/index.js";
 import { subscriptions, users } from "../db/schema.js";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import type { UserPlan } from "@repo/shared/constants/taxonomy";
 
 const razorpay = new Razorpay({
@@ -40,7 +40,7 @@ export async function createOrder(
     await db.insert(subscriptions).values({
         userId,
         razorpayOrderId: order.id,
-        plan: planId as any,
+        plan: planId as UserPlan,
         status: "pending",
     });
 
@@ -144,7 +144,7 @@ export async function getUserSubscription(userId: string) {
         .select()
         .from(subscriptions)
         .where(eq(subscriptions.userId, userId))
-        .orderBy(subscriptions.createdAt)
+        .orderBy(desc(subscriptions.createdAt))
         .limit(1);
 
     return sub ?? null;
