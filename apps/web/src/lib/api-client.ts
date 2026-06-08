@@ -77,6 +77,10 @@ export const api = {
     verifyPayment: (data: any) =>
         request("/api/payments/verify", { method: "POST", body: data }),
     getSubscription: () => request("/api/payments/subscription"),
+    getUserPlan: () =>
+        request<{ plan: string; interviewCount: number }>(
+            "/api/profiles/user-plan",
+        ),
 
     getUploadUrl: (filename: string, contentType: string, folder = "resumes") =>
         request("/api/upload/presign", {
