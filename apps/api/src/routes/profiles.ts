@@ -25,7 +25,34 @@ router.get("/me", requireAuth, async (req, res) => {
     }
 });
 
-// Create profile (onboarding)
+router.get("/user-plan", requireAuth, async (req, res) => {
+    try {
+        const [appUser] = await db
+            .select({
+                plan: users.plan,
+                interviewCount: users.interviewCount,
+            })
+            .from(users)
+            .where(eq(users.id, req.user!.id))
+            .limit(1);
+
+        res.json({
+            success: true,
+            data: appUser ?? { plan: "free", interviewCount: 0 },
+        });
+    } catch (error) {
+        console.error("[Profiles] Error fetching user plan:", error);
+        res.status(500).json({
+            success: false,
+            error: {
+                code: "INTERNAL_ERROR",
+                message: "Failed to fetch user plan",
+            },
+        });
+    }
+});
+
+// create profile (onboarding)
 router.post("/", requireAuth, async (req, res) => {
     try {
         const {
