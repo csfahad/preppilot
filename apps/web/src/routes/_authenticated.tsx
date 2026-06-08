@@ -2,6 +2,7 @@ import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { useSession } from "@/lib/auth-client";
 import { useEffect } from "react";
 import Header from "@/components/header";
+import { useSubscriptionStore } from "@/stores/subscription";
 
 export const Route = createFileRoute("/_authenticated")({
     component: AuthenticatedLayout,
@@ -10,12 +11,19 @@ export const Route = createFileRoute("/_authenticated")({
 function AuthenticatedLayout() {
     const { data: session, isPending } = useSession();
     const navigate = useNavigate();
+    const fetchPlan = useSubscriptionStore((s) => s.fetchPlan);
 
     useEffect(() => {
         if (!isPending && !session) {
             navigate({ to: "/auth/login" });
         }
     }, [session, isPending, navigate]);
+
+    useEffect(() => {
+        if (session?.user) {
+            fetchPlan();
+        }
+    }, [session, fetchPlan]);
 
     if (isPending) {
         return (
