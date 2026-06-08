@@ -78,7 +78,8 @@ export const Route = createFileRoute("/_authenticated/interview/new")({
 function NewInterviewPage() {
     const navigate = useNavigate();
     const search = Route.useSearch();
-    const { voiceEnabled } = useSubscriptionStore();
+    const { voiceEnabled, canStartInterview, maxInterviews } =
+        useSubscriptionStore();
     const [loading, setLoading] = useState(false);
     const [profile, setProfile] = useState<any>(null);
     const [initialVoiceAccentPreference] = useState(() => {
@@ -152,6 +153,48 @@ function NewInterviewPage() {
             })
             .catch(() => {});
     }, [hasStoredVoiceAccentPreference]);
+
+    if (!canStartInterview()) {
+        return (
+            <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-center"
+                >
+                    <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+                        <IconRocket className="w-10 h-10 text-primary" />
+                    </div>
+                    <h1 className="font-heading text-3xl font-bold text-foreground mb-3">
+                        Interview Limit Reached
+                    </h1>
+                    <p className="text-muted-foreground text-lg mb-2">
+                        You've used all {maxInterviews} free interviews.
+                    </p>
+                    <p className="text-muted-foreground mb-8">
+                        Upgrade to{" "}
+                        <span className="font-bold text-primary">Pro</span> to
+                        unlock unlimited interviews, voice mode, and
+                        expert-level feedback.
+                    </p>
+                    <div className="flex items-center justify-center gap-4">
+                        <button
+                            onClick={() => navigate({ to: "/pricing" })}
+                            className="px-8 py-3 rounded-xl bg-primary text-primary-foreground font-medium hover:opacity-90 transition-all cursor-pointer"
+                        >
+                            Upgrade to Pro
+                        </button>
+                        <button
+                            onClick={() => navigate({ to: "/dashboard" })}
+                            className="px-8 py-3 rounded-xl border border-border text-foreground font-medium hover:bg-accent transition-all cursor-pointer"
+                        >
+                            Back to Dashboard
+                        </button>
+                    </div>
+                </motion.div>
+            </main>
+        );
+    }
 
     const toggleType = (typeId: string) => {
         setSelectedTypes((prev) =>
