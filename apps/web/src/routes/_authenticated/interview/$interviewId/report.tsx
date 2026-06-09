@@ -57,7 +57,7 @@ function ReportPage() {
 
     if (loading) {
         return (
-            <div className="min-h-[calc(100vh-4rem)] bg-background flex items-center justify-center">
+            <div className="flex-1 flex items-center justify-center">
                 <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
             </div>
         );
@@ -73,7 +73,7 @@ function ReportPage() {
         : [];
 
     return (
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <main className="flex-1 px-6 lg:px-10 py-8 max-w-[1400px] mx-auto w-full overflow-x-hidden">
             <div className="flex items-center justify-between mb-8">
                 <div />
                 <button className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-border text-sm hover:bg-accent transition-colors cursor-pointer">

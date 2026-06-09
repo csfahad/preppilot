@@ -156,7 +156,7 @@ function NewInterviewPage() {
 
     if (!canStartInterview()) {
         return (
-            <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <main className="flex-1 px-6 lg:px-10 py-8 max-w-[1400px] mx-auto w-full">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -240,7 +240,7 @@ function NewInterviewPage() {
     };
 
     return (
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <main className="flex-1 px-6 lg:px-10 py-8 max-w-[1400px] mx-auto w-full">
             <div className="max-w-4xl mx-auto">
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
