@@ -18,8 +18,10 @@ import { Route as InterviewQuestionsIndexRouteImport } from './routes/interview-
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as AuthenticatedTeamIndexRouteImport } from './routes/_authenticated/team/index'
+import { Route as AuthenticatedQuestionsIndexRouteImport } from './routes/_authenticated/questions/index'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard/index'
 import { Route as AuthenticatedAnalyticsIndexRouteImport } from './routes/_authenticated/analytics/index'
+import { Route as AuthenticatedAccountIndexRouteImport } from './routes/_authenticated/account/index'
 import { Route as AuthenticatedTeamJoinRouteImport } from './routes/_authenticated/team/join'
 import { Route as AuthenticatedInterviewNewRouteImport } from './routes/_authenticated/interview/new'
 import { Route as AuthenticatedInterviewInterviewIdIndexRouteImport } from './routes/_authenticated/interview/$interviewId/index'
@@ -70,6 +72,12 @@ const AuthenticatedTeamIndexRoute = AuthenticatedTeamIndexRouteImport.update({
   path: '/team/',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedQuestionsIndexRoute =
+  AuthenticatedQuestionsIndexRouteImport.update({
+    id: '/questions/',
+    path: '/questions/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedDashboardIndexRoute =
   AuthenticatedDashboardIndexRouteImport.update({
     id: '/dashboard/',
@@ -80,6 +88,12 @@ const AuthenticatedAnalyticsIndexRoute =
   AuthenticatedAnalyticsIndexRouteImport.update({
     id: '/analytics/',
     path: '/analytics/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedAccountIndexRoute =
+  AuthenticatedAccountIndexRouteImport.update({
+    id: '/account/',
+    path: '/account/',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedTeamJoinRoute = AuthenticatedTeamJoinRouteImport.update({
@@ -122,8 +136,10 @@ export interface FileRoutesByFullPath {
   '/onboarding/': typeof OnboardingIndexRoute
   '/interview/new': typeof AuthenticatedInterviewNewRoute
   '/team/join': typeof AuthenticatedTeamJoinRoute
+  '/account/': typeof AuthenticatedAccountIndexRoute
   '/analytics/': typeof AuthenticatedAnalyticsIndexRoute
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
+  '/questions/': typeof AuthenticatedQuestionsIndexRoute
   '/team/': typeof AuthenticatedTeamIndexRoute
   '/interview/$interviewId/processing': typeof AuthenticatedInterviewInterviewIdProcessingRoute
   '/interview/$interviewId/report': typeof AuthenticatedInterviewInterviewIdReportRoute
@@ -139,8 +155,10 @@ export interface FileRoutesByTo {
   '/onboarding': typeof OnboardingIndexRoute
   '/interview/new': typeof AuthenticatedInterviewNewRoute
   '/team/join': typeof AuthenticatedTeamJoinRoute
+  '/account': typeof AuthenticatedAccountIndexRoute
   '/analytics': typeof AuthenticatedAnalyticsIndexRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
+  '/questions': typeof AuthenticatedQuestionsIndexRoute
   '/team': typeof AuthenticatedTeamIndexRoute
   '/interview/$interviewId/processing': typeof AuthenticatedInterviewInterviewIdProcessingRoute
   '/interview/$interviewId/report': typeof AuthenticatedInterviewInterviewIdReportRoute
@@ -158,8 +176,10 @@ export interface FileRoutesById {
   '/onboarding/': typeof OnboardingIndexRoute
   '/_authenticated/interview/new': typeof AuthenticatedInterviewNewRoute
   '/_authenticated/team/join': typeof AuthenticatedTeamJoinRoute
+  '/_authenticated/account/': typeof AuthenticatedAccountIndexRoute
   '/_authenticated/analytics/': typeof AuthenticatedAnalyticsIndexRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
+  '/_authenticated/questions/': typeof AuthenticatedQuestionsIndexRoute
   '/_authenticated/team/': typeof AuthenticatedTeamIndexRoute
   '/_authenticated/interview/$interviewId/processing': typeof AuthenticatedInterviewInterviewIdProcessingRoute
   '/_authenticated/interview/$interviewId/report': typeof AuthenticatedInterviewInterviewIdReportRoute
@@ -177,8 +197,10 @@ export interface FileRouteTypes {
     | '/onboarding/'
     | '/interview/new'
     | '/team/join'
+    | '/account/'
     | '/analytics/'
     | '/dashboard/'
+    | '/questions/'
     | '/team/'
     | '/interview/$interviewId/processing'
     | '/interview/$interviewId/report'
@@ -194,8 +216,10 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/interview/new'
     | '/team/join'
+    | '/account'
     | '/analytics'
     | '/dashboard'
+    | '/questions'
     | '/team'
     | '/interview/$interviewId/processing'
     | '/interview/$interviewId/report'
@@ -212,8 +236,10 @@ export interface FileRouteTypes {
     | '/onboarding/'
     | '/_authenticated/interview/new'
     | '/_authenticated/team/join'
+    | '/_authenticated/account/'
     | '/_authenticated/analytics/'
     | '/_authenticated/dashboard/'
+    | '/_authenticated/questions/'
     | '/_authenticated/team/'
     | '/_authenticated/interview/$interviewId/processing'
     | '/_authenticated/interview/$interviewId/report'
@@ -296,6 +322,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTeamIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/questions/': {
+      id: '/_authenticated/questions/'
+      path: '/questions'
+      fullPath: '/questions/'
+      preLoaderRoute: typeof AuthenticatedQuestionsIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/dashboard/': {
       id: '/_authenticated/dashboard/'
       path: '/dashboard'
@@ -308,6 +341,13 @@ declare module '@tanstack/react-router' {
       path: '/analytics'
       fullPath: '/analytics/'
       preLoaderRoute: typeof AuthenticatedAnalyticsIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/account/': {
+      id: '/_authenticated/account/'
+      path: '/account'
+      fullPath: '/account/'
+      preLoaderRoute: typeof AuthenticatedAccountIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/team/join': {
@@ -351,8 +391,10 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteChildren {
   AuthenticatedInterviewNewRoute: typeof AuthenticatedInterviewNewRoute
   AuthenticatedTeamJoinRoute: typeof AuthenticatedTeamJoinRoute
+  AuthenticatedAccountIndexRoute: typeof AuthenticatedAccountIndexRoute
   AuthenticatedAnalyticsIndexRoute: typeof AuthenticatedAnalyticsIndexRoute
   AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
+  AuthenticatedQuestionsIndexRoute: typeof AuthenticatedQuestionsIndexRoute
   AuthenticatedTeamIndexRoute: typeof AuthenticatedTeamIndexRoute
   AuthenticatedInterviewInterviewIdProcessingRoute: typeof AuthenticatedInterviewInterviewIdProcessingRoute
   AuthenticatedInterviewInterviewIdReportRoute: typeof AuthenticatedInterviewInterviewIdReportRoute
@@ -362,8 +404,10 @@ interface AuthenticatedRouteChildren {
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedInterviewNewRoute: AuthenticatedInterviewNewRoute,
   AuthenticatedTeamJoinRoute: AuthenticatedTeamJoinRoute,
+  AuthenticatedAccountIndexRoute: AuthenticatedAccountIndexRoute,
   AuthenticatedAnalyticsIndexRoute: AuthenticatedAnalyticsIndexRoute,
   AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
+  AuthenticatedQuestionsIndexRoute: AuthenticatedQuestionsIndexRoute,
   AuthenticatedTeamIndexRoute: AuthenticatedTeamIndexRoute,
   AuthenticatedInterviewInterviewIdProcessingRoute:
     AuthenticatedInterviewInterviewIdProcessingRoute,
