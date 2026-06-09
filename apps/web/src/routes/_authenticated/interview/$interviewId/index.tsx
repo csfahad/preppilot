@@ -25,6 +25,7 @@ function InterviewRoom() {
     const store = useInterviewStore();
 
     const [loading, setLoading] = useState(true);
+    const [interviewError, setInterviewError] = useState<string | null>(null);
     const [answerText, setAnswerText] = useState("");
     const [voiceAccent, setVoiceAccent] = useState<string | null>(null);
     const [submitting, setSubmitting] = useState(false);
@@ -38,14 +39,20 @@ function InterviewRoom() {
         async function load() {
             try {
                 const res = await api.getInterview(interviewId);
-                if (res.data?.questions) {
+                const interview = res.data;
+                if (!interview?.questions || interview.questions.length === 0) {
+                    setInterviewError("failed");
+                    setLoading(false);
+                    return;
+                }
+                if (interview.questions) {
                     store.setInterview(
                         interviewId,
-                        res.data.questions,
-                        res.data.mode,
-                        res.data.timerEnabled ?? true,
+                        interview.questions,
+                        interview.mode,
+                        interview.timerEnabled ?? true,
                     );
-                    setVoiceAccent(res.data.voiceAccent ?? null);
+                    setVoiceAccent(interview.voiceAccent ?? null);
                 }
             } catch (err) {
                 console.error("Failed to load interview:", err);
@@ -60,7 +67,9 @@ function InterviewRoom() {
     }, [interviewId]);
 
     useEffect(() => {
+        if (store.questions.length === 0) return;
         const currentQ = store.questions[store.currentQuestionIndex];
+        if (!currentQ) return;
         if (!currentQ.timeLimitSeconds || !store.timerEnabled) {
             setTimeLeft(null);
             return;
@@ -143,6 +152,62 @@ function InterviewRoom() {
             </div>
         );
     }
+
+    if (interviewError === "failed") {
+        return (
+            <main className="min-h-[calc(100vh-4rem)] bg-background flex items-center justify-center p-6">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="max-w-md w-full rounded-2xl border border-border bg-card p-8 text-center"
+                >
+                    <div className="w-14 h-14 rounded-2xl bg-destructive/10 flex items-center justify-center mx-auto mb-5">
+                        <svg
+                            className="w-7 h-7 text-destructive"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
+                            />
+                        </svg>
+                    </div>
+                    <h2 className="font-heading text-xl font-semibold text-foreground mb-2">
+                        Question generation failed
+                    </h2>
+                    <p className="text-muted-foreground text-sm mb-6">
+                        The AI service was temporarily unavailable. This can
+                        happen during high load periods.
+                    </p>
+                    <div className="flex items-center justify-center gap-3">
+                        <button
+                            onClick={() => navigate({ to: "/dashboard" })}
+                            className="px-5 py-2.5 rounded-xl border border-border text-foreground hover:bg-accent transition-all cursor-pointer font-medium text-sm"
+                        >
+                            Back to Dashboard
+                        </button>
+                        <button
+                            onClick={async () => {
+                                try {
+                                    await api.cancelInterview(interviewId);
+                                } catch (_) {}
+                                navigate({ to: "/interview/new" });
+                            }}
+                            className="px-5 py-2.5 rounded-xl bg-primary text-primary-foreground hover:opacity-90 transition-all cursor-pointer font-medium text-sm"
+                        >
+                            Try Again
+                        </button>
+                    </div>
+                </motion.div>
+            </main>
+        );
+    }
+
+    if (!currentQuestion) return null;
 
     return (
         <main className="flex min-h-[calc(100vh-4rem)] flex-col">
