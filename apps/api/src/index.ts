@@ -41,6 +41,15 @@ app.use(
 
 app.use(helmet());
 
+// handle auth errors
+app.get("/api/auth/error", (req, res) => {
+    const error = req.query.error || "unknown";
+    const frontendUrl = webOrigins[0];
+    res.redirect(
+        `${frontendUrl}/auth/login?error=${encodeURIComponent(String(error))}`,
+    );
+});
+
 // betterAuth handler
 app.all("/api/auth/{*splat}", toNodeHandler(auth));
 
