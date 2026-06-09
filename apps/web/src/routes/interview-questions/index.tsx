@@ -1,8 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
 import { motion } from "motion/react";
-import { useSession } from "@/lib/auth-client";
-import Header from "@/components/header";
 import PublicHeader from "@/components/public-header";
 import {
     INDUSTRIES,
@@ -116,7 +114,6 @@ function getInterviewTypeId(questionType: string): InterviewTypeId {
 }
 
 function InterviewQuestionsPage() {
-    const { data: session } = useSession();
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedCategory, setSelectedCategory] = useState<string | null>(
         null,
@@ -144,7 +141,7 @@ function InterviewQuestionsPage() {
 
     return (
         <div className="min-h-screen bg-background">
-            {session ? <Header /> : <PublicHeader />}
+            <PublicHeader />
             {/* SEO Header */}
             <div className="border-b border-border bg-muted/30">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
@@ -211,56 +208,49 @@ function InterviewQuestionsPage() {
                 </div>
 
                 {/* Question cards */}
-                <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                     {filteredQuestions.map((q, i) => (
                         <motion.div
                             key={i}
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: i * 0.05 }}
-                            className="bg-card border border-border rounded-xl p-6 hover:border-primary/30 hover:shadow-sm transition-all"
+                            className="bg-card border border-border rounded-xl p-6 hover:border-primary/30 hover:shadow-sm transition-all flex flex-col"
                         >
-                            <div className="flex items-start justify-between gap-4">
-                                <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-3">
-                                        <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
-                                            {q.category}
-                                        </span>
-                                        <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
-                                            {q.role}
-                                        </span>
-                                        <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600">
-                                            {q.type}
-                                        </span>
-                                    </div>
-                                    <h3 className="font-heading text-lg font-semibold text-foreground mb-2">
-                                        {q.question}
-                                    </h3>
-                                    <div className="bg-muted/50 rounded-lg p-3 mt-3">
-                                        <p className="text-xs font-semibold text-primary mb-1 flex items-center gap-1">
-                                            <IconSparkles className="w-3 h-3" />{" "}
-                                            Pro Tip
-                                        </p>
-                                        <p className="text-sm text-muted-foreground">
-                                            {q.tip}
-                                        </p>
-                                    </div>
-                                </div>
-                                <Link
-                                    to="/interview/new"
-                                    search={{
-                                        roleTitle: q.role,
-                                        interviewType: getInterviewTypeId(
-                                            q.type,
-                                        ),
-                                        focusQuestion: q.question,
-                                    }}
-                                    className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-all mt-1"
-                                >
-                                    Practice{" "}
-                                    <IconChevronRight className="w-3.5 h-3.5" />
-                                </Link>
+                            <div className="flex items-center gap-2 mb-3 flex-wrap">
+                                <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
+                                    {q.category}
+                                </span>
+                                <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                                    {q.role}
+                                </span>
+                                <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600">
+                                    {q.type}
+                                </span>
                             </div>
+                            <h3 className="font-heading text-lg font-semibold text-foreground mb-2 flex-1">
+                                {q.question}
+                            </h3>
+                            <div className="bg-muted/50 rounded-lg p-3 mt-3 mb-4">
+                                <p className="text-xs font-semibold text-primary mb-1 flex items-center gap-1">
+                                    <IconSparkles className="w-3 h-3" /> Pro Tip
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                    {q.tip}
+                                </p>
+                            </div>
+                            <Link
+                                to="/interview/new"
+                                search={{
+                                    roleTitle: q.role,
+                                    interviewType: getInterviewTypeId(q.type),
+                                    focusQuestion: q.question,
+                                }}
+                                className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-all w-full"
+                            >
+                                Practice{" "}
+                                <IconChevronRight className="w-3.5 h-3.5" />
+                            </Link>
                         </motion.div>
                     ))}
                 </div>
