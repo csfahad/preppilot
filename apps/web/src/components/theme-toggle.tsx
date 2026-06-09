@@ -84,6 +84,14 @@ export function ThemeToggle() {
 
 export function initTheme() {
     if (typeof window === "undefined") return;
+    const root = document.documentElement;
+    root.classList.add("no-transition");
     const saved = localStorage.getItem("preppilot-theme") as Theme | null;
     applyTheme(saved || "light");
+    // force reflow then remove no-transition
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            root.classList.remove("no-transition");
+        });
+    });
 }
