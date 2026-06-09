@@ -10,10 +10,13 @@ import {
     IconTrendingUp,
     IconFlame,
     IconChevronRight,
-    IconCrown,
     IconMicrophone,
     IconMessageCircle,
-    IconBook2,
+    IconCalendar,
+    IconAlertTriangle,
+    IconTrash,
+    IconRefresh,
+    IconPlayerPlay,
 } from "@tabler/icons-react";
 
 export const Route = createFileRoute("/_authenticated/dashboard/")({
@@ -31,6 +34,7 @@ function DashboardPage() {
     } = useSubscriptionStore();
     const [interviews, setInterviews] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
 
     useEffect(() => {
         async function loadData() {
@@ -63,204 +67,329 @@ function DashboardPage() {
               )
             : 0;
 
-    return (
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            {/* Welcome */}
-            <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mb-8"
-            >
-                <h1 className="font-heading text-3xl font-bold text-foreground">
-                    Welcome back
-                    {session?.user.name
-                        ? `, ${session.user.name.split(" ")[0]}`
-                        : ""}{" "}
-                </h1>
-                <p className="text-muted-foreground mt-1">
-                    Ready to ace your next interview?
-                </p>
-            </motion.div>
+    const activeInterviews = interviews.filter(
+        (i: any) => i.status === "active" || i.status === "processing",
+    );
 
-            {/* Stats cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    const handleDeleteConfiguring = async (interviewId: string) => {
+        setDeletingId(interviewId);
+        try {
+            await api.cancelInterview(interviewId);
+            setInterviews((prev) => prev.filter((i) => i.id !== interviewId));
+        } catch (err) {
+            console.error("Failed to delete interview:", err);
+        } finally {
+            setDeletingId(null);
+        }
+    };
+
+    const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffMs = now.getTime() - date.getTime();
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+
+        if (diffMins < 1) return "Just now";
+        if (diffMins < 60) return `${diffMins}m ago`;
+        if (diffHours < 24) return `${diffHours}h ago`;
+        if (diffDays < 7) return `${diffDays}d ago`;
+        return date.toLocaleDateString("en-IN", {
+            month: "short",
+            day: "numeric",
+        });
+    };
+
+    const getStatusConfig = (status: string) => {
+        switch (status) {
+            case "completed":
+                return {
+                    label: "Completed",
+                    className:
+                        "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+                };
+            case "active":
+                return {
+                    label: "In Progress",
+                    className:
+                        "bg-blue-500/10 text-blue-600 dark:text-blue-400",
+                };
+            case "processing":
+                return {
+                    label: "Processing",
+                    className:
+                        "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+                };
+            case "configuring":
+                return {
+                    label: "Failed",
+                    className: "bg-destructive/10 text-destructive",
+                };
+            default:
+                return {
+                    label: status,
+                    className: "bg-muted text-muted-foreground",
+                };
+        }
+    };
+
+    const getScoreColor = (score: number) => {
+        if (score >= 80) return "text-emerald-500";
+        if (score >= 60) return "text-amber-500";
+        return "text-red-500";
+    };
+
+    return (
+        <main className="flex-1 px-6 lg:px-10 py-8 max-w-[1400px] mx-auto w-full">
+            {/* Welcome + Quick Start */}
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+                <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                >
+                    <h1 className="font-heading text-2xl lg:text-3xl font-bold text-foreground">
+                        Welcome back
+                        {session?.user.name
+                            ? `, ${session.user.name.split(" ")[0]}`
+                            : ""}
+                    </h1>
+                    <p className="text-muted-foreground text-sm mt-1">
+                        Ready to ace your next interview?
+                    </p>
+                </motion.div>
+                <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                >
+                    <Link
+                        to="/interview/new"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-medium text-sm hover:opacity-90 transition-all shadow-sm shadow-primary/20"
+                    >
+                        <IconPlus className="w-4 h-4" />
+                        Start Interview
+                    </Link>
+                </motion.div>
+            </div>
+
+            {/* Stats row */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
                 {[
                     {
                         icon: IconHistory,
                         label: "Total Interviews",
                         value: String(interviews.length),
                         color: "text-blue-500",
+                        bgColor: "bg-blue-500/10",
                     },
                     {
                         icon: IconTrendingUp,
                         label: "Avg. Score",
                         value: avgScore ? `${avgScore}/100` : "—",
-                        color: "text-green-500",
+                        color: "text-emerald-500",
+                        bgColor: "bg-emerald-500/10",
                     },
                     {
                         icon: IconFlame,
                         label: "Streak",
                         value: "0 days",
                         color: "text-orange-500",
-                    },
-                    {
-                        icon: IconCrown,
-                        label: "Plan",
-                        value:
-                            plan === "free"
-                                ? `Free (${interviewCount}/${maxInterviews})`
-                                : plan === "pro_monthly"
-                                  ? "Pro Monthly"
-                                  : plan === "pro_annual"
-                                    ? "Pro Annual"
-                                    : "Pro",
-                        color: "text-purple-500",
+                        bgColor: "bg-orange-500/10",
                     },
                 ].map((stat, i) => (
                     <motion.div
                         key={stat.label}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.1 }}
-                        className="bg-card border border-border rounded-xl p-5"
+                        transition={{ delay: 0.1 + i * 0.05 }}
+                        className="bg-card border border-border rounded-xl p-5 hover:border-border/80 transition-colors"
                     >
-                        <div className="flex items-center justify-between mb-3">
-                            <stat.icon className={`w-5 h-5 ${stat.color}`} />
+                        <div className="flex items-center gap-3">
+                            <div
+                                className={`w-10 h-10 rounded-lg ${stat.bgColor} flex items-center justify-center shrink-0`}
+                            >
+                                <stat.icon
+                                    className={`w-5 h-5 ${stat.color}`}
+                                />
+                            </div>
+                            <div>
+                                <p className="font-heading text-xl font-bold text-foreground leading-none">
+                                    {stat.value}
+                                </p>
+                                <p className="text-xs text-muted-foreground mt-0.5">
+                                    {stat.label}
+                                </p>
+                            </div>
                         </div>
-                        <p className="font-heading text-2xl font-bold text-foreground">
-                            {stat.value}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                            {stat.label}
-                        </p>
                     </motion.div>
                 ))}
             </div>
 
-            {/* Quick Actions */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            {/* Active interviews banner */}
+            {activeInterviews.length > 0 && (
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
+                    transition={{ delay: 0.25 }}
+                    className="mb-6 p-4 rounded-xl bg-blue-500/5 border border-blue-500/15"
                 >
-                    <Link
-                        to="/interview/new"
-                        className="block p-6 rounded-2xl border-2 border-dashed border-primary/30 bg-primary/5 hover:bg-primary/10 hover:border-primary/50 transition-all group"
-                    >
-                        <div className="flex items-center gap-4">
-                            <div className="w-14 h-14 rounded-2xl bg-primary/20 flex items-center justify-center group-hover:scale-105 transition-transform">
-                                <IconPlus className="w-7 h-7 text-primary" />
-                            </div>
-                            <div className="flex-1">
-                                <h3 className="font-heading text-lg font-semibold text-foreground">
-                                    Start New Interview
-                                </h3>
-                                <p className="text-sm text-muted-foreground">
-                                    Configure your role, type, and preferences
-                                </p>
-                            </div>
-                            <IconChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-blue-500/15 flex items-center justify-center shrink-0">
+                            <IconPlayerPlay className="w-4 h-4 text-blue-500" />
                         </div>
-                    </Link>
-                </motion.div>
-
-                <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 }}
-                >
-                    <Link
-                        to="/interview/new"
-                        className="block p-6 rounded-2xl border border-border bg-card hover:bg-accent/50 transition-all group"
-                    >
-                        <div className="flex items-center gap-4">
-                            <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center group-hover:scale-105 transition-transform">
-                                <IconMessageCircle className="w-7 h-7 text-muted-foreground" />
-                            </div>
-                            <div className="flex-1">
-                                <h3 className="font-heading text-lg font-semibold text-foreground">
-                                    Warm-up Mode
-                                </h3>
-                                <p className="text-sm text-muted-foreground">
-                                    3 quick questions, no scoring — just
-                                    practice
-                                </p>
-                            </div>
-                            <IconChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+                        <div className="flex-1">
+                            <p className="text-sm font-medium text-foreground">
+                                You have {activeInterviews.length} active
+                                interview
+                                {activeInterviews.length > 1 ? "s" : ""}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                                Continue where you left off
+                            </p>
                         </div>
-                    </Link>
+                        <Link
+                            to={
+                                activeInterviews[0].status === "processing"
+                                    ? "/interview/$interviewId/processing"
+                                    : "/interview/$interviewId"
+                            }
+                            params={{ interviewId: activeInterviews[0].id }}
+                            className="text-xs font-medium text-blue-500 hover:text-blue-600 transition-colors flex items-center gap-1"
+                        >
+                            Resume <IconChevronRight className="w-3 h-3" />
+                        </Link>
+                    </div>
                 </motion.div>
-
-                <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 }}
-                >
-                    <Link
-                        to="/interview-questions"
-                        className="block p-6 rounded-2xl border border-border bg-card hover:bg-accent/50 transition-all group"
-                    >
-                        <div className="flex items-center gap-4">
-                            <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center group-hover:scale-105 transition-transform">
-                                <IconBook2 className="w-7 h-7 text-muted-foreground" />
-                            </div>
-                            <div className="flex-1">
-                                <h3 className="font-heading text-lg font-semibold text-foreground">
-                                    Question Library
-                                </h3>
-                                <p className="text-sm text-muted-foreground">
-                                    Browse sample questions by role and type
-                                </p>
-                            </div>
-                            <IconChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
-                        </div>
-                    </Link>
-                </motion.div>
-            </div>
+            )}
 
             {/* Interview History */}
             <div>
-                <h2 className="font-heading text-xl font-semibold text-foreground mb-4">
-                    Recent Interviews
-                </h2>
+                <div className="flex items-center justify-between mb-5">
+                    <h2 className="font-heading text-lg font-semibold text-foreground">
+                        Recent Interviews
+                    </h2>
+                    {interviews.length > 0 && (
+                        <span className="text-xs text-muted-foreground">
+                            {interviews.length} total
+                        </span>
+                    )}
+                </div>
+
                 {loading ? (
-                    <div className="space-y-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                         {[1, 2, 3].map((i) => (
                             <div
                                 key={i}
-                                className="h-20 bg-muted rounded-xl animate-pulse"
+                                className="h-44 bg-muted/50 rounded-xl animate-pulse"
                             />
                         ))}
                     </div>
                 ) : interviews.length === 0 ? (
-                    <div className="bg-card border border-border rounded-xl p-12 text-center">
-                        <IconHistory className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="bg-card border border-border rounded-xl p-12 text-center"
+                    >
+                        <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
+                            <IconHistory className="w-7 h-7 text-muted-foreground" />
+                        </div>
                         <h3 className="font-heading text-lg font-semibold text-foreground">
                             No interviews yet
                         </h3>
-                        <p className="text-muted-foreground mt-1 mb-6">
+                        <p className="text-muted-foreground text-sm mt-1 mb-6 max-w-sm mx-auto">
                             Start your first mock interview to begin improving
+                            your skills
                         </p>
                         <Link
                             to="/interview/new"
-                            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary text-primary-foreground font-medium hover:opacity-90 transition-all"
+                            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary text-primary-foreground font-medium text-sm hover:opacity-90 transition-all"
                         >
                             <IconPlus className="w-4 h-4" /> Start Interview
                         </Link>
-                    </div>
+                    </motion.div>
                 ) : (
-                    <div className="space-y-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                         {interviews.map((interview: any, i: number) => {
                             const isCompleted =
                                 interview.status === "completed";
+                            const isConfiguring =
+                                interview.status === "configuring";
+                            const statusConfig = getStatusConfig(
+                                interview.status,
+                            );
+
+                            if (isConfiguring) {
+                                return (
+                                    <motion.div
+                                        key={interview.id}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: i * 0.03 }}
+                                        className="relative bg-card border border-destructive/20 rounded-xl p-5 group"
+                                    >
+                                        {/* Failed state card */}
+                                        <div className="flex items-start justify-between mb-3">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-9 h-9 rounded-lg bg-destructive/10 flex items-center justify-center">
+                                                    <IconAlertTriangle className="w-4 h-4 text-destructive" />
+                                                </div>
+                                                <div>
+                                                    <h4 className="text-sm font-medium text-foreground leading-tight">
+                                                        {interview.roleTitle}
+                                                    </h4>
+                                                    <p className="text-xs text-muted-foreground mt-0.5">
+                                                        {interview.seniority}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <span
+                                                className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${statusConfig.className}`}
+                                            >
+                                                {statusConfig.label}
+                                            </span>
+                                        </div>
+                                        <p className="text-xs text-muted-foreground mb-4">
+                                            Question generation failed. You can
+                                            retry or remove this interview.
+                                        </p>
+                                        <div className="flex items-center gap-2">
+                                            <Link
+                                                to="/interview/new"
+                                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:opacity-90 transition-all"
+                                            >
+                                                <IconRefresh className="w-3 h-3" />
+                                                Retry
+                                            </Link>
+                                            <button
+                                                onClick={() =>
+                                                    handleDeleteConfiguring(
+                                                        interview.id,
+                                                    )
+                                                }
+                                                disabled={
+                                                    deletingId === interview.id
+                                                }
+                                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-medium text-muted-foreground hover:text-destructive hover:border-destructive/30 hover:bg-destructive/5 transition-all cursor-pointer disabled:opacity-40"
+                                            >
+                                                {deletingId === interview.id ? (
+                                                    <div className="w-3 h-3 border-2 border-muted-foreground/30 border-t-muted-foreground rounded-full animate-spin" />
+                                                ) : (
+                                                    <IconTrash className="w-3 h-3" />
+                                                )}
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </motion.div>
+                                );
+                            }
 
                             return (
                                 <motion.div
                                     key={interview.id}
-                                    initial={{ opacity: 0, y: 5 }}
+                                    initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: i * 0.05 }}
+                                    transition={{ delay: i * 0.03 }}
                                 >
                                     <Link
                                         to={
@@ -271,12 +400,13 @@ function DashboardPage() {
                                         params={{
                                             interviewId: interview.id,
                                         }}
-                                        className="block bg-card border border-border rounded-xl p-5 hover:border-primary/30 hover:shadow-sm transition-all group"
+                                        className="block bg-card border border-border rounded-xl p-5 hover:border-primary/25 hover:shadow-sm hover:shadow-primary/5 transition-all group h-full"
                                     >
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-4">
+                                        {/* Card header */}
+                                        <div className="flex items-start justify-between mb-3">
+                                            <div className="flex items-center gap-2.5">
                                                 <div
-                                                    className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                                                    className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
                                                         interview.mode ===
                                                         "voice"
                                                             ? "bg-blue-500/10"
@@ -285,64 +415,76 @@ function DashboardPage() {
                                                 >
                                                     {interview.mode ===
                                                     "voice" ? (
-                                                        <IconMicrophone className="w-5 h-5 text-blue-500" />
+                                                        <IconMicrophone className="w-4 h-4 text-blue-500" />
                                                     ) : (
-                                                        <IconMessageCircle className="w-5 h-5 text-primary" />
+                                                        <IconMessageCircle className="w-4 h-4 text-primary" />
                                                     )}
                                                 </div>
-                                                <div>
-                                                    <h4 className="font-medium text-foreground">
+                                                <div className="min-w-0">
+                                                    <h4 className="text-sm font-medium text-foreground leading-tight truncate">
                                                         {interview.roleTitle}
                                                     </h4>
-                                                    <p className="text-sm text-muted-foreground">
-                                                        {interview.seniority} •{" "}
-                                                        {interview.interviewTypes?.join(
-                                                            ", ",
-                                                        )}
+                                                    <p className="text-xs text-muted-foreground mt-0.5">
+                                                        {interview.seniority}
                                                     </p>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-4">
-                                                {interview.report
-                                                    ?.overallScore && (
+                                            {interview.report?.overallScore !=
+                                                null && (
+                                                <span
+                                                    className={`text-lg font-bold tabular-nums ${getScoreColor(interview.report.overallScore)}`}
+                                                >
+                                                    {
+                                                        interview.report
+                                                            .overallScore
+                                                    }
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        {/* Interview types */}
+                                        <div className="flex flex-wrap gap-1.5 mb-4">
+                                            {interview.interviewTypes
+                                                ?.slice(0, 3)
+                                                .map((type: string) => (
                                                     <span
-                                                        className={`text-lg font-bold ${
-                                                            interview.report
-                                                                .overallScore >=
-                                                            70
-                                                                ? "text-green-500"
-                                                                : interview
-                                                                        .report
-                                                                        .overallScore >=
-                                                                    50
-                                                                  ? "text-yellow-500"
-                                                                  : "text-red-500"
-                                                        }`}
+                                                        key={type}
+                                                        className="text-[10px] px-2 py-0.5 rounded-md bg-muted text-muted-foreground font-medium"
                                                     >
-                                                        {
-                                                            interview.report
-                                                                .overallScore
-                                                        }
+                                                        {type.replace(
+                                                            /_/g,
+                                                            " ",
+                                                        )}
+                                                    </span>
+                                                ))}
+                                            {interview.interviewTypes?.length >
+                                                3 && (
+                                                <span className="text-[10px] px-2 py-0.5 rounded-md bg-muted text-muted-foreground font-medium">
+                                                    +
+                                                    {interview.interviewTypes
+                                                        .length - 3}
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        {/* Card footer */}
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <span
+                                                    className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${statusConfig.className}`}
+                                                >
+                                                    {statusConfig.label}
+                                                </span>
+                                                {interview.createdAt && (
+                                                    <span className="flex items-center gap-1 text-[10px] text-muted-foreground/70">
+                                                        <IconCalendar className="w-3 h-3" />
+                                                        {formatDate(
+                                                            interview.createdAt,
+                                                        )}
                                                     </span>
                                                 )}
-                                                <span
-                                                    className={`text-xs px-2.5 py-1 rounded-full font-medium ${
-                                                        interview.status ===
-                                                        "completed"
-                                                            ? "bg-green-500/10 text-green-600"
-                                                            : interview.status ===
-                                                                "active"
-                                                              ? "bg-blue-500/10 text-blue-600"
-                                                              : interview.status ===
-                                                                  "processing"
-                                                                ? "bg-yellow-500/10 text-yellow-600"
-                                                                : "bg-muted text-muted-foreground"
-                                                    }`}
-                                                >
-                                                    {interview.status}
-                                                </span>
-                                                <IconChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
                                             </div>
+                                            <IconChevronRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary transition-colors" />
                                         </div>
                                     </Link>
                                 </motion.div>
@@ -352,30 +494,29 @@ function DashboardPage() {
                 )}
             </div>
 
-            {/* Paywall nudge */}
+            {/* Free plan usage nudge */}
             {plan === "free" && interviewCount >= 2 && (
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 }}
-                    className="mt-8 p-6 rounded-2xl bg-linear-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20"
+                    transition={{ delay: 0.4 }}
+                    className="mt-8 p-5 rounded-xl bg-primary/5 border border-primary/15"
                 >
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                         <div>
-                            <h3 className="font-heading text-lg font-semibold text-foreground flex items-center gap-2">
-                                <IconCrown className="w-5 h-5 text-primary" />
+                            <p className="text-sm font-semibold text-foreground">
                                 {!canStartInterview()
                                     ? "You've used all free interviews"
-                                    : "1 free interview remaining"}
-                            </h3>
-                            <p className="text-sm text-muted-foreground mt-1">
+                                    : `${maxInterviews - interviewCount} free interview${maxInterviews - interviewCount !== 1 ? "s" : ""} remaining`}
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-0.5">
                                 Upgrade to unlock unlimited interviews, voice
                                 mode, and expert-level feedback
                             </p>
                         </div>
                         <Link
                             to="/pricing"
-                            className="shrink-0 px-6 py-2.5 rounded-xl bg-primary text-primary-foreground font-medium hover:opacity-90 transition-all"
+                            className="shrink-0 px-5 py-2 rounded-xl bg-primary text-primary-foreground font-medium text-sm hover:opacity-90 transition-all"
                         >
                             Upgrade to Pro
                         </Link>
