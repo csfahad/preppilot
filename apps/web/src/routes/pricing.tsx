@@ -1,10 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { api } from "@/lib/api-client";
 import { useSession } from "@/lib/auth-client";
 import { useSubscriptionStore } from "@/stores/subscription";
-import Header from "@/components/header";
 import PublicHeader from "@/components/public-header";
 import {
     IconCheck,
@@ -13,6 +12,7 @@ import {
     IconSparkles,
     IconMicrophone,
     IconChartBar,
+    IconArrowLeft,
 } from "@tabler/icons-react";
 
 export const Route = createFileRoute("/pricing")({
@@ -35,7 +35,7 @@ const PLANS = [
             { text: "Full feedback & tips", included: false },
             { text: "Priority support", included: false },
         ],
-        cta: "Current Plan",
+        cta: "Get Started Free",
         popular: false,
     },
     {
@@ -77,9 +77,26 @@ const PLANS = [
 ];
 
 function PricingPage() {
-    const { data: session } = useSession();
+    const { data: session, isPending } = useSession();
     const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
-    const { plan: currentPlan, fetchPlan } = useSubscriptionStore();
+    const { plan: currentPlan, fetchPlan, hasFetched } = useSubscriptionStore();
+
+    useEffect(() => {
+        if (session?.user) {
+            fetchPlan();
+        }
+    }, [session, fetchPlan]);
+
+    if (isPending) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-background">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+                    <p className="text-muted-foreground text-sm">Loading...</p>
+                </div>
+            </div>
+        );
+    }
 
     const handleSubscribe = async (planId: string) => {
         if (planId === "free") return;
@@ -124,7 +141,21 @@ function PricingPage() {
 
     return (
         <div className="min-h-screen bg-background">
-            {session ? <Header /> : <PublicHeader />}
+            {session ? (
+                <div className="border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-40">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center">
+                        <Link
+                            to="/dashboard"
+                            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                            <IconArrowLeft className="w-4 h-4" />
+                            Back to Dashboard
+                        </Link>
+                    </div>
+                </div>
+            ) : (
+                <PublicHeader />
+            )}
             <script src="https://checkout.razorpay.com/v1/checkout.js" />
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -208,26 +239,38 @@ function PricingPage() {
                                 onClick={() => handleSubscribe(plan.id)}
                                 disabled={
                                     plan.id === "free" ||
-                                    plan.id === currentPlan ||
-                                    (currentPlan !== "free" &&
+                                    (hasFetched && plan.id === currentPlan) ||
+                                    (hasFetched &&
+                                        currentPlan !== "free" &&
                                         plan.id !== "free") ||
-                                    loadingPlan === plan.id
+                                    loadingPlan === plan.id ||
+                                    (!hasFetched && !!session)
                                 }
                                 className={`w-full py-3 rounded-xl font-medium transition-all cursor-pointer ${
-                                    plan.id === currentPlan
+                                    hasFetched && plan.id === currentPlan
                                         ? "bg-muted text-muted-foreground cursor-default"
-                                        : plan.popular
-                                          ? "bg-primary text-primary-foreground hover:opacity-90"
-                                          : plan.id === "free"
-                                            ? "bg-muted text-muted-foreground cursor-default"
-                                            : "border border-border text-foreground hover:bg-accent"
+                                        : plan.id === "free" &&
+                                            hasFetched &&
+                                            currentPlan !== "free"
+                                          ? "bg-muted text-muted-foreground cursor-default"
+                                          : plan.popular
+                                            ? "bg-primary text-primary-foreground hover:opacity-90"
+                                            : plan.id === "free"
+                                              ? "bg-muted text-muted-foreground cursor-default"
+                                              : "border border-border text-foreground hover:bg-accent"
                                 } disabled:opacity-50 disabled:cursor-not-allowed`}
                             >
                                 {loadingPlan === plan.id
                                     ? "Processing..."
-                                    : plan.id === currentPlan
-                                      ? "Current Plan"
-                                      : plan.cta}
+                                    : !hasFetched && session
+                                      ? "Loading..."
+                                      : hasFetched && plan.id === currentPlan
+                                        ? "Current Plan"
+                                        : hasFetched &&
+                                            plan.id === "free" &&
+                                            currentPlan !== "free"
+                                          ? "Included"
+                                          : plan.cta}
                             </button>
                         </motion.div>
                     ))}
