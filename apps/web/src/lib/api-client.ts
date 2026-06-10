@@ -81,6 +81,17 @@ export const api = {
         request<{ plan: string; interviewCount: number }>(
             "/api/profiles/user-plan",
         ),
+    getUpgradePricing: () =>
+        request<{
+            currentPlan: string;
+            upgradePlan: string;
+            regularPrice: number;
+            prorataAmount: number;
+            credit: number;
+            daysRemaining: number;
+            totalDays: number;
+            currentPeriodEnd: string;
+        } | null>("/api/payments/upgrade-pricing"),
 
     getUploadUrl: (filename: string, contentType: string, folder = "resumes") =>
         request("/api/upload/presign", {
