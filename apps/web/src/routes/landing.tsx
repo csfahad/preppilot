@@ -51,6 +51,7 @@ function LandingPage() {
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                             <Link
                                 to="/auth/login"
+                                search={{ error: undefined }}
                                 className="flex items-center gap-2 px-8 py-4 rounded-2xl bg-primary text-primary-foreground font-heading font-semibold text-lg hover:opacity-90 transition-all shadow-lg shadow-primary/20"
                             >
                                 Start Free Interview{" "}
@@ -394,6 +395,7 @@ function LandingPage() {
                         </p>
                         <Link
                             to="/auth/login"
+                            search={{ error: undefined }}
                             className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-primary text-primary-foreground font-heading font-semibold text-lg hover:opacity-90 transition-all shadow-lg shadow-primary/20"
                         >
                             Start Free Interview{" "}
