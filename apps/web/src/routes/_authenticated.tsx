@@ -228,7 +228,7 @@ function AuthenticatedLayout() {
                         <Link
                             to="/account"
                             onClick={closeSidebar}
-                            className="flex items-center gap-2 px-2 py-1.5 rounded-lg text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-colors flex-1 text-xs font-medium cursor-pointer"
+                            className="flex items-center gap-2 px-2 py-1.5 rounded-lg text-sidebar-foreground/60 hover:text-sidebar-foreground transition-colors flex-1 text-xs font-medium cursor-pointer"
                         >
                             <IconSettings className="w-3.5 h-3.5" />
                             Settings
