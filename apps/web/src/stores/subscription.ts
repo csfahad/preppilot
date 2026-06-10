@@ -10,6 +10,7 @@ interface SubscriptionState {
     modelAnswers: boolean;
     fullFeedback: boolean;
     currentPeriodEnd: string | null;
+    currentPeriodStart: string | null;
     hasFetched: boolean;
 
     // actions
@@ -18,6 +19,7 @@ interface SubscriptionState {
         plan: string;
         status: string;
         currentPeriodEnd: string;
+        currentPeriodStart: string;
     }) => void;
     incrementInterviewCount: () => void;
     fetchPlan: () => Promise<void>;
@@ -74,6 +76,7 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
     modelAnswers: false,
     fullFeedback: false,
     currentPeriodEnd: null,
+    currentPeriodStart: null,
     hasFetched: false,
 
     setPlan: (plan, interviewCount) => {
@@ -91,6 +94,7 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
             plan: sub.plan,
             status: sub.status,
             currentPeriodEnd: sub.currentPeriodEnd,
+            currentPeriodStart: sub.currentPeriodStart,
             ...limits,
         });
     },
@@ -100,15 +104,26 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
 
     fetchPlan: async () => {
         try {
-            const res = await api.getUserPlan();
-            if (res.data) {
+            const [planRes, subRes] = await Promise.all([
+                api.getUserPlan(),
+                api.getSubscription().catch(() => ({ data: null })),
+            ]);
+            if (planRes.data) {
                 const limits =
-                    PLAN_LIMITS[res.data.plan] || PLAN_LIMITS["free"]!;
+                    PLAN_LIMITS[planRes.data.plan] || PLAN_LIMITS["free"]!;
                 set({
-                    plan: res.data.plan,
-                    interviewCount: res.data.interviewCount,
+                    plan: planRes.data.plan,
+                    interviewCount: planRes.data.interviewCount,
                     hasFetched: true,
                     ...limits,
+                    ...(subRes.data
+                        ? {
+                              status: subRes.data.status,
+                              currentPeriodStart:
+                                  subRes.data.currentPeriodStart,
+                              currentPeriodEnd: subRes.data.currentPeriodEnd,
+                          }
+                        : {}),
                 });
             }
         } catch (err) {
