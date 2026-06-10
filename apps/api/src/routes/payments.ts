@@ -6,6 +6,7 @@ import {
     activateSubscription,
     handleWebhook,
     getUserSubscription,
+    getUpgradePricing,
 } from "../services/payment.service.js";
 import crypto from "crypto";
 
@@ -120,6 +121,22 @@ router.get("/subscription", requireAuth, async (req, res) => {
             error: {
                 code: "INTERNAL_ERROR",
                 message: "Failed to fetch subscription",
+            },
+        });
+    }
+});
+
+router.get("/upgrade-pricing", requireAuth, async (req, res) => {
+    try {
+        const pricing = await getUpgradePricing(req.user!.id);
+        res.json({ success: true, data: pricing });
+    } catch (error) {
+        console.error("[Payments] Error fetching upgrade pricing:", error);
+        res.status(500).json({
+            success: false,
+            error: {
+                code: "INTERNAL_ERROR",
+                message: "Failed to fetch upgrade pricing",
             },
         });
     }
