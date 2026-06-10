@@ -2,7 +2,7 @@ import Razorpay from "razorpay";
 import crypto from "crypto";
 import { db } from "../db/index.js";
 import { subscriptions, users } from "../db/schema.js";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 import type { UserPlan } from "@repo/shared/constants/taxonomy";
 
 const razorpay = new Razorpay({
@@ -23,9 +23,27 @@ export async function createOrder(
     const plan = PLAN_PRICES[planId];
     if (!plan) throw new Error(`Unknown plan: ${planId}`);
 
-    // create order in Razorpay
+    const [appUser] = await db
+        .select({ plan: users.plan })
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1);
+
+    if (appUser?.plan === "pro_annual" && planId === "pro_monthly") {
+        throw new Error("Cannot downgrade from Pro Annual to Pro Monthly");
+    }
+
+    let amount = plan.amount;
+
+    if (appUser?.plan === "pro_monthly" && planId === "pro_annual") {
+        const upgradeInfo = await getUpgradePricing(userId);
+        if (upgradeInfo) {
+            amount = upgradeInfo.prorataAmount;
+        }
+    }
+
     const order = await razorpay.orders.create({
-        amount: plan.amount,
+        amount,
         currency: "INR",
         receipt: `${planId.slice(0, 7)}_${userId.slice(-8)}_${Date.now()}`,
         notes: {
@@ -46,7 +64,7 @@ export async function createOrder(
 
     return {
         orderId: order.id,
-        amount: plan.amount,
+        amount,
         currency: "INR",
         razorpayKeyId: process.env.RAZORPAY_KEY_ID!,
         userEmail,
@@ -85,6 +103,19 @@ export async function activateSubscription(
         periodEnd.setFullYear(periodEnd.getFullYear() + 1);
     } else {
         periodEnd.setMonth(periodEnd.getMonth() + 1);
+    }
+
+    if (sub.plan === "pro_annual") {
+        await db
+            .update(subscriptions)
+            .set({ status: "expired", updatedAt: now })
+            .where(
+                and(
+                    eq(subscriptions.userId, sub.userId),
+                    eq(subscriptions.plan, "pro_monthly"),
+                    eq(subscriptions.status, "active"),
+                ),
+            );
     }
 
     await db
@@ -148,4 +179,66 @@ export async function getUserSubscription(userId: string) {
         .limit(1);
 
     return sub ?? null;
+}
+
+export async function getUpgradePricing(userId: string) {
+    const [appUser] = await db
+        .select({ plan: users.plan })
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1);
+
+    if (!appUser || appUser.plan !== "pro_monthly") {
+        return null;
+    }
+
+    const [activeSub] = await db
+        .select()
+        .from(subscriptions)
+        .where(
+            and(
+                eq(subscriptions.userId, userId),
+                eq(subscriptions.status, "active"),
+                eq(subscriptions.plan, "pro_monthly"),
+            ),
+        )
+        .orderBy(desc(subscriptions.createdAt))
+        .limit(1);
+
+    if (
+        !activeSub ||
+        !activeSub.currentPeriodStart ||
+        !activeSub.currentPeriodEnd
+    ) {
+        return null;
+    }
+
+    const now = new Date();
+    const periodStart = new Date(activeSub.currentPeriodStart);
+    const periodEnd = new Date(activeSub.currentPeriodEnd);
+
+    const totalDays = Math.ceil(
+        (periodEnd.getTime() - periodStart.getTime()) / (1000 * 60 * 60 * 24),
+    );
+    const elapsedDays = Math.ceil(
+        (now.getTime() - periodStart.getTime()) / (1000 * 60 * 60 * 24),
+    );
+    const remainingDays = Math.max(0, totalDays - elapsedDays);
+
+    const monthlyPrice = PLAN_PRICES["pro_monthly"]!.amount;
+    const annualPrice = PLAN_PRICES["pro_annual"]!.amount;
+
+    const credit = Math.round((remainingDays / totalDays) * monthlyPrice);
+    const prorataAmount = annualPrice - credit;
+
+    return {
+        currentPlan: "pro_monthly" as const,
+        upgradePlan: "pro_annual" as const,
+        regularPrice: annualPrice,
+        prorataAmount,
+        credit,
+        daysRemaining: remainingDays,
+        totalDays,
+        currentPeriodEnd: activeSub.currentPeriodEnd.toISOString(),
+    };
 }
