@@ -13,6 +13,7 @@ import {
     IconMicrophone,
     IconChartBar,
     IconArrowLeft,
+    IconArrowUp,
 } from "@tabler/icons-react";
 
 export const Route = createFileRoute("/pricing")({
@@ -80,12 +81,32 @@ function PricingPage() {
     const { data: session, isPending } = useSession();
     const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
     const { plan: currentPlan, fetchPlan, hasFetched } = useSubscriptionStore();
+    const [upgradePricing, setUpgradePricing] = useState<{
+        currentPlan: string;
+        upgradePlan: string;
+        regularPrice: number;
+        prorataAmount: number;
+        credit: number;
+        daysRemaining: number;
+        totalDays: number;
+        currentPeriodEnd: string;
+    } | null>(null);
 
     useEffect(() => {
         if (session?.user) {
             fetchPlan();
         }
     }, [session, fetchPlan]);
+
+    useEffect(() => {
+        if (session?.user && hasFetched && currentPlan === "pro_monthly") {
+            api.getUpgradePricing()
+                .then((res) => {
+                    if (res.data) setUpgradePricing(res.data);
+                })
+                .catch(() => {});
+        }
+    }, [session, hasFetched, currentPlan]);
 
     if (isPending) {
         return (
@@ -203,12 +224,38 @@ function PricingPage() {
                             </div>
 
                             <div className="mb-6">
-                                <span className="font-heading text-4xl font-bold text-foreground">
-                                    {plan.price}
-                                </span>
-                                <span className="text-muted-foreground text-sm">
-                                    {plan.period}
-                                </span>
+                                {plan.id === "pro_annual" && upgradePricing ? (
+                                    <>
+                                        <div className="flex items-baseline gap-2">
+                                            <span className="font-heading text-4xl font-bold text-foreground">
+                                                ₹
+                                                {Math.round(
+                                                    upgradePricing.prorataAmount /
+                                                        100,
+                                                ).toLocaleString("en-IN")}
+                                            </span>
+                                            <span className="text-muted-foreground text-sm line-through">
+                                                ₹3,999
+                                            </span>
+                                        </div>
+                                        <p className="text-xs text-primary mt-1.5 flex items-center gap-1">
+                                            <IconArrowUp className="w-3 h-3" />₹
+                                            {Math.round(
+                                                upgradePricing.credit / 100,
+                                            ).toLocaleString("en-IN")}{" "}
+                                            credit from current plan
+                                        </p>
+                                    </>
+                                ) : (
+                                    <>
+                                        <span className="font-heading text-4xl font-bold text-foreground">
+                                            {plan.price}
+                                        </span>
+                                        <span className="text-muted-foreground text-sm">
+                                            {plan.period}
+                                        </span>
+                                    </>
+                                )}
                             </div>
 
                             <ul className="space-y-3 mb-8 flex-1">
@@ -241,8 +288,8 @@ function PricingPage() {
                                     plan.id === "free" ||
                                     (hasFetched && plan.id === currentPlan) ||
                                     (hasFetched &&
-                                        currentPlan !== "free" &&
-                                        plan.id !== "free") ||
+                                        currentPlan === "pro_annual" &&
+                                        plan.id === "pro_monthly") ||
                                     loadingPlan === plan.id ||
                                     (!hasFetched && !!session)
                                 }
@@ -253,11 +300,14 @@ function PricingPage() {
                                             hasFetched &&
                                             currentPlan !== "free"
                                           ? "bg-muted text-muted-foreground cursor-default"
-                                          : plan.popular
+                                          : plan.id === "pro_annual" &&
+                                              upgradePricing
                                             ? "bg-primary text-primary-foreground hover:opacity-90"
-                                            : plan.id === "free"
-                                              ? "bg-muted text-muted-foreground cursor-default"
-                                              : "border border-border text-foreground hover:bg-accent"
+                                            : plan.popular
+                                              ? "bg-primary text-primary-foreground hover:opacity-90"
+                                              : plan.id === "free"
+                                                ? "bg-muted text-muted-foreground cursor-default"
+                                                : "border border-border text-foreground hover:bg-accent"
                                 } disabled:opacity-50 disabled:cursor-not-allowed`}
                             >
                                 {loadingPlan === plan.id
