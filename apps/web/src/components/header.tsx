@@ -17,7 +17,13 @@ export default function Header() {
 
     const handleSignOut = () => {
         signOut({
-            fetchOptions: { onSuccess: () => navigate({ to: "/auth/login" }) },
+            fetchOptions: {
+                onSuccess: () =>
+                    navigate({
+                        to: "/auth/login",
+                        search: { error: undefined },
+                    }),
+            },
         });
     };
 
