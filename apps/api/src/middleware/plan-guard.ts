@@ -1,9 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import { PLAN_LIMITS, type UserPlan } from "@repo/shared/constants/taxonomy";
 
-export function requirePlanAccess(
-    feature?: "voice" | "model_answers" | "full_feedback",
-) {
+export function requirePlanAccess(feature?: "model_answers" | "full_feedback") {
     return (req: Request, res: Response, next: NextFunction) => {
         if (!req.user) {
             res.status(401).json({
@@ -42,17 +40,6 @@ export function requirePlanAccess(
         }
 
         // check feature-specific access
-        if (feature === "voice" && !limits.voiceEnabled) {
-            res.status(403).json({
-                success: false,
-                error: {
-                    code: "FEATURE_LOCKED",
-                    message:
-                        "Voice interviews are available on Pro plans. Upgrade to unlock.",
-                },
-            });
-            return;
-        }
 
         if (feature === "model_answers" && !limits.modelAnswers) {
             res.status(403).json({
