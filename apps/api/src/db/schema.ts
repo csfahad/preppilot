@@ -65,10 +65,16 @@ export const verification = pgTable("verification", {
 
 export const userPlanEnum = pgEnum("user_plan", [
     "free",
-    "pro_monthly",
-    "pro_annual",
-    "pay_per_interview",
+    "mini_pack",
+    "standard_pack",
+    "premium_pack",
     "enterprise",
+]);
+
+export const packTypeEnum = pgEnum("pack_type", [
+    "mini",
+    "standard",
+    "premium",
 ]);
 
 export const interviewStatusEnum = pgEnum("interview_status", [
@@ -79,7 +85,12 @@ export const interviewStatusEnum = pgEnum("interview_status", [
     "cancelled",
 ]);
 
-export const interviewModeEnum = pgEnum("interview_mode", ["text", "voice"]);
+export const realtimeSessionStatusEnum = pgEnum("realtime_session_status", [
+    "pending",
+    "active",
+    "ended",
+    "failed",
+]);
 
 export const interviewerToneEnum = pgEnum("interviewer_tone", [
     "friendly",
@@ -163,11 +174,10 @@ export const interviews = pgTable("interviews", {
     interviewerTone: interviewerToneEnum("interviewer_tone")
         .notNull()
         .default("balanced"),
-    mode: interviewModeEnum("mode").notNull().default("text"),
-    voiceAccent: varchar("voice_accent", { length: 50 }),
+    voiceAccent: varchar("voice_accent", { length: 50 })
+        .notNull()
+        .default("american"),
     durationMinutes: integer("duration_minutes").notNull().default(30),
-    timerEnabled: boolean("timer_enabled").notNull().default(true),
-    warmupMode: boolean("warmup_mode").notNull().default(false),
     targetCompany: varchar("target_company", { length: 200 }),
     jobDescription: text("job_description"),
     startedAt: timestamp("started_at", { withTimezone: true }),
@@ -278,6 +288,79 @@ export const subscriptions = pgTable("subscriptions", {
         .defaultNow(),
 });
 
+// realtime interview: conversation transcript
+export const conversationTurns = pgTable("conversation_turns", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    interviewId: uuid("interview_id")
+        .notNull()
+        .references(() => interviews.id, { onDelete: "cascade" }),
+    speaker: text("speaker").notNull(), // "user" | "ai"
+    text: text("text").notNull(),
+    turnIndex: integer("turn_index").notNull(),
+    startedAt: timestamp("started_at", { withTimezone: true }).notNull(),
+    durationMs: integer("duration_ms"),
+    metadata: jsonb("metadata"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+        .notNull()
+        .defaultNow(),
+});
+
+// realtime interview: user video/audio recording
+export const interviewRecordings = pgTable("interview_recordings", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    interviewId: uuid("interview_id")
+        .notNull()
+        .unique()
+        .references(() => interviews.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+        .notNull()
+        .references(() => users.id, { onDelete: "cascade" }),
+    videoUrl: text("video_url"),
+    audioUrl: text("audio_url"),
+    durationSeconds: integer("duration_seconds"),
+    fileSizeBytes: integer("file_size_bytes"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+        .notNull()
+        .defaultNow(),
+});
+
+// realtime interview: session tracking
+export const realtimeSessions = pgTable("realtime_sessions", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    interviewId: uuid("interview_id")
+        .notNull()
+        .unique()
+        .references(() => interviews.id, { onDelete: "cascade" }),
+    convaiAgentId: text("convai_agent_id"),
+    convaiConversationId: text("convai_conversation_id"),
+    status: realtimeSessionStatusEnum("status").notNull().default("pending"),
+    startedAt: timestamp("started_at", { withTimezone: true }),
+    endedAt: timestamp("ended_at", { withTimezone: true }),
+    totalTurns: integer("total_turns").default(0),
+    tokenUsage: jsonb("token_usage"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+        .notNull()
+        .defaultNow(),
+});
+
+// pack-based interview credits
+export const interviewCredits = pgTable("interview_credits", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+        .notNull()
+        .references(() => users.id, { onDelete: "cascade" }),
+    packType: packTypeEnum("pack_type").notNull(),
+    totalCredits: integer("total_credits").notNull(),
+    usedCredits: integer("used_credits").notNull().default(0),
+    durationMinutes: integer("duration_minutes").notNull(),
+    razorpayOrderId: varchar("razorpay_order_id", { length: 255 }),
+    razorpayPaymentId: varchar("razorpay_payment_id", { length: 255 }),
+    purchasedAt: timestamp("purchased_at", { withTimezone: true })
+        .notNull()
+        .defaultNow(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }),
+});
+
 export const usersRelations = relations(users, ({ one, many }) => ({
     profile: one(profiles, {
         fields: [users.id],
@@ -286,6 +369,8 @@ export const usersRelations = relations(users, ({ one, many }) => ({
     interviews: many(interviews),
     answers: many(answers),
     subscriptions: many(subscriptions),
+    interviewCredits: many(interviewCredits),
+    recordings: many(interviewRecordings),
 }));
 
 export const profilesRelations = relations(profiles, ({ one }) => ({
@@ -304,6 +389,15 @@ export const interviewsRelations = relations(interviews, ({ one, many }) => ({
     report: one(interviewReports, {
         fields: [interviews.id],
         references: [interviewReports.interviewId],
+    }),
+    conversationTurns: many(conversationTurns),
+    recording: one(interviewRecordings, {
+        fields: [interviews.id],
+        references: [interviewRecordings.interviewId],
+    }),
+    realtimeSession: one(realtimeSessions, {
+        fields: [interviews.id],
+        references: [realtimeSessions.interviewId],
     }),
 }));
 
@@ -353,6 +447,50 @@ export const subscriptionsRelations = relations(subscriptions, ({ one }) => ({
         references: [users.id],
     }),
 }));
+
+export const conversationTurnsRelations = relations(
+    conversationTurns,
+    ({ one }) => ({
+        interview: one(interviews, {
+            fields: [conversationTurns.interviewId],
+            references: [interviews.id],
+        }),
+    }),
+);
+
+export const interviewRecordingsRelations = relations(
+    interviewRecordings,
+    ({ one }) => ({
+        interview: one(interviews, {
+            fields: [interviewRecordings.interviewId],
+            references: [interviews.id],
+        }),
+        user: one(users, {
+            fields: [interviewRecordings.userId],
+            references: [users.id],
+        }),
+    }),
+);
+
+export const realtimeSessionsRelations = relations(
+    realtimeSessions,
+    ({ one }) => ({
+        interview: one(interviews, {
+            fields: [realtimeSessions.interviewId],
+            references: [interviews.id],
+        }),
+    }),
+);
+
+export const interviewCreditsRelations = relations(
+    interviewCredits,
+    ({ one }) => ({
+        user: one(users, {
+            fields: [interviewCredits.userId],
+            references: [users.id],
+        }),
+    }),
+);
 
 // enterprise: Teams
 export const teamRoleEnum = pgEnum("team_role", ["owner", "admin", "member"]);
