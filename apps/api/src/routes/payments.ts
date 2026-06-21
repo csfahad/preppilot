@@ -48,7 +48,7 @@ router.post("/create-pack-order", requireAuth, async (req, res) => {
     }
 });
 
-// Legacy subscription endpoint — redirects to pack flow
+// Legacy subscription endpoint - redirects to pack flow
 router.post("/create-subscription", requireAuth, async (req, res) => {
     try {
         const { planId } = req.body;
