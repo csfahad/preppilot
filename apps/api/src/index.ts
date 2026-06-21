@@ -11,6 +11,7 @@ import answersRouter from "./routes/answers.js";
 import paymentsRouter from "./routes/payments.js";
 import uploadRouter from "./routes/upload.js";
 import teamsRouter from "./routes/teams.js";
+import llmProxyRouter from "./realtime/llm-proxy.js";
 
 import { auth } from "./lib/auth.js";
 import { isAllowedWebOrigin, webOrigins } from "./lib/origins.js";
@@ -18,8 +19,6 @@ import { isAllowedWebOrigin, webOrigins } from "./lib/origins.js";
 import { startReportWorker } from "./jobs/generate-report.js";
 import { startResumeWorker } from "./jobs/parse-resume.js";
 import { startEmailWorker } from "./jobs/send-email.js";
-
-import { setupVoiceWebSocket } from "./voice/ws-server.js";
 
 const app = express();
 const PORT = parseInt(process.env.PORT!);
@@ -85,6 +84,9 @@ app.use("/api/payments", paymentsRouter);
 app.use("/api/upload", uploadRouter);
 app.use("/api/teams", teamsRouter);
 
+// LLM proxy endpoint for 11Labs ConvAI
+app.use("/v1", llmProxyRouter);
+
 // 404 handler
 app.use((_req, res) => {
     res.status(404).json({
@@ -114,8 +116,6 @@ app.use(
 
 // start server
 const server = createServer(app);
-
-setupVoiceWebSocket(server);
 
 // start background workers
 let workers: Array<{ close: () => Promise<void> }> = [];

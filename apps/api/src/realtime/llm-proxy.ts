@@ -18,7 +18,7 @@ interface OpenAIChatCompletionRequest {
     max_tokens?: number;
 }
 
-router.post("/v1/chat/completions", async (req, res) => {
+router.post("/chat/completions", async (req, res) => {
     try {
         const body = req.body as OpenAIChatCompletionRequest;
         const { messages, stream, temperature, max_tokens } = body;
