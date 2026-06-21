@@ -1,10 +1,11 @@
-CREATE TYPE "public"."interview_mode" AS ENUM('text', 'voice');
 CREATE TYPE "public"."interview_status" AS ENUM('configuring', 'active', 'processing', 'completed', 'cancelled');
 CREATE TYPE "public"."interviewer_tone" AS ENUM('friendly', 'tough', 'balanced', 'case');
+CREATE TYPE "public"."pack_type" AS ENUM('mini', 'standard', 'premium');
 CREATE TYPE "public"."question_type" AS ENUM('behavioral', 'technical_coding', 'domain_knowledge', 'case_study', 'hr_screening', 'leadership', 'situational', 'culture_fit');
+CREATE TYPE "public"."realtime_session_status" AS ENUM('pending', 'active', 'ended', 'failed');
 CREATE TYPE "public"."subscription_status" AS ENUM('active', 'cancelled', 'paused', 'expired', 'pending');
 CREATE TYPE "public"."team_role" AS ENUM('owner', 'admin', 'member');
-CREATE TYPE "public"."user_plan" AS ENUM('free', 'pro_monthly', 'pro_annual', 'pay_per_interview', 'enterprise');
+CREATE TYPE "public"."user_plan" AS ENUM('free', 'mini_pack', 'standard_pack', 'premium_pack', 'enterprise');
 CREATE TABLE "account" (
 	"id" text PRIMARY KEY NOT NULL,
 	"account_id" text NOT NULL,
@@ -34,6 +35,43 @@ CREATE TABLE "answers" (
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 
+CREATE TABLE "conversation_turns" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"interview_id" uuid NOT NULL,
+	"speaker" text NOT NULL,
+	"text" text NOT NULL,
+	"turn_index" integer NOT NULL,
+	"started_at" timestamp with time zone NOT NULL,
+	"duration_ms" integer,
+	"metadata" jsonb,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+
+CREATE TABLE "interview_credits" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"user_id" uuid NOT NULL,
+	"pack_type" "pack_type" NOT NULL,
+	"total_credits" integer NOT NULL,
+	"used_credits" integer DEFAULT 0 NOT NULL,
+	"duration_minutes" integer NOT NULL,
+	"razorpay_order_id" varchar(255),
+	"razorpay_payment_id" varchar(255),
+	"purchased_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"expires_at" timestamp with time zone
+);
+
+CREATE TABLE "interview_recordings" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"interview_id" uuid NOT NULL,
+	"user_id" uuid NOT NULL,
+	"video_url" text,
+	"audio_url" text,
+	"duration_seconds" integer,
+	"file_size_bytes" integer,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "interview_recordings_interview_id_unique" UNIQUE("interview_id")
+);
+
 CREATE TABLE "interview_reports" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"interview_id" uuid NOT NULL,
@@ -56,11 +94,8 @@ CREATE TABLE "interviews" (
 	"interview_types" text[] NOT NULL,
 	"status" "interview_status" DEFAULT 'configuring' NOT NULL,
 	"interviewer_tone" "interviewer_tone" DEFAULT 'balanced' NOT NULL,
-	"mode" "interview_mode" DEFAULT 'text' NOT NULL,
-	"voice_accent" varchar(50),
+	"voice_accent" varchar(50) DEFAULT 'american' NOT NULL,
 	"duration_minutes" integer DEFAULT 30 NOT NULL,
-	"timer_enabled" boolean DEFAULT true NOT NULL,
-	"warmup_mode" boolean DEFAULT false NOT NULL,
 	"target_company" varchar(200),
 	"job_description" text,
 	"started_at" timestamp with time zone,
@@ -99,6 +134,20 @@ CREATE TABLE "questions" (
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 
+CREATE TABLE "realtime_sessions" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"interview_id" uuid NOT NULL,
+	"convai_agent_id" text,
+	"convai_conversation_id" text,
+	"status" realtime_session_status DEFAULT 'pending' NOT NULL,
+	"started_at" timestamp with time zone,
+	"ended_at" timestamp with time zone,
+	"total_turns" integer DEFAULT 0,
+	"token_usage" jsonb,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "realtime_sessions_interview_id_unique" UNIQUE("interview_id")
+);
+
 CREATE TABLE "scores" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"answer_id" uuid NOT NULL,
@@ -132,8 +181,8 @@ CREATE TABLE "session" (
 CREATE TABLE "subscriptions" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"user_id" uuid NOT NULL,
-	"razorpay_subscription_id" varchar(255) NOT NULL,
-	"razorpay_plan_id" varchar(255) NOT NULL,
+	"razorpay_order_id" varchar(255) NOT NULL,
+	"razorpay_payment_id" varchar(255),
 	"plan" "user_plan" NOT NULL,
 	"status" "subscription_status" DEFAULT 'pending' NOT NULL,
 	"current_period_start" timestamp with time zone,
@@ -212,10 +261,15 @@ CREATE TABLE "verification" (
 ALTER TABLE "account" ADD CONSTRAINT "account_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "answers" ADD CONSTRAINT "answers_question_id_questions_id_fk" FOREIGN KEY ("question_id") REFERENCES "public"."questions"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "answers" ADD CONSTRAINT "answers_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "conversation_turns" ADD CONSTRAINT "conversation_turns_interview_id_interviews_id_fk" FOREIGN KEY ("interview_id") REFERENCES "public"."interviews"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "interview_credits" ADD CONSTRAINT "interview_credits_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "interview_recordings" ADD CONSTRAINT "interview_recordings_interview_id_interviews_id_fk" FOREIGN KEY ("interview_id") REFERENCES "public"."interviews"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "interview_recordings" ADD CONSTRAINT "interview_recordings_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "interview_reports" ADD CONSTRAINT "interview_reports_interview_id_interviews_id_fk" FOREIGN KEY ("interview_id") REFERENCES "public"."interviews"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "interviews" ADD CONSTRAINT "interviews_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "profiles" ADD CONSTRAINT "profiles_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "questions" ADD CONSTRAINT "questions_interview_id_interviews_id_fk" FOREIGN KEY ("interview_id") REFERENCES "public"."interviews"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "realtime_sessions" ADD CONSTRAINT "realtime_sessions_interview_id_interviews_id_fk" FOREIGN KEY ("interview_id") REFERENCES "public"."interviews"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "scores" ADD CONSTRAINT "scores_answer_id_answers_id_fk" FOREIGN KEY ("answer_id") REFERENCES "public"."answers"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "session" ADD CONSTRAINT "session_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
 ALTER TABLE "subscriptions" ADD CONSTRAINT "subscriptions_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
