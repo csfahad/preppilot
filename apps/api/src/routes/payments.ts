@@ -1,34 +1,69 @@
 import { Router, type Request } from "express";
 import { requireAuth } from "../middleware/auth.js";
 import {
-    createOrder,
+    createPackOrder,
     verifyPaymentSignature,
-    activateSubscription,
+    activatePackPurchase,
     handleWebhook,
     getUserSubscription,
-    getUpgradePricing,
+    getUserCredits,
+    consumeCredit,
 } from "../services/payment.service.js";
 import crypto from "crypto";
 
 const router = Router();
 
-router.post("/create-subscription", requireAuth, async (req, res) => {
+// create a pack purchase order
+router.post("/create-pack-order", requireAuth, async (req, res) => {
     try {
-        const { planId } = req.body;
+        const { packType } = req.body;
 
-        if (!planId || !["pro_monthly", "pro_annual"].includes(planId)) {
+        if (!packType || !["mini", "standard", "premium"].includes(packType)) {
             res.status(400).json({
                 success: false,
                 error: {
                     code: "VALIDATION_ERROR",
                     message:
-                        "Valid planId required (pro_monthly or pro_annual)",
+                        "Valid packType required (mini, standard, or premium)",
                 },
             });
             return;
         }
 
-        const result = await createOrder(req.user!.id, planId, req.user!.email);
+        const result = await createPackOrder(
+            req.user!.id,
+            packType,
+            req.user!.email,
+        );
+        res.json({ success: true, data: result });
+    } catch (error) {
+        console.error("[Payments] Error creating pack order:", error);
+        res.status(500).json({
+            success: false,
+            error: {
+                code: "INTERNAL_ERROR",
+                message: "Failed to create order",
+            },
+        });
+    }
+});
+
+// Legacy subscription endpoint — redirects to pack flow
+router.post("/create-subscription", requireAuth, async (req, res) => {
+    try {
+        const { planId } = req.body;
+        // map old plan IDs to new pack types
+        const packMap: Record<string, string> = {
+            mini_pack: "mini",
+            standard_pack: "standard",
+            premium_pack: "premium",
+        };
+        const packType = packMap[planId]!;
+        const result = await createPackOrder(
+            req.user!.id,
+            packType,
+            req.user!.email,
+        );
         res.json({ success: true, data: result });
     } catch (error) {
         console.error("[Payments] Error creating order:", error);
@@ -42,11 +77,36 @@ router.post("/create-subscription", requireAuth, async (req, res) => {
     }
 });
 
-// verify razorpay checkout signature
 router.post("/verify", requireAuth, async (req, res) => {
     try {
-        const { razorpayOrderId, razorpayPaymentId, razorpaySignature } =
-            req.body;
+        const isDev = process.env.NODE_ENV !== "production";
+
+        if (!isDev) {
+            res.json({
+                success: true,
+                data: { message: "Payment is being processed via webhook" },
+            });
+            return;
+        }
+
+        const {
+            razorpayOrderId,
+            razorpayPaymentId,
+            razorpaySignature,
+            packType,
+        } = req.body;
+
+        if (!packType || !["mini", "standard", "premium"].includes(packType)) {
+            res.status(400).json({
+                success: false,
+                error: {
+                    code: "VALIDATION_ERROR",
+                    message:
+                        "Valid packType required (mini, standard, or premium)",
+                },
+            });
+            return;
+        }
 
         const isValid = await verifyPaymentSignature(
             razorpayOrderId,
@@ -65,11 +125,14 @@ router.post("/verify", requireAuth, async (req, res) => {
             return;
         }
 
-        const subscription = await activateSubscription(
+        await activatePackPurchase(
             razorpayOrderId,
             razorpayPaymentId,
+            packType,
+            req.user!.id,
         );
-        res.json({ success: true, data: subscription });
+
+        res.json({ success: true, data: { packType } });
     } catch (error) {
         console.error("[Payments] Error verifying payment:", error);
         res.status(500).json({
@@ -85,13 +148,15 @@ router.post("/verify", requireAuth, async (req, res) => {
 // razorpay webhook handler
 router.post("/webhook", async (req: Request, res) => {
     try {
-        // verify webhook signature
+        // verify webhook signature using the raw body buffer
+        // (index.ts stores it via the express.json verify callback)
         const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET!;
         const signature = req.headers["x-razorpay-signature"] as string;
 
+        const rawBody = (req as any).rawBody as Buffer;
         const expectedSignature = crypto
             .createHmac("sha256", webhookSecret)
-            .update(JSON.stringify(req.body))
+            .update(rawBody)
             .digest("hex");
 
         if (signature !== expectedSignature) {
@@ -126,17 +191,46 @@ router.get("/subscription", requireAuth, async (req, res) => {
     }
 });
 
-router.get("/upgrade-pricing", requireAuth, async (req, res) => {
+// get user credits
+router.get("/credits", requireAuth, async (req, res) => {
     try {
-        const pricing = await getUpgradePricing(req.user!.id);
-        res.json({ success: true, data: pricing });
+        const credits = await getUserCredits(req.user!.id);
+        res.json({ success: true, data: credits });
     } catch (error) {
-        console.error("[Payments] Error fetching upgrade pricing:", error);
+        console.error("[Payments] Error fetching credits:", error);
         res.status(500).json({
             success: false,
             error: {
                 code: "INTERNAL_ERROR",
-                message: "Failed to fetch upgrade pricing",
+                message: "Failed to fetch credits",
+            },
+        });
+    }
+});
+
+// consume a credit (called before starting an interview)
+router.post("/consume-credit", requireAuth, async (req, res) => {
+    try {
+        const consumed = await consumeCredit(req.user!.id);
+        if (!consumed) {
+            res.status(403).json({
+                success: false,
+                error: {
+                    code: "NO_CREDITS",
+                    message:
+                        "You have no interview credits remaining. Purchase a pack to continue.",
+                },
+            });
+            return;
+        }
+        res.json({ success: true });
+    } catch (error) {
+        console.error("[Payments] Error consuming credit:", error);
+        res.status(500).json({
+            success: false,
+            error: {
+                code: "INTERNAL_ERROR",
+                message: "Failed to consume credit",
             },
         });
     }
