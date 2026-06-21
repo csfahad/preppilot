@@ -1,5 +1,5 @@
 import { Router, type Request } from "express";
-import { eq } from "drizzle-orm";
+import { eq, asc } from "drizzle-orm";
 import { requireAuth } from "../middleware/auth.js";
 import { requirePlanAccess } from "../middleware/plan-guard.js";
 import { rateLimit } from "../middleware/rate-limit.js";
@@ -12,8 +12,18 @@ import {
     getUserInterviews,
 } from "../services/interview.service.js";
 import { db } from "../db/index.js";
-import { profiles } from "../db/schema.js";
+import {
+    profiles,
+    interviews,
+    realtimeSessions,
+    conversationTurns,
+} from "../db/schema.js";
 import { enqueueReportGeneration } from "../jobs/generate-report.js";
+import {
+    createConvAISession,
+    endConvAISession,
+} from "../realtime/convai-session.js";
+import { buildInterviewerSystemPrompt } from "../realtime/interview-prompt.js";
 
 const router = Router();
 
@@ -68,13 +78,10 @@ router.post(
                     req.body.seniority || profile?.seniority || "Mid-Level",
                 interviewTypes: req.body.interviewTypes,
                 interviewerTone: req.body.interviewerTone || "balanced",
-                mode: req.body.mode || "text",
-                voiceAccent: req.body.voiceAccent,
+                voiceAccent: req.body.voiceAccent || "american",
                 durationMinutes: Number.isFinite(durationMinutes)
                     ? durationMinutes
                     : 30,
-                timerEnabled: req.body.timerEnabled ?? true,
-                warmupMode: req.body.warmupMode ?? false,
                 targetCompany:
                     req.body.targetCompany || profile?.targetCompanies?.[0],
                 jobDescription: req.body.jobDescription,
@@ -97,7 +104,7 @@ router.post(
                         ? "AI_NOT_CONFIGURED"
                         : "INTERNAL_ERROR",
                     message: isAiConfigError
-                        ? "Question generation is not configured. Set the API key for the selected AI_PROVIDER on the API server."
+                        ? "AI is not configured. Set the API key for the selected AI_PROVIDER on the API server."
                         : "Failed to create interview",
                 },
             });
@@ -300,6 +307,215 @@ router.patch("/:id/cancel", requireAuth, async (req, res) => {
             error: {
                 code: "INTERNAL_ERROR",
                 message: "Failed to cancel interview",
+            },
+        });
+    }
+});
+
+/* Realtime session routes */
+router.post("/:id/realtime/start", requireAuth, async (req, res) => {
+    try {
+        const interviewId = getParam(req, "id");
+        if (!interviewId) {
+            res.status(400).json({
+                success: false,
+                error: {
+                    code: "VALIDATION_ERROR",
+                    message: "Interview id is required",
+                },
+            });
+            return;
+        }
+
+        const interview = await getInterviewById(interviewId);
+        if (!interview || interview.userId !== req.user!.id) {
+            res.status(404).json({
+                success: false,
+                error: { code: "NOT_FOUND", message: "Interview not found" },
+            });
+            return;
+        }
+
+        if (
+            interview.status !== "configuring" &&
+            interview.status !== "active"
+        ) {
+            res.status(400).json({
+                success: false,
+                error: {
+                    code: "INVALID_STATUS",
+                    message: `Cannot start a realtime session for an interview with status '${interview.status}'`,
+                },
+            });
+            return;
+        }
+
+        // build the system prompt for the AI interviewer
+        const systemPrompt = buildInterviewerSystemPrompt({
+            roleTitle: interview.roleTitle,
+            industry: interview.industry,
+            functionCategory: interview.functionCategory,
+            seniority: interview.seniority,
+            interviewTypes: interview.interviewTypes,
+            interviewerTone: interview.interviewerTone,
+            durationMinutes: interview.durationMinutes,
+            targetCompany: interview.targetCompany ?? undefined,
+            jobDescription: interview.jobDescription ?? undefined,
+        });
+
+        // create the ElevenLabs ConvAI session (signed URL)
+        const { agentId, signedUrl, overrides } = await createConvAISession({
+            interviewId,
+            userId: req.user!.id,
+            systemPrompt,
+            voiceAccent: interview.voiceAccent,
+            durationMinutes: interview.durationMinutes,
+            roleTitle: interview.roleTitle,
+        });
+
+        // save session record in DB
+        const [session] = await db
+            .insert(realtimeSessions)
+            .values({
+                interviewId,
+                convaiAgentId: agentId,
+                status: "active",
+                startedAt: new Date(),
+            })
+            .returning();
+
+        // update interview status to active
+        await db
+            .update(interviews)
+            .set({ status: "active", startedAt: new Date() })
+            .where(eq(interviews.id, interviewId));
+
+        res.json({
+            success: true,
+            data: { signedUrl, sessionId: session!.id, overrides },
+        });
+    } catch (error) {
+        console.error("[Interviews] Error starting realtime session:", error);
+        res.status(500).json({
+            success: false,
+            error: {
+                code: "INTERNAL_ERROR",
+                message: "Failed to start realtime session",
+            },
+        });
+    }
+});
+
+router.post("/:id/realtime/end", requireAuth, async (req, res) => {
+    try {
+        const interviewId = getParam(req, "id");
+        if (!interviewId) {
+            res.status(400).json({
+                success: false,
+                error: {
+                    code: "VALIDATION_ERROR",
+                    message: "Interview id is required",
+                },
+            });
+            return;
+        }
+
+        const interview = await getInterviewById(interviewId);
+        if (!interview || interview.userId !== req.user!.id) {
+            res.status(404).json({
+                success: false,
+                error: { code: "NOT_FOUND", message: "Interview not found" },
+            });
+            return;
+        }
+
+        // find the active realtime session
+        const session = await db.query.realtimeSessions.findFirst({
+            where: eq(realtimeSessions.interviewId, interviewId),
+        });
+
+        if (session?.convaiConversationId) {
+            try {
+                await endConvAISession(session.convaiConversationId);
+            } catch (convaiErr) {
+                console.warn(
+                    "[Interviews] Error ending ConvAI session (continuing):",
+                    convaiErr,
+                );
+            }
+        }
+
+        // update session status to ended
+        if (session) {
+            await db
+                .update(realtimeSessions)
+                .set({ status: "ended", endedAt: new Date() })
+                .where(eq(realtimeSessions.id, session.id));
+        }
+
+        // update interview status to processing
+        await db
+            .update(interviews)
+            .set({ status: "processing", endedAt: new Date() })
+            .where(eq(interviews.id, interviewId));
+
+        // enqueue report generation
+        await enqueueReportGeneration({
+            interviewId,
+            userId: req.user!.id,
+            userEmail: req.user!.email,
+            userName: req.user!.name,
+        });
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error("[Interviews] Error ending realtime session:", error);
+        res.status(500).json({
+            success: false,
+            error: {
+                code: "INTERNAL_ERROR",
+                message: "Failed to end realtime session",
+            },
+        });
+    }
+});
+
+router.get("/:id/transcript", requireAuth, async (req, res) => {
+    try {
+        const interviewId = getParam(req, "id");
+        if (!interviewId) {
+            res.status(400).json({
+                success: false,
+                error: {
+                    code: "VALIDATION_ERROR",
+                    message: "Interview id is required",
+                },
+            });
+            return;
+        }
+
+        const interview = await getInterviewById(interviewId);
+        if (!interview || interview.userId !== req.user!.id) {
+            res.status(404).json({
+                success: false,
+                error: { code: "NOT_FOUND", message: "Interview not found" },
+            });
+            return;
+        }
+
+        const turns = await db.query.conversationTurns.findMany({
+            where: eq(conversationTurns.interviewId, interviewId),
+            orderBy: [asc(conversationTurns.turnIndex)],
+        });
+
+        res.json({ success: true, data: turns });
+    } catch (error) {
+        console.error("[Interviews] Error fetching transcript:", error);
+        res.status(500).json({
+            success: false,
+            error: {
+                code: "INTERNAL_ERROR",
+                message: "Failed to fetch transcript",
             },
         });
     }
