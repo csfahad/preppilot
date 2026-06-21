@@ -146,9 +146,9 @@ export type InterviewerToneId = (typeof INTERVIEWER_TONES)[number]["id"];
 // User Plans
 export const USER_PLANS = [
     "free",
-    "pro_monthly",
-    "pro_annual",
-    "pay_per_interview",
+    "mini_pack",
+    "standard_pack",
+    "premium_pack",
     "enterprise",
 ] as const;
 export type UserPlan = (typeof USER_PLANS)[number];
@@ -157,38 +157,32 @@ export const PLAN_LIMITS: Record<
     UserPlan,
     {
         maxInterviews: number;
-        voiceEnabled: boolean;
         modelAnswers: boolean;
         fullFeedback: boolean;
     }
 > = {
     free: {
-        maxInterviews: 3,
-        voiceEnabled: false,
+        maxInterviews: 1,
         modelAnswers: false,
         fullFeedback: false,
     },
-    pro_monthly: {
+    mini_pack: {
         maxInterviews: Infinity,
-        voiceEnabled: true,
+        modelAnswers: true,
+        fullFeedback: false,
+    },
+    standard_pack: {
+        maxInterviews: Infinity,
         modelAnswers: true,
         fullFeedback: true,
     },
-    pro_annual: {
+    premium_pack: {
         maxInterviews: Infinity,
-        voiceEnabled: true,
-        modelAnswers: true,
-        fullFeedback: true,
-    },
-    pay_per_interview: {
-        maxInterviews: Infinity,
-        voiceEnabled: true,
         modelAnswers: true,
         fullFeedback: true,
     },
     enterprise: {
         maxInterviews: Infinity,
-        voiceEnabled: true,
         modelAnswers: true,
         fullFeedback: true,
     },
