@@ -3,9 +3,7 @@ import { db } from "../db/index.js";
 import { interviews, questions, users } from "../db/schema.js";
 import { callClaudeJSON } from "../ai/llm-calls.js";
 import {
-    buildQuestionGeneratorPrompt,
     buildAdaptiveFollowUpPrompt,
-    type GeneratedQuestion,
     type AdaptiveDecision,
 } from "../ai/prompts.js";
 
@@ -17,11 +15,8 @@ interface CreateInterviewParams {
     seniority: string;
     interviewTypes: string[];
     interviewerTone: string;
-    mode: string;
-    voiceAccent?: string;
+    voiceAccent: string;
     durationMinutes: number;
-    timerEnabled: boolean;
-    warmupMode: boolean;
     targetCompany?: string;
     jobDescription?: string;
     skills?: string[];
@@ -40,59 +35,14 @@ export async function createInterview(params: CreateInterviewParams) {
             seniority: params.seniority,
             interviewTypes: params.interviewTypes,
             interviewerTone: params.interviewerTone as any,
-            mode: params.mode as any,
             voiceAccent: params.voiceAccent,
             durationMinutes: params.durationMinutes,
-            timerEnabled: params.timerEnabled,
-            warmupMode: params.warmupMode,
             targetCompany: params.targetCompany,
             jobDescription: params.jobDescription,
         })
         .returning();
 
     if (!interview) throw new Error("Failed to create interview");
-
-    // calculate question count based on duration
-    const questionsPerMinute = 0.5; // ~2 minutes per question average
-    const questionCount = Math.max(
-        3,
-        Math.min(20, Math.round(params.durationMinutes * questionsPerMinute)),
-    );
-
-    // generate questions via llm-call
-    const prompt = buildQuestionGeneratorPrompt({
-        roleTitle: params.roleTitle,
-        industry: params.industry,
-        functionCategory: params.functionCategory,
-        seniority: params.seniority,
-        experienceYears: params.experienceYears ?? 3,
-        interviewTypes: params.interviewTypes,
-        targetCompany: params.targetCompany,
-        jobDescription: params.jobDescription,
-        questionCount,
-        skills: params.skills,
-    });
-
-    const generatedQuestions = await callClaudeJSON<GeneratedQuestion[]>(
-        prompt.system,
-        [{ role: "user", content: prompt.user }],
-    );
-
-    // save questions to DB
-    const questionRecords = generatedQuestions.map((q, index) => ({
-        interviewId: interview.id,
-        text: q.question,
-        type: q.type as any,
-        order: index + 1,
-        timeLimitSeconds: params.timerEnabled
-            ? q.expectedDurationSeconds
-            : null,
-        difficulty: q.difficulty,
-        expectedDurationSeconds: q.expectedDurationSeconds,
-        followUpTo: null,
-    }));
-
-    await db.insert(questions).values(questionRecords);
 
     // increment user interview count
     await db
