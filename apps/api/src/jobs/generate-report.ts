@@ -4,14 +4,18 @@ import {
     interviewReports,
     interviews,
     questions,
-    answers,
     scores,
+    conversationTurns,
 } from "../db/schema.js";
 import { eq } from "drizzle-orm";
 import { callClaudeJSON } from "../ai/llm-calls.js";
-import { buildReportSummaryPrompt } from "../ai/prompts.js";
+import {
+    buildReportSummaryPrompt,
+    buildEvaluationPrompt,
+} from "../ai/prompts.js";
 import { sendFeedbackReadyEmail } from "../lib/email.js";
 import { createRedisConnection } from "../lib/redis.js";
+import { processRealtimeTranscript } from "../realtime/transcript-collector.js";
 
 const QUEUE_NAME = "generate-report";
 
@@ -25,6 +29,19 @@ interface ReportSummary {
     weaknesses: string[];
     radarScores: Record<string, number>;
     overallScore: number;
+}
+
+interface AnswerScore {
+    overall: number;
+    clarity: number;
+    relevance: number;
+    depth: number;
+    structure: number;
+    technicalAccuracy: number;
+    confidence: number;
+    feedbackText: string;
+    modelAnswer: string;
+    improvementTips: string[];
 }
 
 export interface GenerateReportJobData {
@@ -57,8 +74,46 @@ async function saveReport(interviewId: string, summary: ReportSummary) {
         });
 }
 
+/**
+ * Check if this interview has conversation turns (i.e. was a realtime interview).
+ */
+async function hasRealtimeTranscript(interviewId: string): Promise<boolean> {
+    const [turn] = await db
+        .select({ id: conversationTurns.id })
+        .from(conversationTurns)
+        .where(eq(conversationTurns.interviewId, interviewId))
+        .limit(1);
+
+    return !!turn;
+}
+
+/**
+ * Score a single answer using AI.
+ */
+async function scoreAnswer(params: {
+    questionText: string;
+    questionType: string;
+    answerText: string;
+    roleTitle: string;
+    seniority: string;
+    industry: string;
+}): Promise<AnswerScore> {
+    const prompt = buildEvaluationPrompt({
+        question: params.questionText,
+        questionType: params.questionType,
+        answer: params.answerText,
+        roleTitle: params.roleTitle,
+        seniority: params.seniority,
+        industry: params.industry,
+    });
+
+    return callClaudeJSON<AnswerScore>(prompt.system, [
+        { role: "user", content: prompt.user },
+    ]);
+}
+
 export async function generateInterviewReport(data: GenerateReportJobData) {
-    const { interviewId, userEmail, userName } = data;
+    const { interviewId, userId, userEmail, userName } = data;
 
     console.log(`[Report] Generating report for interview ${interviewId}`);
 
@@ -77,7 +132,23 @@ export async function generateInterviewReport(data: GenerateReportJobData) {
         return;
     }
 
-    // fetch all questions with their best answers and scores
+    // Realtime interviews: process transcript first
+    const isRealtime = await hasRealtimeTranscript(interviewId);
+    if (isRealtime) {
+        console.log(
+            `[Report] Realtime interview detected. Processing transcript...`,
+        );
+        await processRealtimeTranscript(interviewId, userId);
+    }
+
+    // Fetch interview details
+    const interview = await db.query.interviews.findFirst({
+        where: eq(interviews.id, interviewId),
+    });
+
+    if (!interview) throw new Error("Interview not found");
+
+    // Fetch questions with their answers
     const interviewQuestions = await db.query.questions.findMany({
         where: eq(questions.interviewId, interviewId),
         with: {
@@ -90,8 +161,57 @@ export async function generateInterviewReport(data: GenerateReportJobData) {
         orderBy: (q, { asc }) => [asc(q.order)],
     });
 
+    // Score unscored answers (common for realtime interviews)
+    for (const q of interviewQuestions) {
+        const latestAnswer = q.answers[0];
+        if (latestAnswer && !latestAnswer.score) {
+            try {
+                const scoreResult = await scoreAnswer({
+                    questionText: q.text,
+                    questionType: q.type,
+                    answerText: latestAnswer.text,
+                    roleTitle: interview.roleTitle,
+                    seniority: interview.seniority,
+                    industry: interview.industry,
+                });
+
+                await db.insert(scores).values({
+                    answerId: latestAnswer.id,
+                    overall: scoreResult.overall,
+                    clarity: scoreResult.clarity,
+                    relevance: scoreResult.relevance,
+                    depth: scoreResult.depth,
+                    structure: scoreResult.structure ?? 5,
+                    technicalAccuracy: scoreResult.technicalAccuracy ?? 5,
+                    confidence: scoreResult.confidence ?? 5,
+                    feedbackText: scoreResult.feedbackText,
+                    modelAnswer: scoreResult.modelAnswer,
+                    improvementTips: scoreResult.improvementTips,
+                });
+            } catch (scoreErr) {
+                console.error(
+                    `[Report] Error scoring answer ${latestAnswer.id}:`,
+                    scoreErr,
+                );
+            }
+        }
+    }
+
+    // Re-fetch with scores (may have just been created)
+    const scoredQuestions = await db.query.questions.findMany({
+        where: eq(questions.interviewId, interviewId),
+        with: {
+            answers: {
+                with: { score: true },
+                orderBy: (a, { desc }) => [desc(a.createdAt)],
+                limit: 1,
+            },
+        },
+        orderBy: (q, { asc }) => [asc(q.order)],
+    });
+
     // build scores summary for AI
-    const questionsAndScores = interviewQuestions
+    const questionsAndScores = scoredQuestions
         .filter((q) => q.answers.length > 0 && q.answers[0]!.score)
         .map((q) => ({
             question: q.text,
@@ -99,13 +219,6 @@ export async function generateInterviewReport(data: GenerateReportJobData) {
             score: q.answers[0]!.score!.overall,
             feedbackText: q.answers[0]!.score!.feedbackText,
         }));
-
-    // get interview details for role context
-    const interview = await db.query.interviews.findFirst({
-        where: eq(interviews.id, interviewId),
-    });
-
-    if (!interview) throw new Error("Interview not found");
 
     if (questionsAndScores.length === 0) {
         console.warn(`[Report] No scored answers for interview ${interviewId}`);
