@@ -12,11 +12,9 @@ import {
 import type { VoiceAccentId } from "@repo/shared/constants/taxonomy";
 import {
     IconRocket,
-    IconClock,
-    IconMicrophone,
-    IconMessageCircle,
     IconVolume,
     IconCheck,
+    IconVideo,
 } from "@tabler/icons-react";
 
 type NewInterviewSearch = {
@@ -78,8 +76,7 @@ export const Route = createFileRoute("/_authenticated/interview/new")({
 function NewInterviewPage() {
     const navigate = useNavigate();
     const search = Route.useSearch();
-    const { voiceEnabled, canStartInterview, maxInterviews } =
-        useSubscriptionStore();
+    const { canStartInterview } = useSubscriptionStore();
     const [loading, setLoading] = useState(false);
     const [profile, setProfile] = useState<any>(null);
     const [initialVoiceAccentPreference] = useState(() => {
@@ -100,13 +97,10 @@ function NewInterviewPage() {
             : ["behavioral", "domain_knowledge"],
     );
     const [tone, setTone] = useState("balanced");
-    const [mode, setMode] = useState<"text" | "voice">("text");
     const [voiceAccent, setVoiceAccent] = useState<VoiceAccentId>(
         initialVoiceAccentPreference.accent,
     );
     const [duration, setDuration] = useState("30");
-    const [timerEnabled, setTimerEnabled] = useState(true);
-    const [warmupMode, setWarmupMode] = useState(false);
     const [targetCompany, setTargetCompany] = useState("");
     const [jobDescription, setJobDescription] = useState(
         search.focusQuestion
@@ -139,10 +133,8 @@ function NewInterviewPage() {
             .then((res) => {
                 const latestVoiceAccent = (
                     (res.data ?? []) as InterviewSummary[]
-                ).find(
-                    (interview) =>
-                        interview.mode === "voice" &&
-                        isVoiceAccentId(interview.voiceAccent),
+                ).find((interview) =>
+                    isVoiceAccentId(interview.voiceAccent),
                 )?.voiceAccent;
 
                 if (isVoiceAccentId(latestVoiceAccent)) {
@@ -166,23 +158,21 @@ function NewInterviewPage() {
                         <IconRocket className="w-10 h-10 text-primary" />
                     </div>
                     <h1 className="font-heading text-3xl font-bold text-foreground mb-3">
-                        Interview Limit Reached
+                        No Interview Credits
                     </h1>
                     <p className="text-muted-foreground text-lg mb-2">
-                        You've used all {maxInterviews} free interviews.
+                        You've used all your interview credits.
                     </p>
                     <p className="text-muted-foreground mb-8">
-                        Upgrade to{" "}
-                        <span className="font-bold text-primary">Pro</span> to
-                        unlock unlimited interviews, voice mode, and
-                        expert-level feedback.
+                        Purchase an interview pack to continue practicing with
+                        our AI interviewer.
                     </p>
                     <div className="flex items-center justify-center gap-4">
                         <button
                             onClick={() => navigate({ to: "/pricing" })}
                             className="px-8 py-3 rounded-xl bg-primary text-primary-foreground font-medium hover:opacity-90 transition-all cursor-pointer"
                         >
-                            Upgrade to Pro
+                            View Interview Packs
                         </button>
                         <button
                             onClick={() => navigate({ to: "/dashboard" })}
@@ -221,17 +211,13 @@ function NewInterviewPage() {
                 seniority: profile?.seniority,
                 interviewTypes: selectedTypes,
                 interviewerTone: tone,
-                mode,
-                voiceAccent: mode === "voice" ? voiceAccent : undefined,
+                voiceAccent,
                 durationMinutes: duration,
-                timerEnabled,
-                warmupMode,
                 targetCompany: targetCompany || undefined,
                 jobDescription: jobDescription || undefined,
             });
 
-            await api.startInterview(res.data.id);
-            navigate({ to: `/interview/${res.data.id}` });
+            navigate({ to: `/interview/${res.data.id}/live` });
         } catch (err) {
             console.error("Create interview error:", err);
         } finally {
@@ -247,12 +233,19 @@ function NewInterviewPage() {
                     animate={{ opacity: 1, y: 0 }}
                     className="mb-8"
                 >
-                    <h1 className="font-heading text-3xl font-bold text-foreground">
-                        Configure Interview
-                    </h1>
-                    <p className="text-muted-foreground mt-2">
-                        Set up your mock interview session
-                    </p>
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                            <IconVideo className="w-5 h-5 text-primary" />
+                        </div>
+                        <div>
+                            <h1 className="font-heading text-3xl font-bold text-foreground">
+                                Configure Interview
+                            </h1>
+                            <p className="text-muted-foreground text-sm">
+                                Set up your live AI interview session
+                            </p>
+                        </div>
+                    </div>
                 </motion.div>
 
                 <form
@@ -320,98 +313,38 @@ function NewInterviewPage() {
                         </div>
                     </section>
 
-                    {/* Mode */}
+                    {/* Interviewer Voice Accent */}
                     <section>
                         <label className="text-sm font-semibold text-foreground block mb-3">
-                            Interview Mode
+                            Interviewer Voice
                         </label>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <button
-                                type="button"
-                                onClick={() => setMode("text")}
-                                className={`p-4 rounded-xl border flex items-center gap-3 transition-all cursor-pointer ${
-                                    mode === "text"
-                                        ? "border-primary bg-primary/10"
-                                        : "border-border hover:border-primary/50"
-                                }`}
-                            >
-                                <IconMessageCircle
-                                    className={`w-6 h-6 ${mode === "text" ? "text-primary" : "text-muted-foreground"}`}
-                                />
-                                <div className="text-left">
-                                    <p className="font-medium text-foreground">
-                                        Text Mode
-                                    </p>
-                                    <p className="text-xs text-muted-foreground">
-                                        Type your answers
-                                    </p>
-                                </div>
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => voiceEnabled && setMode("voice")}
-                                disabled={!voiceEnabled}
-                                className={`p-4 rounded-xl border flex items-center gap-3 transition-all ${
-                                    !voiceEnabled
-                                        ? "opacity-50 cursor-not-allowed"
-                                        : mode === "voice"
-                                          ? "border-primary bg-primary/10 cursor-pointer"
-                                          : "border-border hover:border-primary/50 cursor-pointer"
-                                }`}
-                            >
-                                <IconMicrophone
-                                    className={`w-6 h-6 ${mode === "voice" ? "text-primary" : "text-muted-foreground"}`}
-                                />
-                                <div className="text-left">
-                                    <p className="font-medium text-foreground">
-                                        Voice Mode
-                                    </p>
-                                    <p className="text-xs text-muted-foreground">
-                                        {voiceEnabled
-                                            ? "Speak your answers"
-                                            : "Pro plan required"}
-                                    </p>
-                                </div>
-                            </button>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                            {VOICE_ACCENTS.map((accent) => (
+                                <button
+                                    type="button"
+                                    key={accent.id}
+                                    onClick={() => selectVoiceAccent(accent.id)}
+                                    className={`min-h-16 p-3 rounded-xl border text-sm transition-all cursor-pointer ${
+                                        voiceAccent === accent.id
+                                            ? "border-primary bg-primary/10 text-primary"
+                                            : "border-border hover:border-primary/50"
+                                    }`}
+                                >
+                                    <div className="flex h-full items-center gap-3 text-left">
+                                        <IconVolume className="w-4 h-4 shrink-0" />
+                                        <div className="min-w-0">
+                                            <p className="font-medium leading-5 text-foreground">
+                                                {accent.label}
+                                            </p>
+                                            <p className="text-xs leading-4 text-muted-foreground">
+                                                {accent.region}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </button>
+                            ))}
                         </div>
                     </section>
-
-                    {/* Voice Accent */}
-                    {mode === "voice" && (
-                        <section>
-                            <label className="text-sm font-semibold text-foreground block mb-3">
-                                Interviewer Accent
-                            </label>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                                {VOICE_ACCENTS.map((accent) => (
-                                    <button
-                                        type="button"
-                                        key={accent.id}
-                                        onClick={() =>
-                                            selectVoiceAccent(accent.id)
-                                        }
-                                        className={`min-h-16 p-3 rounded-xl border text-sm transition-all cursor-pointer ${
-                                            voiceAccent === accent.id
-                                                ? "border-primary bg-primary/10 text-primary"
-                                                : "border-border hover:border-primary/50"
-                                        }`}
-                                    >
-                                        <div className="flex h-full items-center gap-3 text-left">
-                                            <IconVolume className="w-4 h-4 shrink-0" />
-                                            <div className="min-w-0">
-                                                <p className="font-medium leading-5 text-foreground">
-                                                    {accent.label}
-                                                </p>
-                                                <p className="text-xs leading-4 text-muted-foreground">
-                                                    {accent.region}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </button>
-                                ))}
-                            </div>
-                        </section>
-                    )}
 
                     {/* Interviewer Tone */}
                     <section>
@@ -439,64 +372,28 @@ function NewInterviewPage() {
                         </div>
                     </section>
 
-                    {/* Duration & Timer */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <section>
-                            <label className="text-sm font-semibold text-foreground block mb-3">
-                                Duration
-                            </label>
-                            <div className="flex gap-2">
-                                {["15", "30", "45", "60"].map((d) => (
-                                    <button
-                                        type="button"
-                                        key={d}
-                                        onClick={() => setDuration(d)}
-                                        className={`flex-1 py-2.5 rounded-lg border text-sm font-medium transition-all cursor-pointer ${
-                                            duration === d
-                                                ? "border-primary bg-primary/10 text-primary"
-                                                : "border-border hover:border-primary/50"
-                                        }`}
-                                    >
-                                        {d}m
-                                    </button>
-                                ))}
-                            </div>
-                        </section>
-                        <section>
-                            <label className="text-sm font-semibold text-foreground block mb-3">
-                                Options
-                            </label>
-                            <div className="space-y-2">
-                                <label className="flex items-center gap-3 cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        checked={timerEnabled}
-                                        onChange={(e) =>
-                                            setTimerEnabled(e.target.checked)
-                                        }
-                                        className="rounded border-border"
-                                    />
-                                    <span className="text-sm text-foreground flex items-center gap-1.5">
-                                        <IconClock className="w-4 h-4 text-muted-foreground" />{" "}
-                                        Timer per question
-                                    </span>
-                                </label>
-                                <label className="flex items-center gap-3 cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        checked={warmupMode}
-                                        onChange={(e) =>
-                                            setWarmupMode(e.target.checked)
-                                        }
-                                        className="rounded border-border"
-                                    />
-                                    <span className="text-sm text-foreground">
-                                        Warm-up mode (no scoring)
-                                    </span>
-                                </label>
-                            </div>
-                        </section>
-                    </div>
+                    {/* Duration */}
+                    <section>
+                        <label className="text-sm font-semibold text-foreground block mb-3">
+                            Duration
+                        </label>
+                        <div className="flex gap-2">
+                            {["15", "30", "45"].map((d) => (
+                                <button
+                                    type="button"
+                                    key={d}
+                                    onClick={() => setDuration(d)}
+                                    className={`flex-1 py-2.5 rounded-lg border text-sm font-medium transition-all cursor-pointer ${
+                                        duration === d
+                                            ? "border-primary bg-primary/10 text-primary"
+                                            : "border-border hover:border-primary/50"
+                                    }`}
+                                >
+                                    {d} min
+                                </button>
+                            ))}
+                        </div>
+                    </section>
 
                     {/* Target Company & JD */}
                     <section>
@@ -539,11 +436,11 @@ function NewInterviewPage() {
                         {loading ? (
                             <>
                                 <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                                Generating questions...
+                                Setting up interview...
                             </>
                         ) : (
                             <>
-                                <IconRocket className="w-5 h-5" /> Start
+                                <IconVideo className="w-5 h-5" /> Start Live
                                 Interview
                             </>
                         )}

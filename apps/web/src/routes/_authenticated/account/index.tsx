@@ -54,7 +54,6 @@ function AccountPage() {
         plan,
         interviewCount,
         maxInterviews,
-        voiceEnabled,
         modelAnswers,
         fullFeedback,
         currentPeriodEnd,
@@ -169,8 +168,8 @@ function AccountPage() {
             icon: IconChartBar,
         },
         {
-            label: "Voice mode",
-            enabled: voiceEnabled,
+            label: "Live AI interview",
+            enabled: true,
             icon: IconMicrophone,
         },
         {

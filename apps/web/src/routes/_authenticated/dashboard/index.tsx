@@ -10,8 +10,7 @@ import {
     IconTrendingUp,
     IconFlame,
     IconChevronRight,
-    IconMicrophone,
-    IconMessageCircle,
+    IconVideo,
     IconCalendar,
     IconAlertTriangle,
     IconTrash,
@@ -405,20 +404,8 @@ function DashboardPage() {
                                         {/* Card header */}
                                         <div className="flex items-start justify-between mb-3">
                                             <div className="flex items-center gap-2.5">
-                                                <div
-                                                    className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
-                                                        interview.mode ===
-                                                        "voice"
-                                                            ? "bg-blue-500/10"
-                                                            : "bg-primary/10"
-                                                    }`}
-                                                >
-                                                    {interview.mode ===
-                                                    "voice" ? (
-                                                        <IconMicrophone className="w-4 h-4 text-blue-500" />
-                                                    ) : (
-                                                        <IconMessageCircle className="w-4 h-4 text-primary" />
-                                                    )}
+                                                <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-primary/10">
+                                                    <IconVideo className="w-4 h-4 text-primary" />
                                                 </div>
                                                 <div className="min-w-0">
                                                     <h4 className="text-sm font-medium text-foreground leading-tight truncate">
