@@ -81,17 +81,6 @@ export const api = {
         request<{ plan: string; interviewCount: number }>(
             "/api/profiles/user-plan",
         ),
-    getUpgradePricing: () =>
-        request<{
-            currentPlan: string;
-            upgradePlan: string;
-            regularPrice: number;
-            prorataAmount: number;
-            credit: number;
-            daysRemaining: number;
-            totalDays: number;
-            currentPeriodEnd: string;
-        } | null>("/api/payments/upgrade-pricing"),
 
     getUploadUrl: (filename: string, contentType: string, folder = "resumes") =>
         request("/api/upload/presign", {
@@ -110,6 +99,33 @@ export const api = {
     removeTeamMember: (memberId: string) =>
         request(`/api/teams/members/${memberId}`, { method: "DELETE" }),
     getTeamAnalytics: () => request("/api/teams/analytics"),
+
+    // Realtime interview sessions
+    startRealtimeSession: (interviewId: string) =>
+        request(`/api/interviews/${interviewId}/realtime/start`, {
+            method: "POST",
+        }),
+    endRealtimeSession: (interviewId: string) =>
+        request(`/api/interviews/${interviewId}/realtime/end`, {
+            method: "POST",
+        }),
+    getTranscript: (interviewId: string) =>
+        request(`/api/interviews/${interviewId}/transcript`),
+
+    // Recording upload
+    getRecordingUploadUrl: (interviewId: string, contentType: string) =>
+        request("/api/upload/recording-url", {
+            method: "POST",
+            body: { interviewId, contentType },
+        }),
+
+    // Credits
+    getCredits: () => request("/api/payments/credits"),
+    purchasePack: (packType: string) =>
+        request("/api/payments/create-pack-order", {
+            method: "POST",
+            body: { packType },
+        }),
 
     health: () => request("/api/health"),
 };

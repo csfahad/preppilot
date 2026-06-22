@@ -40,7 +40,7 @@ export function resetAnalytics() {
 
 export function trackInterviewStarted(data: {
     interviewId: string;
-    mode: "text" | "voice";
+    mode: "realtime";
     types: string[];
     seniority: string;
 }) {
