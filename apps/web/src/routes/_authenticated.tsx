@@ -85,13 +85,15 @@ function AuthenticatedLayout() {
     if (!session) return null;
 
     const planLabel =
-        plan === "pro_monthly"
-            ? "Pro"
-            : plan === "pro_annual"
-              ? "Pro Annual"
-              : plan === "enterprise"
-                ? "Enterprise"
-                : "Free";
+        plan === "mini_pack"
+            ? "Mini"
+            : plan === "standard_pack"
+              ? "Standard"
+              : plan === "premium_pack"
+                ? "Premium"
+                : plan === "enterprise"
+                  ? "Enterprise"
+                  : "Free";
 
     const isPro = plan !== "free";
 

@@ -277,7 +277,7 @@ function LandingPage() {
                             {
                                 step: "02",
                                 title: "Practice with AI",
-                                desc: "Choose your interview type, mode (text or voice), and interviewer tone. Answer questions in real-time with a countdown timer.",
+                                desc: "Enter a live AI interview room with your chosen interviewer voice and tone. Have a real conversation — the AI adapts and asks follow-ups.",
                             },
                             {
                                 step: "03",
