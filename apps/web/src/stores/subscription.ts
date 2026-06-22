@@ -6,7 +6,6 @@ interface SubscriptionState {
     status: string | null;
     interviewCount: number;
     maxInterviews: number;
-    voiceEnabled: boolean;
     modelAnswers: boolean;
     fullFeedback: boolean;
     currentPeriodEnd: string | null;
@@ -30,38 +29,32 @@ const PLAN_LIMITS: Record<
     string,
     {
         maxInterviews: number;
-        voiceEnabled: boolean;
         modelAnswers: boolean;
         fullFeedback: boolean;
     }
 > = {
     free: {
-        maxInterviews: 3,
-        voiceEnabled: false,
+        maxInterviews: 1,
         modelAnswers: false,
         fullFeedback: false,
     },
-    pro_monthly: {
+    mini_pack: {
         maxInterviews: Infinity,
-        voiceEnabled: true,
+        modelAnswers: true,
+        fullFeedback: false,
+    },
+    standard_pack: {
+        maxInterviews: Infinity,
         modelAnswers: true,
         fullFeedback: true,
     },
-    pro_annual: {
+    premium_pack: {
         maxInterviews: Infinity,
-        voiceEnabled: true,
-        modelAnswers: true,
-        fullFeedback: true,
-    },
-    pay_per_interview: {
-        maxInterviews: Infinity,
-        voiceEnabled: true,
         modelAnswers: true,
         fullFeedback: true,
     },
     enterprise: {
         maxInterviews: Infinity,
-        voiceEnabled: true,
         modelAnswers: true,
         fullFeedback: true,
     },
@@ -71,8 +64,7 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
     plan: "free",
     status: null,
     interviewCount: 0,
-    maxInterviews: 3,
-    voiceEnabled: false,
+    maxInterviews: 1,
     modelAnswers: false,
     fullFeedback: false,
     currentPeriodEnd: null,
