@@ -8,438 +8,461 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as PricingRouteImport } from './routes/pricing'
-import { Route as LandingRouteImport } from './routes/landing'
-import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as OnboardingIndexRouteImport } from './routes/onboarding/index'
-import { Route as InterviewQuestionsIndexRouteImport } from './routes/interview-questions/index'
-import { Route as AuthLoginRouteImport } from './routes/auth/login'
-import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
-import { Route as AuthenticatedTeamIndexRouteImport } from './routes/_authenticated/team/index'
-import { Route as AuthenticatedQuestionsIndexRouteImport } from './routes/_authenticated/questions/index'
-import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard/index'
-import { Route as AuthenticatedAnalyticsIndexRouteImport } from './routes/_authenticated/analytics/index'
-import { Route as AuthenticatedAccountIndexRouteImport } from './routes/_authenticated/account/index'
-import { Route as AuthenticatedTeamJoinRouteImport } from './routes/_authenticated/team/join'
-import { Route as AuthenticatedInterviewNewRouteImport } from './routes/_authenticated/interview/new'
-import { Route as AuthenticatedInterviewInterviewIdIndexRouteImport } from './routes/_authenticated/interview/$interviewId/index'
-import { Route as AuthenticatedInterviewInterviewIdReportRouteImport } from './routes/_authenticated/interview/$interviewId/report'
-import { Route as AuthenticatedInterviewInterviewIdProcessingRouteImport } from './routes/_authenticated/interview/$interviewId/processing'
+import { Route as rootRouteImport } from "./routes/__root";
+import { Route as PricingRouteImport } from "./routes/pricing";
+import { Route as LandingRouteImport } from "./routes/landing";
+import { Route as AuthenticatedRouteImport } from "./routes/_authenticated";
+import { Route as IndexRouteImport } from "./routes/index";
+import { Route as OnboardingIndexRouteImport } from "./routes/onboarding/index";
+import { Route as InterviewQuestionsIndexRouteImport } from "./routes/interview-questions/index";
+import { Route as AuthLoginRouteImport } from "./routes/auth/login";
+import { Route as AuthCallbackRouteImport } from "./routes/auth/callback";
+import { Route as AuthenticatedTeamIndexRouteImport } from "./routes/_authenticated/team/index";
+import { Route as AuthenticatedQuestionsIndexRouteImport } from "./routes/_authenticated/questions/index";
+import { Route as AuthenticatedDashboardIndexRouteImport } from "./routes/_authenticated/dashboard/index";
+import { Route as AuthenticatedAnalyticsIndexRouteImport } from "./routes/_authenticated/analytics/index";
+import { Route as AuthenticatedAccountIndexRouteImport } from "./routes/_authenticated/account/index";
+import { Route as AuthenticatedTeamJoinRouteImport } from "./routes/_authenticated/team/join";
+import { Route as AuthenticatedInterviewNewRouteImport } from "./routes/_authenticated/interview/new";
+import { Route as AuthenticatedInterviewInterviewIdIndexRouteImport } from "./routes/_authenticated/interview/$interviewId/index";
+import { Route as AuthenticatedInterviewInterviewIdReportRouteImport } from "./routes/_authenticated/interview/$interviewId/report";
+import { Route as AuthenticatedInterviewInterviewIdProcessingRouteImport } from "./routes/_authenticated/interview/$interviewId/processing";
+import { Route as AuthenticatedInterviewInterviewIdLiveRouteImport } from "./routes/_authenticated/interview/$interviewId/live";
 
 const PricingRoute = PricingRouteImport.update({
-  id: '/pricing',
-  path: '/pricing',
-  getParentRoute: () => rootRouteImport,
-} as any)
+    id: "/pricing",
+    path: "/pricing",
+    getParentRoute: () => rootRouteImport,
+} as any);
 const LandingRoute = LandingRouteImport.update({
-  id: '/landing',
-  path: '/landing',
-  getParentRoute: () => rootRouteImport,
-} as any)
+    id: "/landing",
+    path: "/landing",
+    getParentRoute: () => rootRouteImport,
+} as any);
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
-  id: '/_authenticated',
-  getParentRoute: () => rootRouteImport,
-} as any)
+    id: "/_authenticated",
+    getParentRoute: () => rootRouteImport,
+} as any);
 const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
+    id: "/",
+    path: "/",
+    getParentRoute: () => rootRouteImport,
+} as any);
 const OnboardingIndexRoute = OnboardingIndexRouteImport.update({
-  id: '/onboarding/',
-  path: '/onboarding/',
-  getParentRoute: () => rootRouteImport,
-} as any)
+    id: "/onboarding/",
+    path: "/onboarding/",
+    getParentRoute: () => rootRouteImport,
+} as any);
 const InterviewQuestionsIndexRoute = InterviewQuestionsIndexRouteImport.update({
-  id: '/interview-questions/',
-  path: '/interview-questions/',
-  getParentRoute: () => rootRouteImport,
-} as any)
+    id: "/interview-questions/",
+    path: "/interview-questions/",
+    getParentRoute: () => rootRouteImport,
+} as any);
 const AuthLoginRoute = AuthLoginRouteImport.update({
-  id: '/auth/login',
-  path: '/auth/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
+    id: "/auth/login",
+    path: "/auth/login",
+    getParentRoute: () => rootRouteImport,
+} as any);
 const AuthCallbackRoute = AuthCallbackRouteImport.update({
-  id: '/auth/callback',
-  path: '/auth/callback',
-  getParentRoute: () => rootRouteImport,
-} as any)
+    id: "/auth/callback",
+    path: "/auth/callback",
+    getParentRoute: () => rootRouteImport,
+} as any);
 const AuthenticatedTeamIndexRoute = AuthenticatedTeamIndexRouteImport.update({
-  id: '/team/',
-  path: '/team/',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
+    id: "/team/",
+    path: "/team/",
+    getParentRoute: () => AuthenticatedRoute,
+} as any);
 const AuthenticatedQuestionsIndexRoute =
-  AuthenticatedQuestionsIndexRouteImport.update({
-    id: '/questions/',
-    path: '/questions/',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
+    AuthenticatedQuestionsIndexRouteImport.update({
+        id: "/questions/",
+        path: "/questions/",
+        getParentRoute: () => AuthenticatedRoute,
+    } as any);
 const AuthenticatedDashboardIndexRoute =
-  AuthenticatedDashboardIndexRouteImport.update({
-    id: '/dashboard/',
-    path: '/dashboard/',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
+    AuthenticatedDashboardIndexRouteImport.update({
+        id: "/dashboard/",
+        path: "/dashboard/",
+        getParentRoute: () => AuthenticatedRoute,
+    } as any);
 const AuthenticatedAnalyticsIndexRoute =
-  AuthenticatedAnalyticsIndexRouteImport.update({
-    id: '/analytics/',
-    path: '/analytics/',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
+    AuthenticatedAnalyticsIndexRouteImport.update({
+        id: "/analytics/",
+        path: "/analytics/",
+        getParentRoute: () => AuthenticatedRoute,
+    } as any);
 const AuthenticatedAccountIndexRoute =
-  AuthenticatedAccountIndexRouteImport.update({
-    id: '/account/',
-    path: '/account/',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
+    AuthenticatedAccountIndexRouteImport.update({
+        id: "/account/",
+        path: "/account/",
+        getParentRoute: () => AuthenticatedRoute,
+    } as any);
 const AuthenticatedTeamJoinRoute = AuthenticatedTeamJoinRouteImport.update({
-  id: '/team/join',
-  path: '/team/join',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
+    id: "/team/join",
+    path: "/team/join",
+    getParentRoute: () => AuthenticatedRoute,
+} as any);
 const AuthenticatedInterviewNewRoute =
-  AuthenticatedInterviewNewRouteImport.update({
-    id: '/interview/new',
-    path: '/interview/new',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
+    AuthenticatedInterviewNewRouteImport.update({
+        id: "/interview/new",
+        path: "/interview/new",
+        getParentRoute: () => AuthenticatedRoute,
+    } as any);
 const AuthenticatedInterviewInterviewIdIndexRoute =
-  AuthenticatedInterviewInterviewIdIndexRouteImport.update({
-    id: '/interview/$interviewId/',
-    path: '/interview/$interviewId/',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
+    AuthenticatedInterviewInterviewIdIndexRouteImport.update({
+        id: "/interview/$interviewId/",
+        path: "/interview/$interviewId/",
+        getParentRoute: () => AuthenticatedRoute,
+    } as any);
 const AuthenticatedInterviewInterviewIdReportRoute =
-  AuthenticatedInterviewInterviewIdReportRouteImport.update({
-    id: '/interview/$interviewId/report',
-    path: '/interview/$interviewId/report',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
+    AuthenticatedInterviewInterviewIdReportRouteImport.update({
+        id: "/interview/$interviewId/report",
+        path: "/interview/$interviewId/report",
+        getParentRoute: () => AuthenticatedRoute,
+    } as any);
 const AuthenticatedInterviewInterviewIdProcessingRoute =
-  AuthenticatedInterviewInterviewIdProcessingRouteImport.update({
-    id: '/interview/$interviewId/processing',
-    path: '/interview/$interviewId/processing',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
+    AuthenticatedInterviewInterviewIdProcessingRouteImport.update({
+        id: "/interview/$interviewId/processing",
+        path: "/interview/$interviewId/processing",
+        getParentRoute: () => AuthenticatedRoute,
+    } as any);
+const AuthenticatedInterviewInterviewIdLiveRoute =
+    AuthenticatedInterviewInterviewIdLiveRouteImport.update({
+        id: "/interview/$interviewId/live",
+        path: "/interview/$interviewId/live",
+        getParentRoute: () => AuthenticatedRoute,
+    } as any);
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/landing': typeof LandingRoute
-  '/pricing': typeof PricingRoute
-  '/auth/callback': typeof AuthCallbackRoute
-  '/auth/login': typeof AuthLoginRoute
-  '/interview-questions/': typeof InterviewQuestionsIndexRoute
-  '/onboarding/': typeof OnboardingIndexRoute
-  '/interview/new': typeof AuthenticatedInterviewNewRoute
-  '/team/join': typeof AuthenticatedTeamJoinRoute
-  '/account/': typeof AuthenticatedAccountIndexRoute
-  '/analytics/': typeof AuthenticatedAnalyticsIndexRoute
-  '/dashboard/': typeof AuthenticatedDashboardIndexRoute
-  '/questions/': typeof AuthenticatedQuestionsIndexRoute
-  '/team/': typeof AuthenticatedTeamIndexRoute
-  '/interview/$interviewId/processing': typeof AuthenticatedInterviewInterviewIdProcessingRoute
-  '/interview/$interviewId/report': typeof AuthenticatedInterviewInterviewIdReportRoute
-  '/interview/$interviewId/': typeof AuthenticatedInterviewInterviewIdIndexRoute
+    "/": typeof IndexRoute;
+    "/landing": typeof LandingRoute;
+    "/pricing": typeof PricingRoute;
+    "/auth/callback": typeof AuthCallbackRoute;
+    "/auth/login": typeof AuthLoginRoute;
+    "/interview-questions/": typeof InterviewQuestionsIndexRoute;
+    "/onboarding/": typeof OnboardingIndexRoute;
+    "/interview/new": typeof AuthenticatedInterviewNewRoute;
+    "/team/join": typeof AuthenticatedTeamJoinRoute;
+    "/account/": typeof AuthenticatedAccountIndexRoute;
+    "/analytics/": typeof AuthenticatedAnalyticsIndexRoute;
+    "/dashboard/": typeof AuthenticatedDashboardIndexRoute;
+    "/questions/": typeof AuthenticatedQuestionsIndexRoute;
+    "/team/": typeof AuthenticatedTeamIndexRoute;
+    "/interview/$interviewId/live": typeof AuthenticatedInterviewInterviewIdLiveRoute;
+    "/interview/$interviewId/processing": typeof AuthenticatedInterviewInterviewIdProcessingRoute;
+    "/interview/$interviewId/report": typeof AuthenticatedInterviewInterviewIdReportRoute;
+    "/interview/$interviewId/": typeof AuthenticatedInterviewInterviewIdIndexRoute;
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/landing': typeof LandingRoute
-  '/pricing': typeof PricingRoute
-  '/auth/callback': typeof AuthCallbackRoute
-  '/auth/login': typeof AuthLoginRoute
-  '/interview-questions': typeof InterviewQuestionsIndexRoute
-  '/onboarding': typeof OnboardingIndexRoute
-  '/interview/new': typeof AuthenticatedInterviewNewRoute
-  '/team/join': typeof AuthenticatedTeamJoinRoute
-  '/account': typeof AuthenticatedAccountIndexRoute
-  '/analytics': typeof AuthenticatedAnalyticsIndexRoute
-  '/dashboard': typeof AuthenticatedDashboardIndexRoute
-  '/questions': typeof AuthenticatedQuestionsIndexRoute
-  '/team': typeof AuthenticatedTeamIndexRoute
-  '/interview/$interviewId/processing': typeof AuthenticatedInterviewInterviewIdProcessingRoute
-  '/interview/$interviewId/report': typeof AuthenticatedInterviewInterviewIdReportRoute
-  '/interview/$interviewId': typeof AuthenticatedInterviewInterviewIdIndexRoute
+    "/": typeof IndexRoute;
+    "/landing": typeof LandingRoute;
+    "/pricing": typeof PricingRoute;
+    "/auth/callback": typeof AuthCallbackRoute;
+    "/auth/login": typeof AuthLoginRoute;
+    "/interview-questions": typeof InterviewQuestionsIndexRoute;
+    "/onboarding": typeof OnboardingIndexRoute;
+    "/interview/new": typeof AuthenticatedInterviewNewRoute;
+    "/team/join": typeof AuthenticatedTeamJoinRoute;
+    "/account": typeof AuthenticatedAccountIndexRoute;
+    "/analytics": typeof AuthenticatedAnalyticsIndexRoute;
+    "/dashboard": typeof AuthenticatedDashboardIndexRoute;
+    "/questions": typeof AuthenticatedQuestionsIndexRoute;
+    "/team": typeof AuthenticatedTeamIndexRoute;
+    "/interview/$interviewId/live": typeof AuthenticatedInterviewInterviewIdLiveRoute;
+    "/interview/$interviewId/processing": typeof AuthenticatedInterviewInterviewIdProcessingRoute;
+    "/interview/$interviewId/report": typeof AuthenticatedInterviewInterviewIdReportRoute;
+    "/interview/$interviewId": typeof AuthenticatedInterviewInterviewIdIndexRoute;
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/_authenticated': typeof AuthenticatedRouteWithChildren
-  '/landing': typeof LandingRoute
-  '/pricing': typeof PricingRoute
-  '/auth/callback': typeof AuthCallbackRoute
-  '/auth/login': typeof AuthLoginRoute
-  '/interview-questions/': typeof InterviewQuestionsIndexRoute
-  '/onboarding/': typeof OnboardingIndexRoute
-  '/_authenticated/interview/new': typeof AuthenticatedInterviewNewRoute
-  '/_authenticated/team/join': typeof AuthenticatedTeamJoinRoute
-  '/_authenticated/account/': typeof AuthenticatedAccountIndexRoute
-  '/_authenticated/analytics/': typeof AuthenticatedAnalyticsIndexRoute
-  '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
-  '/_authenticated/questions/': typeof AuthenticatedQuestionsIndexRoute
-  '/_authenticated/team/': typeof AuthenticatedTeamIndexRoute
-  '/_authenticated/interview/$interviewId/processing': typeof AuthenticatedInterviewInterviewIdProcessingRoute
-  '/_authenticated/interview/$interviewId/report': typeof AuthenticatedInterviewInterviewIdReportRoute
-  '/_authenticated/interview/$interviewId/': typeof AuthenticatedInterviewInterviewIdIndexRoute
+    __root__: typeof rootRouteImport;
+    "/": typeof IndexRoute;
+    "/_authenticated": typeof AuthenticatedRouteWithChildren;
+    "/landing": typeof LandingRoute;
+    "/pricing": typeof PricingRoute;
+    "/auth/callback": typeof AuthCallbackRoute;
+    "/auth/login": typeof AuthLoginRoute;
+    "/interview-questions/": typeof InterviewQuestionsIndexRoute;
+    "/onboarding/": typeof OnboardingIndexRoute;
+    "/_authenticated/interview/new": typeof AuthenticatedInterviewNewRoute;
+    "/_authenticated/team/join": typeof AuthenticatedTeamJoinRoute;
+    "/_authenticated/account/": typeof AuthenticatedAccountIndexRoute;
+    "/_authenticated/analytics/": typeof AuthenticatedAnalyticsIndexRoute;
+    "/_authenticated/dashboard/": typeof AuthenticatedDashboardIndexRoute;
+    "/_authenticated/questions/": typeof AuthenticatedQuestionsIndexRoute;
+    "/_authenticated/team/": typeof AuthenticatedTeamIndexRoute;
+    "/_authenticated/interview/$interviewId/live": typeof AuthenticatedInterviewInterviewIdLiveRoute;
+    "/_authenticated/interview/$interviewId/processing": typeof AuthenticatedInterviewInterviewIdProcessingRoute;
+    "/_authenticated/interview/$interviewId/report": typeof AuthenticatedInterviewInterviewIdReportRoute;
+    "/_authenticated/interview/$interviewId/": typeof AuthenticatedInterviewInterviewIdIndexRoute;
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/landing'
-    | '/pricing'
-    | '/auth/callback'
-    | '/auth/login'
-    | '/interview-questions/'
-    | '/onboarding/'
-    | '/interview/new'
-    | '/team/join'
-    | '/account/'
-    | '/analytics/'
-    | '/dashboard/'
-    | '/questions/'
-    | '/team/'
-    | '/interview/$interviewId/processing'
-    | '/interview/$interviewId/report'
-    | '/interview/$interviewId/'
-  fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/landing'
-    | '/pricing'
-    | '/auth/callback'
-    | '/auth/login'
-    | '/interview-questions'
-    | '/onboarding'
-    | '/interview/new'
-    | '/team/join'
-    | '/account'
-    | '/analytics'
-    | '/dashboard'
-    | '/questions'
-    | '/team'
-    | '/interview/$interviewId/processing'
-    | '/interview/$interviewId/report'
-    | '/interview/$interviewId'
-  id:
-    | '__root__'
-    | '/'
-    | '/_authenticated'
-    | '/landing'
-    | '/pricing'
-    | '/auth/callback'
-    | '/auth/login'
-    | '/interview-questions/'
-    | '/onboarding/'
-    | '/_authenticated/interview/new'
-    | '/_authenticated/team/join'
-    | '/_authenticated/account/'
-    | '/_authenticated/analytics/'
-    | '/_authenticated/dashboard/'
-    | '/_authenticated/questions/'
-    | '/_authenticated/team/'
-    | '/_authenticated/interview/$interviewId/processing'
-    | '/_authenticated/interview/$interviewId/report'
-    | '/_authenticated/interview/$interviewId/'
-  fileRoutesById: FileRoutesById
+    fileRoutesByFullPath: FileRoutesByFullPath;
+    fullPaths:
+        | "/"
+        | "/landing"
+        | "/pricing"
+        | "/auth/callback"
+        | "/auth/login"
+        | "/interview-questions/"
+        | "/onboarding/"
+        | "/interview/new"
+        | "/team/join"
+        | "/account/"
+        | "/analytics/"
+        | "/dashboard/"
+        | "/questions/"
+        | "/team/"
+        | "/interview/$interviewId/live"
+        | "/interview/$interviewId/processing"
+        | "/interview/$interviewId/report"
+        | "/interview/$interviewId/";
+    fileRoutesByTo: FileRoutesByTo;
+    to:
+        | "/"
+        | "/landing"
+        | "/pricing"
+        | "/auth/callback"
+        | "/auth/login"
+        | "/interview-questions"
+        | "/onboarding"
+        | "/interview/new"
+        | "/team/join"
+        | "/account"
+        | "/analytics"
+        | "/dashboard"
+        | "/questions"
+        | "/team"
+        | "/interview/$interviewId/live"
+        | "/interview/$interviewId/processing"
+        | "/interview/$interviewId/report"
+        | "/interview/$interviewId";
+    id:
+        | "__root__"
+        | "/"
+        | "/_authenticated"
+        | "/landing"
+        | "/pricing"
+        | "/auth/callback"
+        | "/auth/login"
+        | "/interview-questions/"
+        | "/onboarding/"
+        | "/_authenticated/interview/new"
+        | "/_authenticated/team/join"
+        | "/_authenticated/account/"
+        | "/_authenticated/analytics/"
+        | "/_authenticated/dashboard/"
+        | "/_authenticated/questions/"
+        | "/_authenticated/team/"
+        | "/_authenticated/interview/$interviewId/live"
+        | "/_authenticated/interview/$interviewId/processing"
+        | "/_authenticated/interview/$interviewId/report"
+        | "/_authenticated/interview/$interviewId/";
+    fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
-  LandingRoute: typeof LandingRoute
-  PricingRoute: typeof PricingRoute
-  AuthCallbackRoute: typeof AuthCallbackRoute
-  AuthLoginRoute: typeof AuthLoginRoute
-  InterviewQuestionsIndexRoute: typeof InterviewQuestionsIndexRoute
-  OnboardingIndexRoute: typeof OnboardingIndexRoute
+    IndexRoute: typeof IndexRoute;
+    AuthenticatedRoute: typeof AuthenticatedRouteWithChildren;
+    LandingRoute: typeof LandingRoute;
+    PricingRoute: typeof PricingRoute;
+    AuthCallbackRoute: typeof AuthCallbackRoute;
+    AuthLoginRoute: typeof AuthLoginRoute;
+    InterviewQuestionsIndexRoute: typeof InterviewQuestionsIndexRoute;
+    OnboardingIndexRoute: typeof OnboardingIndexRoute;
 }
 
-declare module '@tanstack/react-router' {
-  interface FileRoutesByPath {
-    '/pricing': {
-      id: '/pricing'
-      path: '/pricing'
-      fullPath: '/pricing'
-      preLoaderRoute: typeof PricingRouteImport
-      parentRoute: typeof rootRouteImport
+declare module "@tanstack/react-router" {
+    interface FileRoutesByPath {
+        "/pricing": {
+            id: "/pricing";
+            path: "/pricing";
+            fullPath: "/pricing";
+            preLoaderRoute: typeof PricingRouteImport;
+            parentRoute: typeof rootRouteImport;
+        };
+        "/landing": {
+            id: "/landing";
+            path: "/landing";
+            fullPath: "/landing";
+            preLoaderRoute: typeof LandingRouteImport;
+            parentRoute: typeof rootRouteImport;
+        };
+        "/_authenticated": {
+            id: "/_authenticated";
+            path: "";
+            fullPath: "/";
+            preLoaderRoute: typeof AuthenticatedRouteImport;
+            parentRoute: typeof rootRouteImport;
+        };
+        "/": {
+            id: "/";
+            path: "/";
+            fullPath: "/";
+            preLoaderRoute: typeof IndexRouteImport;
+            parentRoute: typeof rootRouteImport;
+        };
+        "/onboarding/": {
+            id: "/onboarding/";
+            path: "/onboarding";
+            fullPath: "/onboarding/";
+            preLoaderRoute: typeof OnboardingIndexRouteImport;
+            parentRoute: typeof rootRouteImport;
+        };
+        "/interview-questions/": {
+            id: "/interview-questions/";
+            path: "/interview-questions";
+            fullPath: "/interview-questions/";
+            preLoaderRoute: typeof InterviewQuestionsIndexRouteImport;
+            parentRoute: typeof rootRouteImport;
+        };
+        "/auth/login": {
+            id: "/auth/login";
+            path: "/auth/login";
+            fullPath: "/auth/login";
+            preLoaderRoute: typeof AuthLoginRouteImport;
+            parentRoute: typeof rootRouteImport;
+        };
+        "/auth/callback": {
+            id: "/auth/callback";
+            path: "/auth/callback";
+            fullPath: "/auth/callback";
+            preLoaderRoute: typeof AuthCallbackRouteImport;
+            parentRoute: typeof rootRouteImport;
+        };
+        "/_authenticated/team/": {
+            id: "/_authenticated/team/";
+            path: "/team";
+            fullPath: "/team/";
+            preLoaderRoute: typeof AuthenticatedTeamIndexRouteImport;
+            parentRoute: typeof AuthenticatedRoute;
+        };
+        "/_authenticated/questions/": {
+            id: "/_authenticated/questions/";
+            path: "/questions";
+            fullPath: "/questions/";
+            preLoaderRoute: typeof AuthenticatedQuestionsIndexRouteImport;
+            parentRoute: typeof AuthenticatedRoute;
+        };
+        "/_authenticated/dashboard/": {
+            id: "/_authenticated/dashboard/";
+            path: "/dashboard";
+            fullPath: "/dashboard/";
+            preLoaderRoute: typeof AuthenticatedDashboardIndexRouteImport;
+            parentRoute: typeof AuthenticatedRoute;
+        };
+        "/_authenticated/analytics/": {
+            id: "/_authenticated/analytics/";
+            path: "/analytics";
+            fullPath: "/analytics/";
+            preLoaderRoute: typeof AuthenticatedAnalyticsIndexRouteImport;
+            parentRoute: typeof AuthenticatedRoute;
+        };
+        "/_authenticated/account/": {
+            id: "/_authenticated/account/";
+            path: "/account";
+            fullPath: "/account/";
+            preLoaderRoute: typeof AuthenticatedAccountIndexRouteImport;
+            parentRoute: typeof AuthenticatedRoute;
+        };
+        "/_authenticated/team/join": {
+            id: "/_authenticated/team/join";
+            path: "/team/join";
+            fullPath: "/team/join";
+            preLoaderRoute: typeof AuthenticatedTeamJoinRouteImport;
+            parentRoute: typeof AuthenticatedRoute;
+        };
+        "/_authenticated/interview/new": {
+            id: "/_authenticated/interview/new";
+            path: "/interview/new";
+            fullPath: "/interview/new";
+            preLoaderRoute: typeof AuthenticatedInterviewNewRouteImport;
+            parentRoute: typeof AuthenticatedRoute;
+        };
+        "/_authenticated/interview/$interviewId/": {
+            id: "/_authenticated/interview/$interviewId/";
+            path: "/interview/$interviewId";
+            fullPath: "/interview/$interviewId/";
+            preLoaderRoute: typeof AuthenticatedInterviewInterviewIdIndexRouteImport;
+            parentRoute: typeof AuthenticatedRoute;
+        };
+        "/_authenticated/interview/$interviewId/report": {
+            id: "/_authenticated/interview/$interviewId/report";
+            path: "/interview/$interviewId/report";
+            fullPath: "/interview/$interviewId/report";
+            preLoaderRoute: typeof AuthenticatedInterviewInterviewIdReportRouteImport;
+            parentRoute: typeof AuthenticatedRoute;
+        };
+        "/_authenticated/interview/$interviewId/processing": {
+            id: "/_authenticated/interview/$interviewId/processing";
+            path: "/interview/$interviewId/processing";
+            fullPath: "/interview/$interviewId/processing";
+            preLoaderRoute: typeof AuthenticatedInterviewInterviewIdProcessingRouteImport;
+            parentRoute: typeof AuthenticatedRoute;
+        };
+        "/_authenticated/interview/$interviewId/live": {
+            id: "/_authenticated/interview/$interviewId/live";
+            path: "/interview/$interviewId/live";
+            fullPath: "/interview/$interviewId/live";
+            preLoaderRoute: typeof AuthenticatedInterviewInterviewIdLiveRouteImport;
+            parentRoute: typeof AuthenticatedRoute;
+        };
     }
-    '/landing': {
-      id: '/landing'
-      path: '/landing'
-      fullPath: '/landing'
-      preLoaderRoute: typeof LandingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated': {
-      id: '/_authenticated'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/onboarding/': {
-      id: '/onboarding/'
-      path: '/onboarding'
-      fullPath: '/onboarding/'
-      preLoaderRoute: typeof OnboardingIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/interview-questions/': {
-      id: '/interview-questions/'
-      path: '/interview-questions'
-      fullPath: '/interview-questions/'
-      preLoaderRoute: typeof InterviewQuestionsIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/login': {
-      id: '/auth/login'
-      path: '/auth/login'
-      fullPath: '/auth/login'
-      preLoaderRoute: typeof AuthLoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/callback': {
-      id: '/auth/callback'
-      path: '/auth/callback'
-      fullPath: '/auth/callback'
-      preLoaderRoute: typeof AuthCallbackRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/team/': {
-      id: '/_authenticated/team/'
-      path: '/team'
-      fullPath: '/team/'
-      preLoaderRoute: typeof AuthenticatedTeamIndexRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/questions/': {
-      id: '/_authenticated/questions/'
-      path: '/questions'
-      fullPath: '/questions/'
-      preLoaderRoute: typeof AuthenticatedQuestionsIndexRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/dashboard/': {
-      id: '/_authenticated/dashboard/'
-      path: '/dashboard'
-      fullPath: '/dashboard/'
-      preLoaderRoute: typeof AuthenticatedDashboardIndexRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/analytics/': {
-      id: '/_authenticated/analytics/'
-      path: '/analytics'
-      fullPath: '/analytics/'
-      preLoaderRoute: typeof AuthenticatedAnalyticsIndexRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/account/': {
-      id: '/_authenticated/account/'
-      path: '/account'
-      fullPath: '/account/'
-      preLoaderRoute: typeof AuthenticatedAccountIndexRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/team/join': {
-      id: '/_authenticated/team/join'
-      path: '/team/join'
-      fullPath: '/team/join'
-      preLoaderRoute: typeof AuthenticatedTeamJoinRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/interview/new': {
-      id: '/_authenticated/interview/new'
-      path: '/interview/new'
-      fullPath: '/interview/new'
-      preLoaderRoute: typeof AuthenticatedInterviewNewRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/interview/$interviewId/': {
-      id: '/_authenticated/interview/$interviewId/'
-      path: '/interview/$interviewId'
-      fullPath: '/interview/$interviewId/'
-      preLoaderRoute: typeof AuthenticatedInterviewInterviewIdIndexRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/interview/$interviewId/report': {
-      id: '/_authenticated/interview/$interviewId/report'
-      path: '/interview/$interviewId/report'
-      fullPath: '/interview/$interviewId/report'
-      preLoaderRoute: typeof AuthenticatedInterviewInterviewIdReportRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/interview/$interviewId/processing': {
-      id: '/_authenticated/interview/$interviewId/processing'
-      path: '/interview/$interviewId/processing'
-      fullPath: '/interview/$interviewId/processing'
-      preLoaderRoute: typeof AuthenticatedInterviewInterviewIdProcessingRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-  }
 }
 
 interface AuthenticatedRouteChildren {
-  AuthenticatedInterviewNewRoute: typeof AuthenticatedInterviewNewRoute
-  AuthenticatedTeamJoinRoute: typeof AuthenticatedTeamJoinRoute
-  AuthenticatedAccountIndexRoute: typeof AuthenticatedAccountIndexRoute
-  AuthenticatedAnalyticsIndexRoute: typeof AuthenticatedAnalyticsIndexRoute
-  AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
-  AuthenticatedQuestionsIndexRoute: typeof AuthenticatedQuestionsIndexRoute
-  AuthenticatedTeamIndexRoute: typeof AuthenticatedTeamIndexRoute
-  AuthenticatedInterviewInterviewIdProcessingRoute: typeof AuthenticatedInterviewInterviewIdProcessingRoute
-  AuthenticatedInterviewInterviewIdReportRoute: typeof AuthenticatedInterviewInterviewIdReportRoute
-  AuthenticatedInterviewInterviewIdIndexRoute: typeof AuthenticatedInterviewInterviewIdIndexRoute
+    AuthenticatedInterviewNewRoute: typeof AuthenticatedInterviewNewRoute;
+    AuthenticatedTeamJoinRoute: typeof AuthenticatedTeamJoinRoute;
+    AuthenticatedAccountIndexRoute: typeof AuthenticatedAccountIndexRoute;
+    AuthenticatedAnalyticsIndexRoute: typeof AuthenticatedAnalyticsIndexRoute;
+    AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute;
+    AuthenticatedQuestionsIndexRoute: typeof AuthenticatedQuestionsIndexRoute;
+    AuthenticatedTeamIndexRoute: typeof AuthenticatedTeamIndexRoute;
+    AuthenticatedInterviewInterviewIdLiveRoute: typeof AuthenticatedInterviewInterviewIdLiveRoute;
+    AuthenticatedInterviewInterviewIdProcessingRoute: typeof AuthenticatedInterviewInterviewIdProcessingRoute;
+    AuthenticatedInterviewInterviewIdReportRoute: typeof AuthenticatedInterviewInterviewIdReportRoute;
+    AuthenticatedInterviewInterviewIdIndexRoute: typeof AuthenticatedInterviewInterviewIdIndexRoute;
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
-  AuthenticatedInterviewNewRoute: AuthenticatedInterviewNewRoute,
-  AuthenticatedTeamJoinRoute: AuthenticatedTeamJoinRoute,
-  AuthenticatedAccountIndexRoute: AuthenticatedAccountIndexRoute,
-  AuthenticatedAnalyticsIndexRoute: AuthenticatedAnalyticsIndexRoute,
-  AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
-  AuthenticatedQuestionsIndexRoute: AuthenticatedQuestionsIndexRoute,
-  AuthenticatedTeamIndexRoute: AuthenticatedTeamIndexRoute,
-  AuthenticatedInterviewInterviewIdProcessingRoute:
-    AuthenticatedInterviewInterviewIdProcessingRoute,
-  AuthenticatedInterviewInterviewIdReportRoute:
-    AuthenticatedInterviewInterviewIdReportRoute,
-  AuthenticatedInterviewInterviewIdIndexRoute:
-    AuthenticatedInterviewInterviewIdIndexRoute,
-}
+    AuthenticatedInterviewNewRoute: AuthenticatedInterviewNewRoute,
+    AuthenticatedTeamJoinRoute: AuthenticatedTeamJoinRoute,
+    AuthenticatedAccountIndexRoute: AuthenticatedAccountIndexRoute,
+    AuthenticatedAnalyticsIndexRoute: AuthenticatedAnalyticsIndexRoute,
+    AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
+    AuthenticatedQuestionsIndexRoute: AuthenticatedQuestionsIndexRoute,
+    AuthenticatedTeamIndexRoute: AuthenticatedTeamIndexRoute,
+    AuthenticatedInterviewInterviewIdLiveRoute:
+        AuthenticatedInterviewInterviewIdLiveRoute,
+    AuthenticatedInterviewInterviewIdProcessingRoute:
+        AuthenticatedInterviewInterviewIdProcessingRoute,
+    AuthenticatedInterviewInterviewIdReportRoute:
+        AuthenticatedInterviewInterviewIdReportRoute,
+    AuthenticatedInterviewInterviewIdIndexRoute:
+        AuthenticatedInterviewInterviewIdIndexRoute,
+};
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
-  AuthenticatedRouteChildren,
-)
+    AuthenticatedRouteChildren,
+);
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  AuthenticatedRoute: AuthenticatedRouteWithChildren,
-  LandingRoute: LandingRoute,
-  PricingRoute: PricingRoute,
-  AuthCallbackRoute: AuthCallbackRoute,
-  AuthLoginRoute: AuthLoginRoute,
-  InterviewQuestionsIndexRoute: InterviewQuestionsIndexRoute,
-  OnboardingIndexRoute: OnboardingIndexRoute,
-}
+    IndexRoute: IndexRoute,
+    AuthenticatedRoute: AuthenticatedRouteWithChildren,
+    LandingRoute: LandingRoute,
+    PricingRoute: PricingRoute,
+    AuthCallbackRoute: AuthCallbackRoute,
+    AuthLoginRoute: AuthLoginRoute,
+    InterviewQuestionsIndexRoute: InterviewQuestionsIndexRoute,
+    OnboardingIndexRoute: OnboardingIndexRoute,
+};
 export const routeTree = rootRouteImport
-  ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>()
+    ._addFileChildren(rootRouteChildren)
+    ._addFileTypes<FileRouteTypes>();
 
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
+import type { getRouter } from "./router.tsx";
+import type { createStart } from "@tanstack/react-start";
+declare module "@tanstack/react-start" {
+    interface Register {
+        ssr: true;
+        router: Awaited<ReturnType<typeof getRouter>>;
+    }
 }
