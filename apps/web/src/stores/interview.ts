@@ -1,121 +1,102 @@
 import { create } from "zustand";
 
-interface InterviewQuestion {
-    id: string;
+export interface TranscriptEntry {
+    speaker: "user" | "ai";
     text: string;
-    type: string;
-    order: number;
-    timeLimitSeconds: number | null;
-    difficulty: number;
-}
-
-interface InterviewAnswer {
-    questionId: string;
-    text: string;
-    score?: {
-        overall: number;
-        clarity: number;
-        relevance: number;
-        depth: number;
-        structure: number;
-        feedbackText: string;
-    };
+    timestamp: number;
 }
 
 interface InterviewState {
     // current interview
     interviewId: string | null;
-    questions: InterviewQuestion[];
-    currentQuestionIndex: number;
-    answers: Map<string, InterviewAnswer>;
     isActive: boolean;
-    mode: "text" | "voice";
+    voiceAccent: string;
+    durationMinutes: number;
 
-    // timer
-    timerEnabled: boolean;
-    timeRemaining: number | null;
+    // realtime session
+    signedUrl: string | null;
+    isConnected: boolean;
+    isAISpeaking: boolean;
+    elapsedSeconds: number;
+
+    // transcript
+    transcript: TranscriptEntry[];
+
+    // recording
+    isRecording: boolean;
 
     // actions
     setInterview: (
         id: string,
-        questions: InterviewQuestion[],
-        mode: "text" | "voice",
-        timerEnabled: boolean,
+        config: {
+            voiceAccent: string;
+            durationMinutes: number;
+        },
     ) => void;
-    submitAnswer: (questionId: string, answer: InterviewAnswer) => void;
-    nextQuestion: () => void;
-    previousQuestion: () => void;
-    setTimeRemaining: (seconds: number | null) => void;
+    setSession: (signedUrl: string) => void;
+    setConnected: (connected: boolean) => void;
+    setAISpeaking: (speaking: boolean) => void;
+    addTranscriptEntry: (entry: TranscriptEntry) => void;
+    setElapsedSeconds: (seconds: number) => void;
+    setRecording: (recording: boolean) => void;
     endInterview: () => void;
     reset: () => void;
 }
 
-export const useInterviewStore = create<InterviewState>((set, get) => ({
+export const useInterviewStore = create<InterviewState>((set) => ({
     interviewId: null,
-    questions: [],
-    currentQuestionIndex: 0,
-    answers: new Map(),
     isActive: false,
-    mode: "text",
-    timerEnabled: true,
-    timeRemaining: null,
+    voiceAccent: "american",
+    durationMinutes: 30,
 
-    setInterview: (id, questions, mode, timerEnabled) =>
+    signedUrl: null,
+    isConnected: false,
+    isAISpeaking: false,
+    elapsedSeconds: 0,
+
+    transcript: [],
+
+    isRecording: false,
+
+    setInterview: (id, config) =>
         set({
             interviewId: id,
-            questions,
-            currentQuestionIndex: 0,
-            answers: new Map(),
             isActive: true,
-            mode,
-            timerEnabled,
-            timeRemaining:
-                timerEnabled && questions[0]?.timeLimitSeconds
-                    ? questions[0].timeLimitSeconds
-                    : null,
+            voiceAccent: config.voiceAccent,
+            durationMinutes: config.durationMinutes,
+            transcript: [],
+            elapsedSeconds: 0,
         }),
 
-    submitAnswer: (questionId, answer) =>
-        set((state) => {
-            const newAnswers = new Map(state.answers);
-            newAnswers.set(questionId, answer);
-            return { answers: newAnswers };
-        }),
+    setSession: (signedUrl) => set({ signedUrl }),
 
-    nextQuestion: () =>
-        set((state) => {
-            const next = Math.min(
-                state.currentQuestionIndex + 1,
-                state.questions.length - 1,
-            );
-            const nextQ = state.questions[next];
-            return {
-                currentQuestionIndex: next,
-                timeRemaining:
-                    state.timerEnabled && nextQ?.timeLimitSeconds
-                        ? nextQ.timeLimitSeconds
-                        : null,
-            };
-        }),
+    setConnected: (connected) => set({ isConnected: connected }),
 
-    previousQuestion: () =>
+    setAISpeaking: (speaking) => set({ isAISpeaking: speaking }),
+
+    addTranscriptEntry: (entry) =>
         set((state) => ({
-            currentQuestionIndex: Math.max(state.currentQuestionIndex - 1, 0),
+            transcript: [...state.transcript, entry],
         })),
 
-    setTimeRemaining: (seconds) => set({ timeRemaining: seconds }),
+    setElapsedSeconds: (seconds) => set({ elapsedSeconds: seconds }),
 
-    endInterview: () => set({ isActive: false }),
+    setRecording: (recording) => set({ isRecording: recording }),
+
+    endInterview: () =>
+        set({ isActive: false, isConnected: false, isAISpeaking: false }),
 
     reset: () =>
         set({
             interviewId: null,
-            questions: [],
-            currentQuestionIndex: 0,
-            answers: new Map(),
             isActive: false,
-            mode: "text",
-            timerEnabled: true,
-            timeRemaining: null,
+            voiceAccent: "american",
+            durationMinutes: 30,
+            signedUrl: null,
+            isConnected: false,
+            isAISpeaking: false,
+            elapsedSeconds: 0,
+            transcript: [],
+            isRecording: false,
         }),
 }));
