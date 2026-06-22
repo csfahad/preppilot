@@ -93,6 +93,7 @@ export async function getInterviewById(interviewId: string) {
                 orderBy: (q, { asc }) => [asc(q.order)],
             },
             report: true,
+            user: true,
         },
     });
 

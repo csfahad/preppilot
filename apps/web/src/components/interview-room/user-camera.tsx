@@ -30,6 +30,7 @@ export function UserCamera({
     const initials = userName
         ? userName
               .split(" ")
+              .filter(Boolean)
               .map((n) => n[0])
               .join("")
               .toUpperCase()
@@ -82,7 +83,7 @@ export function UserCamera({
 
             {/* Name label */}
             <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 px-3 py-1 rounded-lg bg-background/60 backdrop-blur-sm text-xs font-medium text-foreground">
-                You
+                {userName || "You"}
             </div>
 
             {/* Recording indicator */}
