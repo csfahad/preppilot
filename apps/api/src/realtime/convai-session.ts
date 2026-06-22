@@ -42,10 +42,6 @@ export async function createConvAISession(
 
     const voiceId = VOICE_MAP[config.voiceAccent] || VOICE_MAP["american"]!;
 
-    console.log(
-        `[ConvAI] Voice resolution: accent="${config.voiceAccent}", voiceId="${voiceId}"`,
-    );
-
     if (voiceId) {
         await patchAgentVoice(agentId, voiceId);
     }
@@ -157,7 +153,7 @@ async function patchAgentVoice(
         );
         // don't throw - fall back to the agent's existing voice
     } else {
-        console.log(`[ConvAI] Agent voice updated to ${voiceId} successfully`);
+        //
     }
 }
 
