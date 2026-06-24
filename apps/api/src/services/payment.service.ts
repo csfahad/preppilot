@@ -2,7 +2,7 @@ import Razorpay from "razorpay";
 import crypto from "crypto";
 import { db } from "../db/index.js";
 import { subscriptions, users, interviewCredits } from "../db/schema.js";
-import { eq, desc, and, gt, sql } from "drizzle-orm";
+import { eq, desc, and, gt, sql, ne, or, isNull } from "drizzle-orm";
 import type { UserPlan } from "@repo/shared/constants/taxonomy";
 
 const razorpay = new Razorpay({
@@ -50,6 +50,11 @@ export async function createPackOrder(
 ) {
     const pack = PACK_PRICES[packType];
     if (!pack) throw new Error(`Unknown pack type: ${packType}`);
+
+    const purchaseEligibility = await getPackPurchaseEligibility(userId);
+    if (!purchaseEligibility.canPurchase) {
+        throw new Error("ACTIVE_PACK_EXISTS");
+    }
 
     const order = await razorpay.orders.create({
         amount: pack.amount,
@@ -255,14 +260,51 @@ export async function handleWebhook(event: string, payload: any) {
 }
 
 export async function getUserSubscription(userId: string) {
-    const [sub] = await db
+    const [activeSub] = await db
         .select()
         .from(subscriptions)
-        .where(eq(subscriptions.userId, userId))
+        .where(
+            and(
+                eq(subscriptions.userId, userId),
+                eq(subscriptions.status, "active"),
+            ),
+        )
         .orderBy(desc(subscriptions.createdAt))
         .limit(1);
 
-    return sub ?? null;
+    const [latestSub] = activeSub
+        ? [activeSub]
+        : await db
+              .select()
+              .from(subscriptions)
+              .where(eq(subscriptions.userId, userId))
+              .orderBy(desc(subscriptions.createdAt))
+              .limit(1);
+
+    const sub = activeSub ?? latestSub;
+    if (!sub) return null;
+
+    let billingContact = null;
+    if (sub.razorpayPaymentId) {
+        try {
+            const payment = await razorpay.payments.fetch(
+                sub.razorpayPaymentId,
+            );
+            billingContact = {
+                email: payment.email ?? null,
+                contact: payment.contact ?? null,
+                method: payment.method ?? null,
+                amount: payment.amount ?? null,
+            };
+        } catch (error) {
+            console.error(
+                "[Payments] Failed to fetch Razorpay payment:",
+                error,
+            );
+        }
+    }
+
+    return { ...sub, billingContact };
 }
 
 export async function getUserCredits(userId: string) {
@@ -298,6 +340,19 @@ export async function getUserCredits(userId: string) {
     };
 }
 
+export async function getPackPurchaseEligibility(userId: string) {
+    const credits = await getUserCredits(userId);
+
+    return {
+        canPurchase: credits.totalRemaining <= 0,
+        reason:
+            credits.totalRemaining > 0
+                ? "ACTIVE_CREDITS_REMAINING"
+                : "NO_ACTIVE_CREDITS",
+        totalRemaining: credits.totalRemaining,
+    };
+}
+
 export async function consumeCredit(userId: string): Promise<boolean> {
     const { packs } = await getUserCredits(userId);
 
@@ -311,4 +366,116 @@ export async function consumeCredit(userId: string): Promise<boolean> {
         .where(eq(interviewCredits.id, pack.id));
 
     return true;
+}
+
+export async function cancelPlanWithinWindow(userId: string) {
+    const [sub] = await db
+        .select()
+        .from(subscriptions)
+        .where(
+            and(
+                eq(subscriptions.userId, userId),
+                eq(subscriptions.status, "active"),
+            ),
+        )
+        .orderBy(desc(subscriptions.createdAt))
+        .limit(1);
+
+    if (!sub?.razorpayPaymentId || !sub.currentPeriodStart) {
+        throw new Error("No cancellable active pack was found.");
+    }
+
+    const purchasedAt = new Date(sub.currentPeriodStart);
+    const deadline = purchasedAt.getTime() + 24 * 60 * 60 * 1000;
+    if (Date.now() > deadline) {
+        throw new Error(
+            "This pack is outside the 24-hour cancellation window.",
+        );
+    }
+
+    const [creditPack] = await db
+        .select()
+        .from(interviewCredits)
+        .where(
+            and(
+                eq(interviewCredits.userId, userId),
+                eq(interviewCredits.razorpayPaymentId, sub.razorpayPaymentId),
+            ),
+        )
+        .limit(1);
+
+    if (!creditPack) {
+        throw new Error("No credit pack was found for this payment.");
+    }
+
+    const remainingCredits = creditPack.totalCredits - creditPack.usedCredits;
+    if (remainingCredits <= 0) {
+        throw new Error("No unused credits remain for refund.");
+    }
+
+    const packPrice = PACK_PRICES[creditPack.packType]?.amount;
+    if (!packPrice) {
+        throw new Error("Unable to calculate refund for this pack.");
+    }
+
+    const refundAmount = Math.floor(
+        (packPrice * remainingCredits) / creditPack.totalCredits,
+    );
+
+    await razorpay.payments.refund(sub.razorpayPaymentId, {
+        amount: refundAmount,
+        notes: {
+            service: "preppilot",
+            reason: "24_hour_usage_based_cancellation",
+            user_id: userId,
+            remaining_credits: String(remainingCredits),
+        },
+    });
+
+    const now = new Date();
+    await db
+        .update(subscriptions)
+        .set({ status: "cancelled", updatedAt: now })
+        .where(eq(subscriptions.id, sub.id));
+
+    await db
+        .update(interviewCredits)
+        .set({ usedCredits: creditPack.totalCredits })
+        .where(eq(interviewCredits.id, creditPack.id));
+
+    const remainingPacks = await db
+        .select()
+        .from(interviewCredits)
+        .where(
+            and(
+                eq(interviewCredits.userId, userId),
+                ne(interviewCredits.id, creditPack.id),
+                gt(
+                    sql`${interviewCredits.totalCredits} - ${interviewCredits.usedCredits}`,
+                    0,
+                ),
+                or(
+                    isNull(interviewCredits.expiresAt),
+                    gt(interviewCredits.expiresAt, now),
+                ),
+            ),
+        )
+        .orderBy(desc(interviewCredits.purchasedAt));
+
+    const nextPlan = remainingPacks[0]
+        ? PACK_PRICES[remainingPacks[0].packType]!.plan
+        : "free";
+
+    await db
+        .update(users)
+        .set({ plan: nextPlan, updatedAt: now })
+        .where(eq(users.id, userId));
+
+    return {
+        refundAmount,
+        refundAmountFormatted: `₹${(refundAmount / 100).toLocaleString(
+            "en-IN",
+        )}`,
+        remainingCredits,
+    };
 }
