@@ -1,6 +1,11 @@
-import { and, eq, sql } from "drizzle-orm";
+import { and, asc, eq, gt, isNull, or, sql } from "drizzle-orm";
 import { db } from "../db/index.js";
-import { interviews, questions, users } from "../db/schema.js";
+import {
+    interviewCredits,
+    interviews,
+    questions,
+    users,
+} from "../db/schema.js";
 import { callClaudeJSON } from "../ai/llm-calls.js";
 import {
     buildAdaptiveFollowUpPrompt,
@@ -23,7 +28,9 @@ interface CreateInterviewParams {
     experienceYears?: number;
 }
 
-export async function createInterview(params: CreateInterviewParams) {
+export async function createInterview(
+    params: CreateInterviewParams & { consumePackCredit?: boolean },
+) {
     // create the interview record
     const [interview] = await db
         .insert(interviews)
@@ -44,7 +51,38 @@ export async function createInterview(params: CreateInterviewParams) {
 
     if (!interview) throw new Error("Failed to create interview");
 
-    // increment user interview count
+    if (params.consumePackCredit) {
+        const now = new Date();
+        const [creditPack] = await db
+            .select()
+            .from(interviewCredits)
+            .where(
+                and(
+                    eq(interviewCredits.userId, params.userId),
+                    gt(
+                        sql`${interviewCredits.totalCredits} - ${interviewCredits.usedCredits}`,
+                        0,
+                    ),
+                    or(
+                        isNull(interviewCredits.expiresAt),
+                        gt(interviewCredits.expiresAt, now),
+                    ),
+                ),
+            )
+            .orderBy(asc(interviewCredits.purchasedAt))
+            .limit(1);
+
+        if (!creditPack) {
+            throw new Error("NO_ACTIVE_CREDITS");
+        }
+
+        await db
+            .update(interviewCredits)
+            .set({ usedCredits: creditPack.usedCredits + 1 })
+            .where(eq(interviewCredits.id, creditPack.id));
+    }
+
+    // increment total interview count for free limits and usage analytics
     await db
         .update(users)
         .set({ interviewCount: sql`${users.interviewCount} + 1` })
@@ -94,6 +132,7 @@ export async function getInterviewById(interviewId: string) {
             },
             report: true,
             user: true,
+            recording: true,
         },
     });
 
@@ -109,7 +148,7 @@ export async function getUserInterviews(
 
     const results = await db.query.interviews.findMany({
         where: eq(interviews.userId, userId),
-        with: { report: true },
+        with: { report: true, recording: true },
         orderBy: (i, { desc }) => [desc(i.createdAt)],
         limit: pageSize,
         offset,
