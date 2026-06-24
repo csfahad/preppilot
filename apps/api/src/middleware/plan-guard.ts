@@ -1,8 +1,9 @@
 import type { Request, Response, NextFunction } from "express";
 import { PLAN_LIMITS, type UserPlan } from "@repo/shared/constants/taxonomy";
+import { getUserCredits } from "../services/payment.service.js";
 
 export function requirePlanAccess(feature?: "model_answers" | "full_feedback") {
-    return (req: Request, res: Response, next: NextFunction) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
         if (!req.user) {
             res.status(401).json({
                 success: false,
@@ -28,15 +29,30 @@ export function requirePlanAccess(feature?: "model_answers" | "full_feedback") {
             return;
         }
 
-        if (req.user.interviewCount >= limits.maxInterviews) {
-            res.status(403).json({
-                success: false,
-                error: {
-                    code: "PLAN_LIMIT_REACHED",
-                    message: `You've used all ${limits.maxInterviews} interviews on the free plan. Upgrade to continue.`,
-                },
-            });
-            return;
+        if (plan === "free") {
+            if (req.user.interviewCount >= limits.maxInterviews) {
+                res.status(403).json({
+                    success: false,
+                    error: {
+                        code: "PLAN_LIMIT_REACHED",
+                        message: `You've used your free interview. Purchase a pack to continue.`,
+                    },
+                });
+                return;
+            }
+        } else if (plan.endsWith("_pack")) {
+            const credits = await getUserCredits(req.user.id);
+            if (credits.totalRemaining <= 0) {
+                res.status(403).json({
+                    success: false,
+                    error: {
+                        code: "PLAN_LIMIT_REACHED",
+                        message:
+                            "You have no active interview credits remaining. Purchase a new pack to continue.",
+                    },
+                });
+                return;
+            }
         }
 
         // check feature-specific access
