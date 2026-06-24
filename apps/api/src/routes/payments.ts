@@ -8,6 +8,7 @@ import {
     getUserSubscription,
     getUserCredits,
     consumeCredit,
+    cancelPlanWithinWindow,
 } from "../services/payment.service.js";
 import crypto from "crypto";
 
@@ -38,6 +39,19 @@ router.post("/create-pack-order", requireAuth, async (req, res) => {
         res.json({ success: true, data: result });
     } catch (error) {
         console.error("[Payments] Error creating pack order:", error);
+        const message =
+            error instanceof Error ? error.message : "Failed to create order";
+        if (message === "ACTIVE_PACK_EXISTS") {
+            res.status(409).json({
+                success: false,
+                error: {
+                    code: "ACTIVE_PACK_EXISTS",
+                    message:
+                        "You already have active interview credits. Use them before buying another pack.",
+                },
+            });
+            return;
+        }
         res.status(500).json({
             success: false,
             error: {
@@ -58,7 +72,19 @@ router.post("/create-subscription", requireAuth, async (req, res) => {
             standard_pack: "standard",
             premium_pack: "premium",
         };
-        const packType = packMap[planId]!;
+        const packType = packMap[planId];
+        if (!packType) {
+            res.status(400).json({
+                success: false,
+                error: {
+                    code: "VALIDATION_ERROR",
+                    message:
+                        "Valid planId required (mini_pack, standard_pack, or premium_pack)",
+                },
+            });
+            return;
+        }
+
         const result = await createPackOrder(
             req.user!.id,
             packType,
@@ -67,6 +93,19 @@ router.post("/create-subscription", requireAuth, async (req, res) => {
         res.json({ success: true, data: result });
     } catch (error) {
         console.error("[Payments] Error creating order:", error);
+        const message =
+            error instanceof Error ? error.message : "Failed to create order";
+        if (message === "ACTIVE_PACK_EXISTS") {
+            res.status(409).json({
+                success: false,
+                error: {
+                    code: "ACTIVE_PACK_EXISTS",
+                    message:
+                        "You already have active interview credits. Use them before buying another pack.",
+                },
+            });
+            return;
+        }
         res.status(500).json({
             success: false,
             error: {
@@ -186,6 +225,33 @@ router.get("/subscription", requireAuth, async (req, res) => {
             error: {
                 code: "INTERNAL_ERROR",
                 message: "Failed to fetch subscription",
+            },
+        });
+    }
+});
+
+router.post("/cancel-plan", requireAuth, async (req, res) => {
+    try {
+        const result = await cancelPlanWithinWindow(req.user!.id);
+        res.json({ success: true, data: result });
+    } catch (error) {
+        const message =
+            error instanceof Error ? error.message : "Failed to cancel plan";
+        const status =
+            message.includes("24-hour") ||
+            message.includes("No cancellable") ||
+            message.includes("No unused")
+                ? 400
+                : 500;
+
+        res.status(status).json({
+            success: false,
+            error: {
+                code:
+                    status === 400
+                        ? "CANCELLATION_NOT_ALLOWED"
+                        : "INTERNAL_ERROR",
+                message,
             },
         });
     }
