@@ -87,12 +87,24 @@ router.post(
                 jobDescription: req.body.jobDescription,
                 skills: profile?.skills,
                 experienceYears: profile?.experienceYears,
+                consumePackCredit: String(req.user!.plan).endsWith("_pack"),
             });
 
             res.status(201).json({ success: true, data: interview });
         } catch (error) {
             console.error("[Interviews] Error creating interview:", error);
             const errorMessage = getErrorMessage(error);
+            if (errorMessage === "NO_ACTIVE_CREDITS") {
+                res.status(403).json({
+                    success: false,
+                    error: {
+                        code: "PLAN_LIMIT_REACHED",
+                        message:
+                            "You have no active interview credits remaining. Purchase a new pack to continue.",
+                    },
+                });
+                return;
+            }
             const isAiConfigError =
                 errorMessage.includes("ANTHROPIC_API_KEY") ||
                 errorMessage.includes("GEMINI_API_KEY");
