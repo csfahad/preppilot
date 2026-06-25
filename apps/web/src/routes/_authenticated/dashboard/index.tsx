@@ -317,6 +317,9 @@ function DashboardPage() {
                             const statusConfig = getStatusConfig(
                                 interview.status,
                             );
+                            const recordingUrl =
+                                interview.recording?.videoUrl ||
+                                interview.recording?.audioUrl;
 
                             if (isConfiguring) {
                                 return (
@@ -462,6 +465,12 @@ function DashboardPage() {
                                                 >
                                                     {statusConfig.label}
                                                 </span>
+                                                {recordingUrl && (
+                                                    <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
+                                                        <IconPlayerPlay className="w-3 h-3" />
+                                                        Recording
+                                                    </span>
+                                                )}
                                                 {interview.createdAt && (
                                                     <span className="flex items-center gap-1 text-[10px] text-muted-foreground/70">
                                                         <IconCalendar className="w-3 h-3" />
