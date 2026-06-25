@@ -77,6 +77,7 @@ export const api = {
     verifyPayment: (data: any) =>
         request("/api/payments/verify", { method: "POST", body: data }),
     getSubscription: () => request("/api/payments/subscription"),
+    cancelPlan: () => request("/api/payments/cancel-plan", { method: "POST" }),
     getUserPlan: () =>
         request<{ plan: string; interviewCount: number }>(
             "/api/profiles/user-plan",
