@@ -286,8 +286,7 @@ function PricingPage() {
         setLoadingPack(packId);
         try {
             const res = await api.purchasePack(packId);
-            const { orderId, razorpayKeyId, userEmail, planLabel } =
-                res.data as any;
+            const { orderId, razorpayKeyId, userEmail, packLabel } = res.data;
 
             const isDev = import.meta.env.DEV;
 
@@ -295,7 +294,7 @@ function PricingPage() {
                 key: razorpayKeyId,
                 order_id: orderId,
                 name: "PrepPilot",
-                description: planLabel,
+                description: packLabel,
                 prefill: {
                     email: userEmail,
                 },
