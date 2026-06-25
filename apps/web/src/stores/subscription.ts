@@ -72,7 +72,7 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
     hasFetched: false,
 
     setPlan: (plan, interviewCount) => {
-        const limits = PLAN_LIMITS[plan] || PLAN_LIMITS["free"]!;
+        const limits = PLAN_LIMITS[plan] ?? PLAN_LIMITS.free;
         set({
             plan,
             interviewCount,
@@ -81,7 +81,7 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
     },
 
     setSubscription: (sub) => {
-        const limits = PLAN_LIMITS[sub.plan] || PLAN_LIMITS["free"]!;
+        const limits = PLAN_LIMITS[sub.plan] ?? PLAN_LIMITS.free;
         set({
             plan: sub.plan,
             status: sub.status,
@@ -102,7 +102,7 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
             ]);
             if (planRes.data) {
                 const limits =
-                    PLAN_LIMITS[planRes.data.plan] || PLAN_LIMITS["free"]!;
+                    PLAN_LIMITS[planRes.data.plan] ?? PLAN_LIMITS.free;
                 set({
                     plan: planRes.data.plan,
                     interviewCount: planRes.data.interviewCount,
@@ -125,7 +125,7 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
 
     canStartInterview: () => {
         const state = get();
-        const limits = PLAN_LIMITS[state.plan] || PLAN_LIMITS["free"]!;
+        const limits = PLAN_LIMITS[state.plan] ?? PLAN_LIMITS.free;
         return state.interviewCount < limits.maxInterviews;
     },
 }));
