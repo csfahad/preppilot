@@ -49,7 +49,7 @@ function OnboardingWizard() {
 
     useEffect(() => {
         if (!isSessionPending && !session) {
-            navigate({ to: "/auth/login" });
+            navigate({ to: "/auth/login", search: { error: undefined } });
         }
     }, [session, isSessionPending, navigate]);
 
@@ -108,7 +108,7 @@ function OnboardingWizard() {
 
     const handleSubmit = async () => {
         if (!session) {
-            navigate({ to: "/auth/login" });
+            navigate({ to: "/auth/login", search: { error: undefined } });
             return;
         }
 
@@ -219,10 +219,10 @@ function OnboardingWizard() {
                     >
                         <div className="mb-6">
                             <h2 className="font-heading text-2xl font-bold text-foreground">
-                                {STEPS[step]!.label}
+                                {STEPS[step].label}
                             </h2>
                             <p className="text-muted-foreground mt-1">
-                                {STEPS[step]!.desc}
+                                {STEPS[step].desc}
                             </p>
                         </div>
 
@@ -345,8 +345,7 @@ function OnboardingWizard() {
                                     onDragOver={(e) => e.preventDefault()}
                                     onDrop={(e) => {
                                         e.preventDefault();
-                                        const file = e.dataTransfer.files[0];
-                                        if (file) setResumeFile(file);
+                                        setResumeFile(e.dataTransfer.files[0]);
                                     }}
                                 >
                                     <IconFileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />

@@ -5,8 +5,7 @@ import {
     Link,
     useMatchRoute,
 } from "@tanstack/react-router";
-import { useSession } from "@/lib/auth-client";
-import { signOut } from "@/lib/auth-client";
+import { signOut, useSession } from "@/lib/auth-client";
 import { useEffect, useState, useCallback } from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useSubscriptionStore } from "@/stores/subscription";
