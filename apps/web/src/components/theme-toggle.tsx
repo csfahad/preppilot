@@ -25,7 +25,10 @@ function applyTheme(theme: Theme) {
 export function ThemeToggle() {
     const [theme, setTheme] = useState<Theme>(() => {
         if (typeof window === "undefined") return "light";
-        return (localStorage.getItem("preppilot-theme") as Theme) || "light";
+        const stored = localStorage.getItem("preppilot-theme");
+        return stored === "dark" || stored === "light" || stored === "system"
+            ? stored
+            : "light";
     });
 
     const isDark =
@@ -51,7 +54,7 @@ export function ThemeToggle() {
     return (
         <button
             onClick={toggle}
-            className="relative w-9 h-9 rounded-lg flex items-center justify-center text-sidebar-foreground/60 hover:text-sidebar-foreground transition-colors cursor-pointer"
+            className="relative w-9 h-9 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
             title={isDark ? "Switch to light mode" : "Switch to dark mode"}
             aria-label="Toggle theme"
         >
