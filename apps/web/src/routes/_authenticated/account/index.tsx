@@ -2,9 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { api } from "@/lib/api-client";
-import { useSession } from "@/lib/auth-client";
-import { signOut } from "@/lib/auth-client";
+import { signOut, useSession } from "@/lib/auth-client";
 import { useSubscriptionStore } from "@/stores/subscription";
+import { getPlanFullLabel, getPlanLabel, isPaidPlan } from "@/lib/plans";
 import {
     INDUSTRIES,
     FUNCTION_CATEGORIES,
@@ -150,16 +150,9 @@ function AccountPage() {
         });
     };
 
-    const planLabel =
-        plan === "pro_monthly"
-            ? "Pro Monthly"
-            : plan === "pro_annual"
-              ? "Pro Annual"
-              : plan === "enterprise"
-                ? "Enterprise"
-                : "Free";
-
-    const isPro = plan !== "free";
+    const planLabel = getPlanLabel(plan);
+    const planFullLabel = getPlanFullLabel(plan);
+    const isPro = isPaidPlan(plan);
 
     const planFeatures = [
         {
@@ -520,7 +513,7 @@ function AccountPage() {
                                 </div>
                                 <div>
                                     <h3 className="text-sm font-semibold text-foreground">
-                                        {planLabel} Plan
+                                        {planFullLabel}
                                     </h3>
                                     {currentPeriodEnd && (
                                         <p className="text-xs text-muted-foreground">
@@ -547,7 +540,7 @@ function AccountPage() {
                             )}
                             {isPro && (
                                 <Link
-                                    to="/pricing"
+                                    to="/billing"
                                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
                                 >
                                     Manage Plan
