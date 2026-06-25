@@ -9,7 +9,7 @@ interface TranscriptEntry {
 }
 
 interface LiveTranscriptProps {
-    entries: TranscriptEntry[];
+    entries: Array<Partial<TranscriptEntry> | null | undefined>;
     isExpanded: boolean;
     onToggle: () => void;
 }
@@ -25,7 +25,17 @@ export function LiveTranscript({
     onToggle,
 }: LiveTranscriptProps) {
     const scrollRef = useRef<HTMLDivElement>(null);
-    const lastEntry = entries[entries.length - 1];
+    const safeEntries = entries.filter(
+        (entry): entry is TranscriptEntry =>
+            !!entry &&
+            (entry.speaker === "ai" || entry.speaker === "user") &&
+            typeof entry.text === "string" &&
+            typeof entry.timestamp === "number",
+    );
+    const collapsedEntry: TranscriptEntry | null =
+        safeEntries.length > 0
+            ? (safeEntries[safeEntries.length - 1] ?? null)
+            : null;
 
     // auto-scroll to bottom when new entries arrive
     useEffect(() => {
@@ -45,22 +55,29 @@ export function LiveTranscript({
                     <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider shrink-0">
                         Live Transcript
                     </span>
-                    {!isExpanded && lastEntry && (
+                    {!isExpanded && collapsedEntry ? (
                         <span className="text-xs text-muted-foreground truncate">
                             —{" "}
                             <span
                                 className={
-                                    lastEntry.speaker === "ai"
+                                    collapsedEntry.speaker === "ai"
                                         ? "text-primary"
                                         : "text-foreground"
                                 }
                             >
-                                {lastEntry.speaker === "ai" ? "AI: " : "You: "}
+                                {collapsedEntry.speaker === "ai"
+                                    ? "AI: "
+                                    : "You: "}
                             </span>
-                            {lastEntry.text.slice(0, 80)}
-                            {lastEntry.text.length > 80 ? "..." : ""}
+                            {collapsedEntry.text.slice(0, 80)}
+                            {collapsedEntry.text.length > 80 ? "..." : ""}
                         </span>
-                    )}
+                    ) : null}
+                    {!isExpanded && !collapsedEntry ? (
+                        <span className="text-xs text-muted-foreground truncate">
+                            — Waiting for the first turn
+                        </span>
+                    ) : null}
                 </div>
                 {isExpanded ? (
                     <IconChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />
@@ -83,12 +100,12 @@ export function LiveTranscript({
                             ref={scrollRef}
                             className="h-[200px] overflow-y-auto px-5 py-3 space-y-3"
                         >
-                            {entries.length === 0 && (
+                            {safeEntries.length === 0 && (
                                 <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
                                     Conversation will appear here...
                                 </div>
                             )}
-                            {entries.map((entry, i) => (
+                            {safeEntries.map((entry, i) => (
                                 <motion.div
                                     key={i}
                                     initial={{ opacity: 0, y: 8 }}
