@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "motion/react";
 import { api } from "@/lib/api-client";
 import { useSubscriptionStore } from "@/stores/subscription";
@@ -21,6 +21,13 @@ import {
     IconStar,
     IconTrendingUp,
     IconAlertTriangle,
+    IconVideo,
+    IconMicrophone,
+    IconPlayerPause,
+    IconPlayerPlay,
+    IconVolume,
+    IconVolumeOff,
+    IconMaximize,
 } from "@tabler/icons-react";
 
 export const Route = createFileRoute(
@@ -64,6 +71,8 @@ function ReportPage() {
     }
 
     const report = interview?.report;
+    const recording = interview?.recording;
+    const recordingUrl = recording?.videoUrl || recording?.audioUrl;
     const radarData = report?.radarScores
         ? Object.entries(report.radarScores).map(([key, value]) => ({
               subject: key,
@@ -107,6 +116,43 @@ function ReportPage() {
                         {report.summaryText?.split("\n")[0]}
                     </p>
                 </motion.div>
+            )}
+
+            {recordingUrl && (
+                <motion.section
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.12 }}
+                    className="bg-card border border-border rounded-2xl overflow-hidden mb-8"
+                >
+                    <div className="px-6 py-5 border-b border-border flex items-center justify-between gap-4">
+                        <div>
+                            <h2 className="font-heading text-lg font-semibold text-foreground flex items-center gap-2">
+                                {recording.videoUrl ? (
+                                    <IconVideo className="w-5 h-5 text-primary" />
+                                ) : (
+                                    <IconMicrophone className="w-5 h-5 text-primary" />
+                                )}
+                                Interview Recording
+                            </h2>
+                            <p className="text-sm text-muted-foreground mt-1">
+                                Review your realtime session alongside the
+                                feedback.
+                            </p>
+                        </div>
+                        {recording.durationSeconds && (
+                            <span className="text-xs font-medium text-muted-foreground bg-muted px-2.5 py-1 rounded-md">
+                                {Math.round(recording.durationSeconds / 60)} min
+                            </span>
+                        )}
+                    </div>
+                    <div className="p-4 sm:p-6">
+                        <RecordingPlayer
+                            src={recordingUrl}
+                            type={recording.videoUrl ? "video" : "audio"}
+                        />
+                    </div>
+                </motion.section>
             )}
 
             {report && (
@@ -411,5 +457,199 @@ function ReportPage() {
                 </Link>
             </div>
         </main>
+    );
+}
+
+function formatMediaTime(seconds: number) {
+    if (!Number.isFinite(seconds)) return "0:00";
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60)
+        .toString()
+        .padStart(2, "0");
+    return `${mins}:${secs}`;
+}
+
+function RecordingPlayer({
+    src,
+    type,
+}: {
+    src: string;
+    type: "video" | "audio";
+}) {
+    const mediaRef = useRef<HTMLVideoElement | HTMLAudioElement>(null);
+    const shellRef = useRef<HTMLDivElement>(null);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [isMuted, setIsMuted] = useState(false);
+    const [currentTime, setCurrentTime] = useState(0);
+    const [duration, setDuration] = useState(0);
+    const [volume, setVolume] = useState(0.85);
+
+    const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+
+    const togglePlayback = async () => {
+        const media = mediaRef.current;
+        if (!media) return;
+
+        if (media.paused) {
+            await media.play();
+        } else {
+            media.pause();
+        }
+    };
+
+    const toggleMute = () => {
+        const media = mediaRef.current;
+        if (!media) return;
+
+        media.muted = !media.muted;
+        setIsMuted(media.muted);
+    };
+
+    const changeVolume = (value: number) => {
+        const media = mediaRef.current;
+        if (!media) return;
+
+        media.volume = value;
+        media.muted = value === 0;
+        setVolume(value);
+        setIsMuted(media.muted);
+    };
+
+    const seek = (value: number) => {
+        const media = mediaRef.current;
+        if (!media || !duration) return;
+
+        media.currentTime = (value / 100) * duration;
+        setCurrentTime(media.currentTime);
+    };
+
+    const openFullscreen = () => {
+        if (type === "audio") return;
+        void shellRef.current?.requestFullscreen();
+    };
+
+    const sharedMediaProps = {
+        ref: mediaRef as any,
+        src,
+        preload: "metadata",
+        onPlay: () => setIsPlaying(true),
+        onPause: () => setIsPlaying(false),
+        onEnded: () => setIsPlaying(false),
+        onLoadedMetadata: () => {
+            const media = mediaRef.current;
+            if (!media) return;
+            media.volume = volume;
+            setDuration(media.duration);
+        },
+        onTimeUpdate: () => {
+            const media = mediaRef.current;
+            if (!media) return;
+            setCurrentTime(media.currentTime);
+        },
+    };
+
+    return (
+        <div
+            ref={shellRef}
+            className="mx-auto w-full max-w-4xl overflow-hidden rounded-xl border border-border bg-zinc-950 shadow-lg shadow-black/10"
+        >
+            <div
+                className={
+                    type === "video"
+                        ? "relative aspect-video bg-black"
+                        : "relative flex min-h-52 items-center justify-center bg-[linear-gradient(135deg,#0a0a0a,#1f2937)]"
+                }
+            >
+                {type === "video" ? (
+                    <video
+                        {...sharedMediaProps}
+                        className="h-full w-full object-contain"
+                    />
+                ) : (
+                    <>
+                        <audio {...sharedMediaProps} />
+                        <div className="flex flex-col items-center gap-3 text-white/85">
+                            <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-white/10">
+                                <IconMicrophone className="h-8 w-8 text-primary" />
+                            </div>
+                            <p className="text-sm font-semibold">
+                                Audio recording
+                            </p>
+                        </div>
+                    </>
+                )}
+            </div>
+
+            <div className="bg-zinc-950 px-4 py-3 text-white">
+                <input
+                    type="range"
+                    min={0}
+                    max={100}
+                    value={progress}
+                    onChange={(event) => seek(Number(event.target.value))}
+                    aria-label="Seek recording"
+                    className="h-1.5 w-full cursor-pointer accent-primary"
+                />
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                        <button
+                            type="button"
+                            onClick={togglePlayback}
+                            aria-label={
+                                isPlaying ? "Pause recording" : "Play recording"
+                            }
+                            className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-opacity hover:opacity-90"
+                        >
+                            {isPlaying ? (
+                                <IconPlayerPause className="h-5 w-5" />
+                            ) : (
+                                <IconPlayerPlay className="h-5 w-5" />
+                            )}
+                        </button>
+                        <span className="min-w-24 text-xs font-medium text-white/75">
+                            {formatMediaTime(currentTime)} /{" "}
+                            {formatMediaTime(duration)}
+                        </span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <button
+                            type="button"
+                            onClick={toggleMute}
+                            aria-label={isMuted ? "Unmute" : "Mute"}
+                            className="flex h-9 w-9 items-center justify-center rounded-lg text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+                        >
+                            {isMuted ? (
+                                <IconVolumeOff className="h-4 w-4" />
+                            ) : (
+                                <IconVolume className="h-4 w-4" />
+                            )}
+                        </button>
+                        <input
+                            type="range"
+                            min={0}
+                            max={1}
+                            step={0.05}
+                            value={isMuted ? 0 : volume}
+                            onChange={(event) =>
+                                changeVolume(Number(event.target.value))
+                            }
+                            aria-label="Volume"
+                            className="h-1.5 w-24 cursor-pointer accent-primary"
+                        />
+                        {type === "video" && (
+                            <button
+                                type="button"
+                                onClick={openFullscreen}
+                                aria-label="Open fullscreen"
+                                className="flex h-9 w-9 items-center justify-center rounded-lg text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+                            >
+                                <IconMaximize className="h-4 w-4" />
+                            </button>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
     );
 }
