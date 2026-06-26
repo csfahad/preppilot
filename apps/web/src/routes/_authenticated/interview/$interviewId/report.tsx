@@ -28,6 +28,11 @@ import {
     IconVolume,
     IconVolumeOff,
     IconMaximize,
+    IconBrandLinkedin,
+    IconBrandX,
+    IconBrandReddit,
+    IconCopy,
+    IconExternalLink,
 } from "@tabler/icons-react";
 
 export const Route = createFileRoute(
@@ -43,6 +48,10 @@ function ReportPage() {
     const [scores, setScores] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [expandedQ, setExpandedQ] = useState<string | null>(null);
+    const [shareOpen, setShareOpen] = useState(false);
+    const [shareUrl, setShareUrl] = useState<string | null>(null);
+    const [shareMessage, setShareMessage] = useState<string | null>(null);
+    const [creatingShare, setCreatingShare] = useState(false);
 
     useEffect(() => {
         async function load() {
@@ -73,6 +82,9 @@ function ReportPage() {
     const report = interview?.report;
     const recording = interview?.recording;
     const recordingUrl = recording?.videoUrl || recording?.audioUrl;
+    const shareText = report
+        ? `I scored ${report.overallScore}/100 on my ${interview?.roleTitle ?? "mock interview"} practice report with PrepPilot.`
+        : "Review my PrepPilot interview report.";
     const radarData = report?.radarScores
         ? Object.entries(report.radarScores).map(([key, value]) => ({
               subject: key,
@@ -80,14 +92,158 @@ function ReportPage() {
               fullMark: 100,
           }))
         : [];
+    const encodedShareUrl = encodeURIComponent(shareUrl ?? "");
+    const encodedShareText = encodeURIComponent(shareText);
+
+    const handleShare = async () => {
+        setShareOpen(true);
+        setShareMessage(null);
+
+        if (shareUrl) return;
+
+        setCreatingShare(true);
+        try {
+            const res = await api.createReportShare(interviewId);
+            const token = res.data?.token;
+            if (!token) throw new Error("Unable to create share link.");
+            const url = `${window.location.origin}/share/${token}`;
+            setShareUrl(url);
+
+            if ("share" in navigator) {
+                await navigator
+                    .share({
+                        title: "PrepPilot interview report",
+                        text: shareText,
+                        url,
+                    })
+                    .catch(() => {});
+            }
+        } catch (err) {
+            setShareMessage(
+                err instanceof Error
+                    ? err.message
+                    : "Unable to create share link.",
+            );
+        } finally {
+            setCreatingShare(false);
+        }
+    };
+
+    const handleCopyShare = async () => {
+        if (!shareUrl) return;
+
+        await navigator.clipboard.writeText(shareUrl);
+        setShareMessage("Share link copied.");
+    };
 
     return (
         <main className="flex-1 px-6 lg:px-10 py-8 max-w-[1400px] mx-auto w-full overflow-x-hidden">
-            <div className="flex items-center justify-between mb-8">
+            <div className="relative flex items-center justify-between mb-8">
                 <div />
-                <button className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-border text-sm hover:bg-accent transition-colors cursor-pointer">
+                <button
+                    onClick={handleShare}
+                    disabled={!report || creatingShare}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-border text-sm hover:bg-accent transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                >
                     <IconShare className="w-4 h-4" /> Share
                 </button>
+                {shareOpen && (
+                    <div className="absolute right-0 top-12 z-20 w-[min(360px,calc(100vw-3rem))] rounded-xl border border-border bg-card p-4 shadow-xl">
+                        <div className="flex items-start justify-between gap-4">
+                            <div>
+                                <p className="font-heading text-sm font-semibold text-foreground">
+                                    Share report
+                                </p>
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                    Create a signed public link for this report.
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setShareOpen(false)}
+                                className="rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
+                                aria-label="Close share panel"
+                            >
+                                <IconX className="h-4 w-4" />
+                            </button>
+                        </div>
+
+                        <div className="mt-4 rounded-lg border border-border bg-background p-3">
+                            <p className="truncate text-xs text-muted-foreground">
+                                {creatingShare
+                                    ? "Creating secure link..."
+                                    : shareUrl || "Share link unavailable"}
+                            </p>
+                        </div>
+
+                        <div className="mt-3 grid grid-cols-2 gap-2">
+                            <button
+                                type="button"
+                                onClick={handleCopyShare}
+                                disabled={!shareUrl}
+                                className="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium hover:bg-accent disabled:opacity-50"
+                            >
+                                <IconCopy className="h-4 w-4" />
+                                Copy link
+                            </button>
+                            <a
+                                href={
+                                    shareUrl
+                                        ? `https://www.linkedin.com/sharing/share-offsite/?url=${encodedShareUrl}`
+                                        : undefined
+                                }
+                                target="_blank"
+                                rel="noreferrer"
+                                className={`inline-flex items-center justify-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium hover:bg-accent ${shareUrl ? "" : "pointer-events-none opacity-50"}`}
+                            >
+                                <IconBrandLinkedin className="h-4 w-4" />
+                                LinkedIn
+                            </a>
+                            <a
+                                href={
+                                    shareUrl
+                                        ? `https://twitter.com/intent/tweet?text=${encodedShareText}&url=${encodedShareUrl}`
+                                        : undefined
+                                }
+                                target="_blank"
+                                rel="noreferrer"
+                                className={`inline-flex items-center justify-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium hover:bg-accent ${shareUrl ? "" : "pointer-events-none opacity-50"}`}
+                            >
+                                <IconBrandX className="h-4 w-4" />X
+                            </a>
+                            <a
+                                href={
+                                    shareUrl
+                                        ? `https://www.reddit.com/submit?url=${encodedShareUrl}&title=${encodedShareText}`
+                                        : undefined
+                                }
+                                target="_blank"
+                                rel="noreferrer"
+                                className={`inline-flex items-center justify-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium hover:bg-accent ${shareUrl ? "" : "pointer-events-none opacity-50"}`}
+                            >
+                                <IconBrandReddit className="h-4 w-4" />
+                                Reddit
+                            </a>
+                        </div>
+
+                        {shareUrl && (
+                            <a
+                                href={shareUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="mt-3 inline-flex items-center gap-2 text-xs font-medium text-primary hover:underline"
+                            >
+                                Open public report
+                                <IconExternalLink className="h-3.5 w-3.5" />
+                            </a>
+                        )}
+                        {shareMessage && (
+                            <p className="mt-3 text-xs text-muted-foreground">
+                                {shareMessage}
+                            </p>
+                        )}
+                    </div>
+                )}
             </div>
 
             {report && (
