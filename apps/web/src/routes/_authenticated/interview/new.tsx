@@ -15,6 +15,7 @@ import {
     IconVolume,
     IconCheck,
     IconVideo,
+    IconAlertTriangle,
 } from "@tabler/icons-react";
 
 type NewInterviewSearch = {
@@ -78,6 +79,7 @@ function NewInterviewPage() {
     const search = Route.useSearch();
     const { canStartInterview } = useSubscriptionStore();
     const [loading, setLoading] = useState(false);
+    const [startError, setStartError] = useState<string | null>(null);
     const [profile, setProfile] = useState<any>(null);
     const [initialVoiceAccentPreference] = useState(() => {
         const storedVoiceAccent = getStoredVoiceAccent();
@@ -203,6 +205,7 @@ function NewInterviewPage() {
     const handleStart = async () => {
         if (!roleTitle || selectedTypes.length === 0) return;
         setLoading(true);
+        setStartError(null);
         try {
             const res = await api.createInterview({
                 roleTitle,
@@ -220,6 +223,11 @@ function NewInterviewPage() {
             navigate({ to: `/interview/${res.data.id}/live` });
         } catch (err) {
             console.error("Create interview error:", err);
+            setStartError(
+                err instanceof Error
+                    ? err.message
+                    : "Unable to start this interview. Check your credits and try again.",
+            );
         } finally {
             setLoading(false);
         }
@@ -263,6 +271,43 @@ function NewInterviewPage() {
                             <p className="text-sm text-foreground">
                                 {search.focusQuestion}
                             </p>
+                        </section>
+                    )}
+
+                    {startError && (
+                        <section
+                            role="alert"
+                            className="rounded-xl border border-destructive/20 bg-destructive/10 p-4"
+                        >
+                            <div className="flex gap-3">
+                                <IconAlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
+                                <div className="min-w-0">
+                                    <p className="text-sm font-semibold text-foreground">
+                                        Interview could not start
+                                    </p>
+                                    <p className="mt-1 text-sm text-muted-foreground">
+                                        {startError}
+                                    </p>
+                                    <div className="mt-3 flex flex-wrap gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                navigate({ to: "/billing" })
+                                            }
+                                            className="rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground hover:opacity-90"
+                                        >
+                                            Manage credits
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setStartError(null)}
+                                            className="rounded-lg border border-border px-3 py-2 text-xs font-semibold text-foreground hover:bg-accent"
+                                        >
+                                            Dismiss
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </section>
                     )}
 
