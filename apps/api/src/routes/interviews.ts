@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { Router, type Request } from "express";
 import { eq, asc } from "drizzle-orm";
 import { requireAuth } from "../middleware/auth.js";
@@ -34,6 +35,59 @@ function getParam(req: Request, name: string) {
 
 function getErrorMessage(error: unknown) {
     return error instanceof Error ? error.message : "Unknown error";
+}
+
+function getShareSecret() {
+    return process.env.REPORT_SHARE_SECRET!;
+}
+
+function signSharePayload(payload: { interviewId: string; userId: string }) {
+    const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
+    const signature = crypto
+        .createHmac("sha256", getShareSecret())
+        .update(body)
+        .digest("base64url");
+
+    return `${body}.${signature}`;
+}
+
+function verifyShareToken(token: string) {
+    const [body, signature] = token.split(".");
+    if (!body || !signature) return null;
+
+    const expected = crypto
+        .createHmac("sha256", getShareSecret())
+        .update(body)
+        .digest("base64url");
+
+    const providedBuffer = Buffer.from(signature);
+    const expectedBuffer = Buffer.from(expected);
+    if (
+        providedBuffer.length !== expectedBuffer.length ||
+        !crypto.timingSafeEqual(providedBuffer, expectedBuffer)
+    ) {
+        return null;
+    }
+
+    try {
+        const payload = JSON.parse(
+            Buffer.from(body, "base64url").toString("utf8"),
+        ) as { interviewId?: unknown; userId?: unknown };
+
+        if (
+            typeof payload.interviewId !== "string" ||
+            typeof payload.userId !== "string"
+        ) {
+            return null;
+        }
+
+        return {
+            interviewId: payload.interviewId,
+            userId: payload.userId,
+        };
+    } catch {
+        return null;
+    }
 }
 
 router.post(
@@ -185,6 +239,125 @@ router.get("/:id", requireAuth, async (req, res) => {
             error: {
                 code: "INTERNAL_ERROR",
                 message: "Failed to fetch interview",
+            },
+        });
+    }
+});
+
+router.post("/:id/share", requireAuth, async (req, res) => {
+    try {
+        const interviewId = getParam(req, "id");
+        if (!interviewId) {
+            res.status(400).json({
+                success: false,
+                error: {
+                    code: "VALIDATION_ERROR",
+                    message: "Interview id is required",
+                },
+            });
+            return;
+        }
+
+        const interview = await getInterviewById(interviewId);
+        if (!interview || interview.userId !== req.user!.id) {
+            res.status(404).json({
+                success: false,
+                error: { code: "NOT_FOUND", message: "Interview not found" },
+            });
+            return;
+        }
+
+        if (!interview.report) {
+            res.status(409).json({
+                success: false,
+                error: {
+                    code: "REPORT_NOT_READY",
+                    message:
+                        "This report is not ready to share yet. Try again after processing completes.",
+                },
+            });
+            return;
+        }
+
+        const token = signSharePayload({
+            interviewId,
+            userId: req.user!.id,
+        });
+
+        res.json({ success: true, data: { token } });
+    } catch (error) {
+        console.error("[Interviews] Error creating share token:", error);
+        res.status(500).json({
+            success: false,
+            error: {
+                code: "INTERNAL_ERROR",
+                message: "Failed to create share link",
+            },
+        });
+    }
+});
+
+router.get("/shared/:token", async (req, res) => {
+    try {
+        const token = getParam(req, "token");
+        if (!token) {
+            res.status(400).json({
+                success: false,
+                error: {
+                    code: "VALIDATION_ERROR",
+                    message: "Share token is required",
+                },
+            });
+            return;
+        }
+
+        const payload = verifyShareToken(token);
+        if (!payload) {
+            res.status(404).json({
+                success: false,
+                error: {
+                    code: "NOT_FOUND",
+                    message: "This share link is invalid or unavailable.",
+                },
+            });
+            return;
+        }
+
+        const interview = await getInterviewById(payload.interviewId);
+        if (
+            !interview ||
+            interview.userId !== payload.userId ||
+            !interview.report
+        ) {
+            res.status(404).json({
+                success: false,
+                error: {
+                    code: "NOT_FOUND",
+                    message: "This shared report is unavailable.",
+                },
+            });
+            return;
+        }
+
+        res.json({
+            success: true,
+            data: {
+                id: interview.id,
+                roleTitle: interview.roleTitle,
+                seniority: interview.seniority,
+                interviewTypes: interview.interviewTypes,
+                durationMinutes: interview.durationMinutes,
+                createdAt: interview.createdAt,
+                report: interview.report,
+            },
+        });
+    } catch (error) {
+        console.error("[Interviews] Error fetching shared report:", error);
+        res.status(500).json({
+            success: false,
+            error: {
+                code: "INTERNAL_ERROR",
+                message: "Failed to fetch shared report",
             },
         });
     }
