@@ -32,6 +32,7 @@ export function useConvaiSession(options: UseConvaiSessionOptions) {
     const conversationRef = useRef<Conversation | null>(null);
     // Track if the hook is still mounted to prevent state updates after unmount
     const mountedRef = useRef(true);
+    const isMounted = useCallback(() => mountedRef.current, []);
     // Track if disconnect was intentional (user/cleanup) vs server-initiated
     const intentionalCloseRef = useRef(false);
 
@@ -72,7 +73,7 @@ export function useConvaiSession(options: UseConvaiSessionOptions) {
             await navigator.mediaDevices.getUserMedia({ audio: true });
 
             // Check if we were unmounted while waiting for mic
-            if (!mountedRef.current) {
+            if (!isMounted()) {
                 console.log("[ConvAI] Unmounted during mic request, aborting");
                 return;
             }
@@ -88,7 +89,7 @@ export function useConvaiSession(options: UseConvaiSessionOptions) {
                         "[ConvAI] Connected, conversationId:",
                         conversationId,
                     );
-                    if (mountedRef.current) {
+                    if (isMounted()) {
                         setState((s) => ({
                             ...s,
                             isConnected: true,
@@ -106,7 +107,7 @@ export function useConvaiSession(options: UseConvaiSessionOptions) {
                     );
                     conversationRef.current = null;
 
-                    if (mountedRef.current) {
+                    if (isMounted()) {
                         setState((s) => ({
                             ...s,
                             isConnected: false,
@@ -133,7 +134,7 @@ export function useConvaiSession(options: UseConvaiSessionOptions) {
 
                 onModeChange: ({ mode }: { mode: string }) => {
                     const isSpeaking = mode === "speaking";
-                    if (mountedRef.current) {
+                    if (isMounted()) {
                         setState((s) => ({ ...s, isAISpeaking: isSpeaking }));
                     }
                     onAISpeakingChangeRef.current?.(isSpeaking);
@@ -147,7 +148,7 @@ export function useConvaiSession(options: UseConvaiSessionOptions) {
                               ? error
                               : "Conversational AI error";
                     console.error("[ConvAI] Error:", msg);
-                    if (mountedRef.current) {
+                    if (isMounted()) {
                         setState((s) => ({ ...s, error: msg }));
                     }
                 },
@@ -182,19 +183,16 @@ export function useConvaiSession(options: UseConvaiSessionOptions) {
                 }
 
                 if (Object.keys(configOverrides).length > 0) {
-                    sessionConfig.overrides =
-                        configOverrides as typeof sessionConfig.overrides;
+                    sessionConfig.overrides = configOverrides;
                     console.log("[ConvAI] Sending overrides:", {
                         hasPrompt: !!currentOverrides.systemPrompt,
                         hasVoice: !!currentOverrides.voiceId,
-                        promptLength:
-                            currentOverrides.systemPrompt?.length || 0,
+                        promptLength: currentOverrides.systemPrompt.length,
                     });
                 }
             }
 
-            // Check mounted again before starting session
-            if (!mountedRef.current) {
+            if (!isMounted()) {
                 console.log(
                     "[ConvAI] Unmounted before session start, aborting",
                 );
@@ -204,8 +202,7 @@ export function useConvaiSession(options: UseConvaiSessionOptions) {
             console.log("[ConvAI] Starting session...");
             const conversation = await Conversation.startSession(sessionConfig);
 
-            // Check if we were unmounted during startSession
-            if (!mountedRef.current) {
+            if (!isMounted()) {
                 console.log(
                     "[ConvAI] Unmounted during session start, ending session",
                 );
@@ -220,7 +217,7 @@ export function useConvaiSession(options: UseConvaiSessionOptions) {
             const msg =
                 err instanceof Error ? err.message : "Failed to start session";
             console.error("[ConvAI] Failed to start:", msg, err);
-            if (mountedRef.current) {
+            if (isMounted()) {
                 setState((s) => ({
                     ...s,
                     isConnected: false,
@@ -228,8 +225,7 @@ export function useConvaiSession(options: UseConvaiSessionOptions) {
                 }));
             }
         }
-        // No dependencies - uses refs for all external values
-    }, []);
+    }, [isMounted]);
 
     // Disconnect (user-initiated)
     const disconnect = useCallback(async () => {
@@ -244,14 +240,14 @@ export function useConvaiSession(options: UseConvaiSessionOptions) {
             conversationRef.current = null;
         }
 
-        if (mountedRef.current) {
+        if (isMounted()) {
             setState({
                 isConnected: false,
                 isAISpeaking: false,
                 error: null,
             });
         }
-    }, []);
+    }, [isMounted]);
 
     // Track mount status
     useEffect(() => {
