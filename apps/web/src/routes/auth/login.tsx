@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { signIn, useSession } from "@/lib/auth-client";
 import { motion } from "motion/react";
 import {
@@ -55,9 +55,12 @@ function LoginPage() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6 }}
                     >
-                        <h1 className="font-heading text-4xl font-bold tracking-tight text-foreground">
+                        <Link
+                            to="/"
+                            className="font-heading text-4xl font-bold tracking-tight text-foreground"
+                        >
                             Prep<span className="text-primary">Pilot</span>
-                        </h1>
+                        </Link>
                         <p className="mt-2 text-muted-foreground text-lg">
                             Your AI-powered interview coach
                         </p>
@@ -131,9 +134,12 @@ function LoginPage() {
                     className="w-full max-w-md space-y-8"
                 >
                     <div className="lg:hidden text-center">
-                        <h1 className="font-heading text-3xl font-bold tracking-tight">
+                        <Link
+                            to="/"
+                            className="font-heading text-3xl font-bold tracking-tight"
+                        >
                             Prep<span className="text-primary">Pilot</span>
-                        </h1>
+                        </Link>
                     </div>
 
                     <div className="text-center space-y-2">
