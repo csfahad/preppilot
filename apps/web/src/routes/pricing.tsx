@@ -199,7 +199,7 @@ const FAQS = [
     },
     {
         q: "Can I buy multiple packs?",
-        a: "Yes! Credits from different packs stack together. If you buy a Mini Pack and later a Standard Pack, you'll have all remaining credits available across both packs. Each pack's credits maintain their own 6-month validity window.",
+        a: "You can buy another pack only after your active credits are used or expired. PrepPilot does not stack new packs on top of an active pack, and pro-rata upgrades or downgrades are not supported.",
     },
     {
         q: "What payment methods do you accept?",
