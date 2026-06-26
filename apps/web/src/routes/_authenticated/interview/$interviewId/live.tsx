@@ -85,13 +85,14 @@ function LiveInterviewRoom() {
 
     // Init: Load interview data and start session
     useEffect(() => {
-        let cancelled = false;
+        const abortController = new AbortController();
+        const isAborted = () => abortController.signal.aborted;
 
         async function init() {
             try {
                 // 1. Load interview data
                 const interviewRes = await api.getInterview(interviewId);
-                if (cancelled) return;
+                if (isAborted()) return;
 
                 const data = interviewRes.data;
                 setInterviewData(data);
@@ -111,12 +112,12 @@ function LiveInterviewRoom() {
                     );
                 }
 
-                if (cancelled) return;
+                if (isAborted()) return;
 
                 // 3. Get signed URL from server
                 setPhase("connecting");
                 const sessionRes = await api.startRealtimeSession(interviewId);
-                if (cancelled) return;
+                if (isAborted()) return;
 
                 const signedUrl = sessionRes.data?.signedUrl;
                 const overrides = sessionRes.data?.overrides;
@@ -138,7 +139,7 @@ function LiveInterviewRoom() {
                     setElapsedTime((prev) => prev + 1);
                 }, 1000);
             } catch (err) {
-                if (cancelled) return;
+                if (isAborted()) return;
                 console.error("Failed to start interview:", err);
                 setError(
                     err instanceof Error
@@ -152,7 +153,7 @@ function LiveInterviewRoom() {
         init();
 
         return () => {
-            cancelled = true;
+            abortController.abort();
             if (timerRef.current) {
                 clearInterval(timerRef.current);
             }
