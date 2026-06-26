@@ -50,6 +50,12 @@ export const api = {
 
     listInterviews: (page = 1) => request(`/api/interviews?page=${page}`),
     getInterview: (id: string) => request(`/api/interviews/${id}`),
+    createReportShare: (id: string) =>
+        request<{ token: string }>(`/api/interviews/${id}/share`, {
+            method: "POST",
+        }),
+    getSharedReport: (token: string) =>
+        request(`/api/interviews/shared/${token}`),
     createInterview: (data: any) =>
         request("/api/interviews", { method: "POST", body: data }),
     startInterview: (id: string) =>
