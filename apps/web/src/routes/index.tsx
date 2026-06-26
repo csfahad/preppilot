@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { motion } from "motion/react";
 import { useSession } from "@/lib/auth-client";
 import PublicHeader from "@/components/public-header";
+import PublicFooter from "@/components/public-footer";
 import {
     IconArrowRight,
     IconCamera,
@@ -547,6 +548,7 @@ function LandingExperience() {
                     </div>
                 </div>
             </section>
+            <PublicFooter />
         </div>
     );
 }
