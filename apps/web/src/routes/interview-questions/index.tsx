@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
 import { motion } from "motion/react";
 import PublicHeader from "@/components/public-header";
+import PublicFooter from "@/components/public-footer";
 import {
     INDUSTRIES,
     FUNCTIONS,
@@ -344,6 +345,7 @@ function InterviewQuestionsPage() {
                     </Link>
                 </div>
             </main>
+            <PublicFooter />
         </div>
     );
 }

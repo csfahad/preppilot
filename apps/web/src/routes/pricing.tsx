@@ -5,6 +5,8 @@ import { api } from "@/lib/api-client";
 import { useSession } from "@/lib/auth-client";
 import { useSubscriptionStore } from "@/stores/subscription";
 import PublicHeader from "@/components/public-header";
+import PublicFooter from "@/components/public-footer";
+import { AppLoader } from "@/components/app-loader";
 import {
     IconCheck,
     IconX,
@@ -266,14 +268,7 @@ function PricingPage() {
     }, [session, fetchPlan]);
 
     if (isPending) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-background">
-                <div className="flex flex-col items-center gap-4">
-                    <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
-                    <p className="text-muted-foreground text-sm">Loading...</p>
-                </div>
-            </div>
-        );
+        return <AppLoader label="Loading packs" />;
     }
 
     const handlePurchase = async (packId: string) => {
@@ -636,6 +631,7 @@ function PricingPage() {
                     </div>
                 </motion.section>
             </main>
+            <PublicFooter />
         </div>
     );
 }
