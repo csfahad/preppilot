@@ -101,6 +101,7 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
                 api.getSubscription().catch(() => ({ data: null })),
             ]);
             if (planRes.data) {
+                const isFreePlan = planRes.data.plan === "free";
                 const limits =
                     PLAN_LIMITS[planRes.data.plan] ?? PLAN_LIMITS.free;
                 set({
@@ -108,14 +109,18 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
                     interviewCount: planRes.data.interviewCount,
                     hasFetched: true,
                     ...limits,
-                    ...(subRes.data
+                    ...(subRes.data && !isFreePlan
                         ? {
                               status: subRes.data.status,
                               currentPeriodStart:
                                   subRes.data.currentPeriodStart,
                               currentPeriodEnd: subRes.data.currentPeriodEnd,
                           }
-                        : {}),
+                        : {
+                              status: null,
+                              currentPeriodStart: null,
+                              currentPeriodEnd: null,
+                          }),
                 });
             }
         } catch (err) {
