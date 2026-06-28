@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { api } from "@/lib/api-client";
+import { AppLoader } from "@/components/app-loader";
 import PublicHeader from "@/components/public-header";
 import PublicFooter from "@/components/public-footer";
 import {
@@ -77,9 +78,10 @@ function SharedReportPage() {
         return (
             <div className="min-h-screen bg-background">
                 <PublicHeader />
-                <main className="flex min-h-[calc(100vh-4rem)] items-center justify-center">
-                    <div className="h-10 w-10 rounded-full border-4 border-primary/30 border-t-primary animate-spin" />
-                </main>
+                <AppLoader
+                    label="Opening shared report"
+                    className="min-h-[calc(100vh-4rem)]"
+                />
             </div>
         );
     }

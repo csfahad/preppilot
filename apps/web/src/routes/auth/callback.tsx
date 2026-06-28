@@ -1,8 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { motion } from "motion/react";
 import { api } from "@/lib/api-client";
 import { useSession } from "@/lib/auth-client";
+import { AppLoader } from "@/components/app-loader";
 
 export const Route = createFileRoute("/auth/callback")({
     component: AuthCallbackPage,
@@ -19,7 +19,11 @@ function AuthCallbackPage() {
             if (isPending) return;
 
             if (!session) {
-                navigate({ to: "/auth/login", replace: true });
+                navigate({
+                    to: "/auth/login",
+                    replace: true,
+                    search: { error: undefined },
+                });
                 return;
             }
 
@@ -44,23 +48,5 @@ function AuthCallbackPage() {
         };
     }, [session, isPending, navigate]);
 
-    return (
-        <div className="min-h-screen bg-background flex items-center justify-center p-6">
-            <motion.div
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="w-full max-w-sm rounded-3xl border border-border bg-card p-8 text-center shadow-sm"
-            >
-                <div className="mx-auto mb-5 h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center">
-                    <div className="h-6 w-6 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
-                </div>
-                <h1 className="font-heading text-xl font-semibold text-foreground">
-                    Signing you in
-                </h1>
-                <p className="mt-2 text-sm text-muted-foreground">
-                    Checking your account and taking you to the right place.
-                </p>
-            </motion.div>
-        </div>
-    );
+    return <AppLoader label="Checking your account" />;
 }
