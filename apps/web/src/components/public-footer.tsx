@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { ThemeToggle } from "@/components/theme-toggle";
 import {
     IconArrowRight,
     IconBrandGithub,
@@ -120,11 +121,12 @@ export default function PublicFooter() {
                                 target="_blank"
                                 rel="noreferrer"
                                 aria-label={item.label}
-                                className="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-muted-foreground hover:bg-accent hover:text-foreground"
+                                className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground"
                             >
-                                <item.icon className="h-4 w-4" />
+                                <item.icon className="h-3.5 w-3.5" />
                             </a>
                         ))}
+                        <ThemeToggle />
                     </div>
                 </div>
             </div>

@@ -1,5 +1,4 @@
 import { Link } from "@tanstack/react-router";
-import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function PublicHeader() {
     return (
@@ -38,7 +37,6 @@ export default function PublicHeader() {
                     </Link>
                 </div>
                 <div className="flex items-center gap-2">
-                    <ThemeToggle />
                     <Link
                         to="/auth/login"
                         search={{ error: undefined }}
