@@ -5,6 +5,7 @@ import { api } from "@/lib/api-client";
 import { signOut, useSession } from "@/lib/auth-client";
 import { useSubscriptionStore } from "@/stores/subscription";
 import { getPlanFullLabel, getPlanLabel, isPaidPlan } from "@/lib/plans";
+import { AppLoader } from "@/components/app-loader";
 import {
     INDUSTRIES,
     FUNCTION_CATEGORIES,
@@ -153,6 +154,9 @@ function AccountPage() {
     const planLabel = getPlanLabel(plan);
     const planFullLabel = getPlanFullLabel(plan);
     const isPro = isPaidPlan(plan);
+    const freeUsageUsed = Math.min(interviewCount, maxInterviews);
+    const freeUsagePercent =
+        maxInterviews > 0 ? (freeUsageUsed / maxInterviews) * 100 : 0;
 
     const planFeatures = [
         {
@@ -179,13 +183,11 @@ function AccountPage() {
 
     if (profileLoading || !hasFetched) {
         return (
-            <main className="flex-1 flex items-center justify-center">
-                <div className="flex flex-col items-center gap-4">
-                    <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
-                    <p className="text-muted-foreground text-sm">
-                        Loading profile...
-                    </p>
-                </div>
+            <main className="flex-1">
+                <AppLoader
+                    label="Loading profile"
+                    className="min-h-[calc(100vh-4rem)]"
+                />
             </main>
         );
     }
@@ -515,9 +517,9 @@ function AccountPage() {
                                     <h3 className="text-sm font-semibold text-foreground">
                                         {planFullLabel}
                                     </h3>
-                                    {currentPeriodEnd && (
+                                    {isPro && currentPeriodEnd && (
                                         <p className="text-xs text-muted-foreground">
-                                            Renews{" "}
+                                            Expires{" "}
                                             {new Date(
                                                 currentPeriodEnd,
                                             ).toLocaleDateString("en-IN", {
@@ -525,6 +527,11 @@ function AccountPage() {
                                                 day: "numeric",
                                                 year: "numeric",
                                             })}
+                                        </p>
+                                    )}
+                                    {!isPro && (
+                                        <p className="text-xs text-muted-foreground">
+                                            One-time free trial
                                         </p>
                                     )}
                                 </div>
@@ -559,17 +566,23 @@ function AccountPage() {
                                         Interviews Used
                                     </p>
                                     <p className="text-xs font-semibold text-foreground">
-                                        {interviewCount} / {maxInterviews}
+                                        {freeUsageUsed} / {maxInterviews}
                                     </p>
                                 </div>
                                 <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
                                     <div
                                         className="h-full bg-primary rounded-full transition-all duration-500"
                                         style={{
-                                            width: `${Math.min((interviewCount / maxInterviews) * 100, 100)}%`,
+                                            width: `${Math.min(freeUsagePercent, 100)}%`,
                                         }}
                                     />
                                 </div>
+                                {interviewCount >= maxInterviews && (
+                                    <p className="mt-2 text-xs text-muted-foreground">
+                                        Free usage is exhausted permanently for
+                                        this account.
+                                    </p>
+                                )}
                             </div>
                         )}
 
