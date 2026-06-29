@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "motion/react";
+import { AppLoader } from "@/components/app-loader";
 import { api } from "@/lib/api-client";
 import { useSubscriptionStore } from "@/stores/subscription";
 import {
@@ -52,6 +53,14 @@ function ReportPage() {
     const [shareUrl, setShareUrl] = useState<string | null>(null);
     const [shareMessage, setShareMessage] = useState<string | null>(null);
     const [creatingShare, setCreatingShare] = useState(false);
+    const shareRequestRef = useRef<Promise<string | null> | null>(null);
+    const report = interview?.report;
+    const recording = interview?.recording;
+    const recordingUrl = recording?.videoUrl || recording?.audioUrl;
+    const hasShareableReport = Boolean(report);
+    const shareText = report
+        ? `I scored ${report.overallScore}/100 on my ${interview?.roleTitle ?? "mock interview"} practice report with PrepPilot.`
+        : "Review my PrepPilot interview report.";
 
     useEffect(() => {
         async function load() {
@@ -71,20 +80,56 @@ function ReportPage() {
         load();
     }, [interviewId]);
 
+    const createShareUrl = useCallback(() => {
+        if (!shareRequestRef.current) {
+            shareRequestRef.current = api
+                .createReportShare(interviewId)
+                .then((res) => {
+                    const token = res.data?.token;
+                    return token
+                        ? `${window.location.origin}/share/${token}`
+                        : null;
+                })
+                .finally(() => {
+                    shareRequestRef.current = null;
+                });
+        }
+
+        return shareRequestRef.current;
+    }, [interviewId]);
+
+    useEffect(() => {
+        if (!hasShareableReport || shareUrl) return;
+
+        let cancelled = false;
+
+        createShareUrl()
+            .then((url) => {
+                if (!cancelled && url) {
+                    setShareUrl(url);
+                }
+            })
+            .catch((err) => {
+                if (!cancelled) {
+                    console.error("Share link preload error:", err);
+                }
+            });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [createShareUrl, hasShareableReport, shareUrl]);
+
+    useEffect(() => {
+        return () => {
+            shareRequestRef.current = null;
+        };
+    }, []);
+
     if (loading) {
-        return (
-            <div className="flex-1 flex items-center justify-center">
-                <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
-            </div>
-        );
+        return <AppLoader label="Loading interview report" />;
     }
 
-    const report = interview?.report;
-    const recording = interview?.recording;
-    const recordingUrl = recording?.videoUrl || recording?.audioUrl;
-    const shareText = report
-        ? `I scored ${report.overallScore}/100 on my ${interview?.roleTitle ?? "mock interview"} practice report with PrepPilot.`
-        : "Review my PrepPilot interview report.";
     const radarData = report?.radarScores
         ? Object.entries(report.radarScores).map(([key, value]) => ({
               subject: key,
@@ -94,6 +139,9 @@ function ReportPage() {
         : [];
     const encodedShareUrl = encodeURIComponent(shareUrl ?? "");
     const encodedShareText = encodeURIComponent(shareText);
+    const encodedLinkedInText = encodeURIComponent(
+        shareUrl ? `${shareText} ${shareUrl}` : shareText,
+    );
 
     const handleShare = async () => {
         setShareOpen(true);
@@ -103,10 +151,8 @@ function ReportPage() {
 
         setCreatingShare(true);
         try {
-            const res = await api.createReportShare(interviewId);
-            const token = res.data?.token;
-            if (!token) throw new Error("Unable to create share link.");
-            const url = `${window.location.origin}/share/${token}`;
+            const url = await createShareUrl();
+            if (!url) throw new Error("Unable to create share link.");
             setShareUrl(url);
 
             if ("share" in navigator) {
@@ -189,7 +235,7 @@ function ReportPage() {
                             <a
                                 href={
                                     shareUrl
-                                        ? `https://www.linkedin.com/sharing/share-offsite/?url=${encodedShareUrl}`
+                                        ? `https://www.linkedin.com/feed/?shareActive=true&text=${encodedLinkedInText}`
                                         : undefined
                                 }
                                 target="_blank"
