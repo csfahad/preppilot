@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import { api } from "@/lib/api-client";
 import { useSession } from "@/lib/auth-client";
 import { useSubscriptionStore } from "@/stores/subscription";
+import { AppLoader } from "@/components/app-loader";
 import {
     IconPlus,
     IconHistory,
@@ -276,14 +277,12 @@ function DashboardPage() {
                 </div>
 
                 {loading ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                        {[1, 2, 3].map((i) => (
-                            <div
-                                key={i}
-                                className="h-44 bg-muted/50 rounded-xl animate-pulse"
-                            />
-                        ))}
-                    </div>
+                    <section aria-busy="true" aria-live="polite">
+                        <AppLoader
+                            label="Loading recent interviews"
+                            className="min-h-[260px] rounded-xl border border-border bg-card"
+                        />
+                    </section>
                 ) : interviews.length === 0 ? (
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}

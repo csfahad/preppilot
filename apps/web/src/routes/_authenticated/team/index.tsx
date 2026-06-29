@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { api } from "@/lib/api-client";
+import { AppLoader } from "@/components/app-loader";
 import {
     IconPlus,
     IconTrash,
@@ -103,9 +104,9 @@ function TeamPage() {
 
     if (loading) {
         return (
-            <div className="flex-1 flex items-center justify-center">
-                <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
-            </div>
+            <main className="flex-1" aria-busy="true">
+                <AppLoader label="Loading team workspace" />
+            </main>
         );
     }
 
@@ -263,14 +264,12 @@ function TeamPage() {
                                 Team Analytics
                             </h2>
                             {analyticsLoading ? (
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                    {[1, 2, 3].map((i) => (
-                                        <div
-                                            key={i}
-                                            className="h-28 bg-muted rounded-xl animate-pulse"
-                                        />
-                                    ))}
-                                </div>
+                                <section aria-busy="true" aria-live="polite">
+                                    <AppLoader
+                                        label="Loading team analytics"
+                                        className="min-h-[180px] rounded-xl border border-border bg-card"
+                                    />
+                                </section>
                             ) : analytics ? (
                                 <>
                                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">

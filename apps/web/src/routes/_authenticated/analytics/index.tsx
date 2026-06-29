@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { api } from "@/lib/api-client";
+import { AppLoader } from "@/components/app-loader";
 import { INTERVIEW_TYPES } from "@repo/shared/constants/interview-types";
 import {
     LineChart,
@@ -141,9 +142,9 @@ function AnalyticsPage() {
 
     if (loading) {
         return (
-            <div className="flex-1 flex items-center justify-center">
-                <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
-            </div>
+            <main className="flex-1" aria-busy="true">
+                <AppLoader label="Loading analytics" />
+            </main>
         );
     }
 
