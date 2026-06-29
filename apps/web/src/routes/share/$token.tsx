@@ -22,6 +22,36 @@ import {
 } from "@tabler/icons-react";
 
 export const Route = createFileRoute("/share/$token")({
+    head: ({ params }) => {
+        const appUrl = import.meta.env.VITE_PUBLIC_APP_URL!.replace(/\/$/, "");
+        const shareUrl = `${appUrl}/share/${params.token}`;
+        const title = "Shared PrepPilot interview report";
+        const description =
+            "View a signed PrepPilot mock interview report with score, radar breakdown, strengths, and improvement areas.";
+
+        return {
+            meta: [
+                { title },
+                { name: "description", content: description },
+                { property: "og:type", content: "article" },
+                { property: "og:site_name", content: "PrepPilot" },
+                { property: "og:title", content: title },
+                { property: "og:description", content: description },
+                { property: "og:url", content: shareUrl },
+                { property: "og:image", content: `${appUrl}/logo512.png` },
+                { property: "og:image:width", content: "512" },
+                { property: "og:image:height", content: "512" },
+                {
+                    property: "og:image:alt",
+                    content: "PrepPilot shared interview report",
+                },
+                { name: "twitter:card", content: "summary_large_image" },
+                { name: "twitter:title", content: title },
+                { name: "twitter:description", content: description },
+                { name: "twitter:image", content: `${appUrl}/logo512.png` },
+            ],
+        };
+    },
     component: SharedReportPage,
 });
 
