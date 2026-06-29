@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "motion/react";
 import { api } from "@/lib/api-client";
 import { useSubscriptionStore } from "@/stores/subscription";
@@ -80,6 +80,7 @@ function NewInterviewPage() {
     const { canStartInterview } = useSubscriptionStore();
     const [loading, setLoading] = useState(false);
     const [startError, setStartError] = useState<string | null>(null);
+    const startErrorRef = useRef<HTMLElement | null>(null);
     const [profile, setProfile] = useState<any>(null);
     const [initialVoiceAccentPreference] = useState(() => {
         const storedVoiceAccent = getStoredVoiceAccent();
@@ -147,6 +148,18 @@ function NewInterviewPage() {
             })
             .catch(() => {});
     }, [hasStoredVoiceAccentPreference]);
+
+    useEffect(() => {
+        if (!startError) return;
+
+        requestAnimationFrame(() => {
+            startErrorRef.current?.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+            });
+            startErrorRef.current?.focus({ preventScroll: true });
+        });
+    }, [startError]);
 
     if (!canStartInterview()) {
         return (
@@ -276,7 +289,9 @@ function NewInterviewPage() {
 
                     {startError && (
                         <section
+                            ref={startErrorRef}
                             role="alert"
+                            tabIndex={-1}
                             className="rounded-xl border border-destructive/20 bg-destructive/10 p-4"
                         >
                             <div className="flex gap-3">
