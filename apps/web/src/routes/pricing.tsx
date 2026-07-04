@@ -259,6 +259,7 @@ function FaqItem({ q, a, index }: { q: string; a: string; index: number }) {
 function PricingPage() {
     const { data: session, isPending } = useSession();
     const [loadingPack, setLoadingPack] = useState<string | null>(null);
+    const [confirmingPayment, setConfirmingPayment] = useState(false);
     const { plan: currentPlan, fetchPlan, hasFetched } = useSubscriptionStore();
 
     useEffect(() => {
@@ -294,33 +295,40 @@ function PricingPage() {
                     email: userEmail,
                 },
                 handler: async (response: any) => {
-                    if (isDev) {
-                        await api.verifyPayment({
-                            razorpayOrderId: response.razorpay_order_id,
-                            razorpayPaymentId: response.razorpay_payment_id,
-                            razorpaySignature: response.razorpay_signature,
-                            packType: packId,
-                        });
-                        await fetchPlan();
-                        window.location.href = "/dashboard";
-                    } else {
-                        // Production: webhook handles activation.
-                        // Poll until credits appear, then redirect.
-                        const maxAttempts = 15;
-                        const pollInterval = 2000; // 2 seconds
+                    setConfirmingPayment(true);
+                    try {
+                        if (isDev) {
+                            await api.verifyPayment({
+                                razorpayOrderId: response.razorpay_order_id,
+                                razorpayPaymentId: response.razorpay_payment_id,
+                                razorpaySignature: response.razorpay_signature,
+                                packType: packId,
+                            });
+                        } else {
+                            // Production: webhook handles activation.
+                            // Poll until credits appear, then redirect.
+                            const maxAttempts = 15;
+                            const pollInterval = 2000; // 2 seconds
 
-                        for (let i = 0; i < maxAttempts; i++) {
-                            await new Promise((r) =>
-                                setTimeout(r, pollInterval),
-                            );
-                            const planRes = await api.getUserPlan();
-                            if (planRes.data && planRes.data.plan !== "free") {
-                                break;
+                            for (let i = 0; i < maxAttempts; i++) {
+                                await new Promise((r) =>
+                                    setTimeout(r, pollInterval),
+                                );
+                                const planRes = await api.getUserPlan();
+                                if (
+                                    planRes.data &&
+                                    planRes.data.plan !== "free"
+                                ) {
+                                    break;
+                                }
                             }
                         }
 
                         await fetchPlan();
                         window.location.href = "/dashboard";
+                    } catch (err) {
+                        console.error("Payment confirmation error:", err);
+                        setConfirmingPayment(false);
                     }
                 },
                 theme: { color: "#65a30d" },
@@ -337,6 +345,16 @@ function PricingPage() {
 
     return (
         <div className="min-h-screen bg-background">
+            {confirmingPayment && (
+                <div
+                    role="status"
+                    aria-live="polite"
+                    aria-busy="true"
+                    className="fixed inset-0 z-100 bg-background/95 backdrop-blur-sm"
+                >
+                    <AppLoader label="Confirming payment" />
+                </div>
+            )}
             {session ? (
                 <div className="border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-40">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center">
