@@ -5,6 +5,7 @@ import { api } from "@/lib/api-client";
 import { useSession } from "@/lib/auth-client";
 import { getPlanFullLabel } from "@/lib/plans";
 import { useSubscriptionStore } from "@/stores/subscription";
+import { AppLoader } from "@/components/app-loader";
 import {
     IconArrowLeft,
     IconArrowRight,
@@ -103,6 +104,7 @@ function BillingPage() {
     const [loading, setLoading] = useState(true);
     const [cancelling, setCancelling] = useState(false);
     const [loadingPack, setLoadingPack] = useState<string | null>(null);
+    const [confirmingPayment, setConfirmingPayment] = useState(false);
     const [message, setMessage] = useState<string | null>(null);
 
     useEffect(() => {
@@ -226,17 +228,30 @@ function BillingPage() {
                 description: packLabel,
                 prefill: { email: userEmail },
                 handler: async (response: any) => {
-                    if (isDev) {
-                        await api.verifyPayment({
-                            razorpayOrderId: response.razorpay_order_id,
-                            razorpayPaymentId: response.razorpay_payment_id,
-                            razorpaySignature: response.razorpay_signature,
-                            packType: packId,
-                        });
+                    setConfirmingPayment(true);
+                    try {
+                        if (isDev) {
+                            await api.verifyPayment({
+                                razorpayOrderId: response.razorpay_order_id,
+                                razorpayPaymentId: response.razorpay_payment_id,
+                                razorpaySignature: response.razorpay_signature,
+                                packType: packId,
+                            });
+                        }
+                        await fetchPlan();
+                        await reloadBilling();
+                        setMessage(
+                            "New pack activated. Your credits are ready.",
+                        );
+                    } catch (err) {
+                        setMessage(
+                            err instanceof Error
+                                ? err.message
+                                : "Payment completed, but activation could not be confirmed. Refresh billing in a moment.",
+                        );
+                    } finally {
+                        setConfirmingPayment(false);
                     }
-                    await fetchPlan();
-                    await reloadBilling();
-                    setMessage("New pack activated. Your credits are ready.");
                 },
                 theme: { color: "#65a30d" },
             });
@@ -254,14 +269,24 @@ function BillingPage() {
 
     if (loading) {
         return (
-            <main className="flex-1 flex items-center justify-center">
-                <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+            <main className="flex-1" aria-busy="true">
+                <AppLoader label="Loading billing" />
             </main>
         );
     }
 
     return (
         <main className="flex-1 px-6 lg:px-10 py-8 max-w-[1200px] mx-auto w-full">
+            {confirmingPayment && (
+                <div
+                    role="status"
+                    aria-live="polite"
+                    aria-busy="true"
+                    className="fixed inset-0 z-100 bg-background/95 backdrop-blur-sm"
+                >
+                    <AppLoader label="Confirming payment" />
+                </div>
+            )}
             <div className="mb-8">
                 <Link
                     to="/account"
