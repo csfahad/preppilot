@@ -264,15 +264,22 @@ function DashboardPage() {
             )}
 
             {/* Interview History */}
-            <div>
-                <div className="flex items-center justify-between mb-5">
-                    <h2 className="font-heading text-lg font-semibold text-foreground">
-                        Recent Interviews
-                    </h2>
+            <section className="overflow-hidden rounded-2xl border border-border bg-card">
+                <div className="flex flex-col gap-4 border-b border-border bg-muted/25 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                    <div>
+                        <h2 className="font-heading text-lg font-semibold text-foreground">
+                            Recent Interviews
+                        </h2>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                            Review recordings, reports, and sessions that need
+                            attention.
+                        </p>
+                    </div>
                     {interviews.length > 0 && (
-                        <span className="text-xs text-muted-foreground">
+                        <div className="inline-flex w-fit items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground">
+                            <IconHistory className="h-3.5 w-3.5" />
                             {interviews.length} total
-                        </span>
+                        </div>
                     )}
                 </div>
 
@@ -280,34 +287,35 @@ function DashboardPage() {
                     <section aria-busy="true" aria-live="polite">
                         <AppLoader
                             label="Loading recent interviews"
-                            className="min-h-[260px] rounded-xl border border-border bg-card"
+                            className="min-h-[320px] bg-card"
                         />
                     </section>
                 ) : interviews.length === 0 ? (
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="bg-card border border-border rounded-xl p-12 text-center"
+                        className="px-6 py-14 text-center"
                     >
-                        <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
-                            <IconHistory className="w-7 h-7 text-muted-foreground" />
+                        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-muted">
+                            <IconVideo className="h-8 w-8 text-muted-foreground" />
                         </div>
-                        <h3 className="font-heading text-lg font-semibold text-foreground">
-                            No interviews yet
+                        <h3 className="font-heading text-xl font-semibold text-foreground">
+                            Start with a camera-on practice round
                         </h3>
-                        <p className="text-muted-foreground text-sm mt-1 mb-6 max-w-sm mx-auto">
-                            Start your first mock interview to begin improving
-                            your skills
+                        <p className="mx-auto mt-2 mb-7 max-w-md text-sm leading-6 text-muted-foreground">
+                            Your completed sessions will appear here with the
+                            report, recording status, and score evidence in one
+                            place.
                         </p>
                         <Link
                             to="/interview/new"
-                            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary text-primary-foreground font-medium text-sm hover:opacity-90 transition-all"
+                            className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-all hover:opacity-90"
                         >
-                            <IconPlus className="w-4 h-4" /> Start Interview
+                            <IconPlus className="h-4 w-4" /> Start Interview
                         </Link>
                     </motion.div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                    <div className="divide-y divide-border">
                         {interviews.map((interview: any, i: number) => {
                             const isCompleted =
                                 interview.status === "completed";
@@ -327,59 +335,67 @@ function DashboardPage() {
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: i * 0.03 }}
-                                        className="relative bg-card border border-destructive/20 rounded-xl p-5 group"
+                                        className="bg-destructive/5 px-5 py-5 sm:px-6"
                                     >
-                                        {/* Failed state card */}
-                                        <div className="flex items-start justify-between mb-3">
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-9 h-9 rounded-lg bg-destructive/10 flex items-center justify-center">
-                                                    <IconAlertTriangle className="w-4 h-4 text-destructive" />
+                                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                                            <div className="flex min-w-0 items-start gap-4">
+                                                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-destructive/10">
+                                                    <IconAlertTriangle className="h-5 w-5 text-destructive" />
                                                 </div>
-                                                <div>
-                                                    <h4 className="text-sm font-medium text-foreground leading-tight">
-                                                        {interview.roleTitle}
-                                                    </h4>
-                                                    <p className="text-xs text-muted-foreground mt-0.5">
-                                                        {interview.seniority}
+                                                <div className="min-w-0">
+                                                    <div className="mb-1.5 flex flex-wrap items-center gap-2">
+                                                        <h4 className="truncate text-sm font-semibold text-foreground">
+                                                            {
+                                                                interview.roleTitle
+                                                            }
+                                                        </h4>
+                                                        <span
+                                                            className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${statusConfig.className}`}
+                                                        >
+                                                            {statusConfig.label}
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-sm text-muted-foreground">
+                                                        Question generation
+                                                        failed. Retry setup or
+                                                        remove this unfinished
+                                                        interview.
+                                                    </p>
+                                                    <p className="mt-2 text-xs text-muted-foreground">
+                                                        {interview.seniority ||
+                                                            "Interview setup"}
                                                     </p>
                                                 </div>
                                             </div>
-                                            <span
-                                                className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${statusConfig.className}`}
-                                            >
-                                                {statusConfig.label}
-                                            </span>
-                                        </div>
-                                        <p className="text-xs text-muted-foreground mb-4">
-                                            Question generation failed. You can
-                                            retry or remove this interview.
-                                        </p>
-                                        <div className="flex items-center gap-2">
-                                            <Link
-                                                to="/interview/new"
-                                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:opacity-90 transition-all"
-                                            >
-                                                <IconRefresh className="w-3 h-3" />
-                                                Retry
-                                            </Link>
-                                            <button
-                                                onClick={() =>
-                                                    handleDeleteConfiguring(
-                                                        interview.id,
-                                                    )
-                                                }
-                                                disabled={
-                                                    deletingId === interview.id
-                                                }
-                                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-medium text-muted-foreground hover:text-destructive hover:border-destructive/30 hover:bg-destructive/5 transition-all cursor-pointer disabled:opacity-40"
-                                            >
-                                                {deletingId === interview.id ? (
-                                                    <div className="w-3 h-3 border-2 border-muted-foreground/30 border-t-muted-foreground rounded-full animate-spin" />
-                                                ) : (
-                                                    <IconTrash className="w-3 h-3" />
-                                                )}
-                                                Delete
-                                            </button>
+                                            <div className="flex shrink-0 items-center gap-2">
+                                                <Link
+                                                    to="/interview/new"
+                                                    className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground transition-all hover:opacity-90"
+                                                >
+                                                    <IconRefresh className="h-3.5 w-3.5" />
+                                                    Retry
+                                                </Link>
+                                                <button
+                                                    onClick={() =>
+                                                        handleDeleteConfiguring(
+                                                            interview.id,
+                                                        )
+                                                    }
+                                                    disabled={
+                                                        deletingId ===
+                                                        interview.id
+                                                    }
+                                                    className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-2 text-xs font-semibold text-muted-foreground transition-all hover:border-destructive/30 hover:bg-destructive/5 hover:text-destructive disabled:cursor-not-allowed disabled:opacity-40"
+                                                >
+                                                    {deletingId ===
+                                                    interview.id ? (
+                                                        <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-muted-foreground" />
+                                                    ) : (
+                                                        <IconTrash className="h-3.5 w-3.5" />
+                                                    )}
+                                                    Delete
+                                                </button>
+                                            </div>
                                         </div>
                                     </motion.div>
                                 );
@@ -401,85 +417,121 @@ function DashboardPage() {
                                         params={{
                                             interviewId: interview.id,
                                         }}
-                                        className="block bg-card border border-border rounded-xl p-5 hover:border-primary/25 hover:shadow-sm hover:shadow-primary/5 transition-all group h-full"
+                                        className="group block px-5 py-5 transition-colors hover:bg-muted/30 sm:px-6"
                                     >
-                                        {/* Card header */}
-                                        <div className="flex items-start justify-between mb-3">
-                                            <div className="flex items-center gap-2.5">
-                                                <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-primary/10">
-                                                    <IconVideo className="w-4 h-4 text-primary" />
+                                        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                                            <div className="flex min-w-0 items-start gap-4">
+                                                <div className="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-zinc-950 text-primary">
+                                                    <IconVideo className="h-5 w-5" />
+                                                    {recordingUrl && (
+                                                        <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-primary" />
+                                                    )}
                                                 </div>
-                                                <div className="min-w-0">
-                                                    <h4 className="text-sm font-medium text-foreground leading-tight truncate">
-                                                        {interview.roleTitle}
-                                                    </h4>
-                                                    <p className="text-xs text-muted-foreground mt-0.5">
-                                                        {interview.seniority}
+                                                <div className="min-w-0 flex-1">
+                                                    <div className="mb-1.5 flex flex-wrap items-center gap-2">
+                                                        <h4 className="truncate text-sm font-semibold text-foreground">
+                                                            {
+                                                                interview.roleTitle
+                                                            }
+                                                        </h4>
+                                                        <span
+                                                            className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${statusConfig.className}`}
+                                                        >
+                                                            {statusConfig.label}
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-sm text-muted-foreground">
+                                                        {interview.seniority ||
+                                                            "Practice session"}
+                                                        {interview.createdAt
+                                                            ? ` · ${formatDate(interview.createdAt)}`
+                                                            : ""}
                                                     </p>
+                                                    <div className="mt-3 flex flex-wrap gap-1.5">
+                                                        {interview.interviewTypes
+                                                            ?.slice(0, 3)
+                                                            .map(
+                                                                (
+                                                                    type: string,
+                                                                ) => (
+                                                                    <span
+                                                                        key={
+                                                                            type
+                                                                        }
+                                                                        className="rounded-md bg-muted px-2 py-1 text-[10px] font-medium capitalize text-muted-foreground"
+                                                                    >
+                                                                        {type.replace(
+                                                                            /_/g,
+                                                                            " ",
+                                                                        )}
+                                                                    </span>
+                                                                ),
+                                                            )}
+                                                        {interview
+                                                            .interviewTypes
+                                                            ?.length > 3 && (
+                                                            <span className="rounded-md bg-muted px-2 py-1 text-[10px] font-medium text-muted-foreground">
+                                                                +
+                                                                {interview
+                                                                    .interviewTypes
+                                                                    .length - 3}
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
-                                            {interview.report?.overallScore !=
-                                                null && (
-                                                <span
-                                                    className={`text-lg font-bold tabular-nums ${getScoreColor(interview.report.overallScore)}`}
-                                                >
-                                                    {
-                                                        interview.report
-                                                            .overallScore
-                                                    }
-                                                </span>
-                                            )}
-                                        </div>
 
-                                        {/* Interview types */}
-                                        <div className="flex flex-wrap gap-1.5 mb-4">
-                                            {interview.interviewTypes
-                                                ?.slice(0, 3)
-                                                .map((type: string) => (
-                                                    <span
-                                                        key={type}
-                                                        className="text-[10px] px-2 py-0.5 rounded-md bg-muted text-muted-foreground font-medium"
-                                                    >
-                                                        {type.replace(
-                                                            /_/g,
-                                                            " ",
-                                                        )}
-                                                    </span>
-                                                ))}
-                                            {interview.interviewTypes?.length >
-                                                3 && (
-                                                <span className="text-[10px] px-2 py-0.5 rounded-md bg-muted text-muted-foreground font-medium">
-                                                    +
-                                                    {interview.interviewTypes
-                                                        .length - 3}
-                                                </span>
-                                            )}
-                                        </div>
+                                            <div className="flex items-center justify-between gap-4 lg:justify-end">
+                                                <div className="flex items-center gap-2">
+                                                    {recordingUrl && (
+                                                        <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-semibold text-primary">
+                                                            <IconPlayerPlay className="h-3 w-3" />
+                                                            Recording
+                                                        </span>
+                                                    )}
+                                                    {interview.createdAt && (
+                                                        <span className="hidden items-center gap-1.5 text-xs text-muted-foreground sm:inline-flex">
+                                                            <IconCalendar className="h-3.5 w-3.5" />
+                                                            {formatDate(
+                                                                interview.createdAt,
+                                                            )}
+                                                        </span>
+                                                    )}
+                                                </div>
 
-                                        {/* Card footer */}
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-2">
-                                                <span
-                                                    className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${statusConfig.className}`}
-                                                >
-                                                    {statusConfig.label}
-                                                </span>
-                                                {recordingUrl && (
-                                                    <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
-                                                        <IconPlayerPlay className="w-3 h-3" />
-                                                        Recording
+                                                <div className="flex shrink-0 items-center gap-3">
+                                                    {interview.report
+                                                        ?.overallScore !=
+                                                    null ? (
+                                                        <div className="min-w-16 rounded-xl bg-background px-3 py-2 text-center">
+                                                            <p
+                                                                className={`text-lg font-bold leading-none tabular-nums ${getScoreColor(interview.report.overallScore)}`}
+                                                            >
+                                                                {
+                                                                    interview
+                                                                        .report
+                                                                        .overallScore
+                                                                }
+                                                            </p>
+                                                            <p className="mt-1 text-[10px] font-medium text-muted-foreground">
+                                                                Score
+                                                            </p>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="min-w-16 rounded-xl bg-background px-3 py-2 text-center">
+                                                            <p className="text-lg font-bold leading-none text-muted-foreground">
+                                                                -
+                                                            </p>
+                                                            <p className="mt-1 text-[10px] font-medium text-muted-foreground">
+                                                                Pending
+                                                            </p>
+                                                        </div>
+                                                    )}
+                                                    <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-background text-muted-foreground transition-all group-hover:border-primary/30 group-hover:text-primary">
+                                                        <IconChevronRight className="h-4 w-4" />
                                                     </span>
-                                                )}
-                                                {interview.createdAt && (
-                                                    <span className="flex items-center gap-1 text-[10px] text-muted-foreground/70">
-                                                        <IconCalendar className="w-3 h-3" />
-                                                        {formatDate(
-                                                            interview.createdAt,
-                                                        )}
-                                                    </span>
-                                                )}
+                                                </div>
                                             </div>
-                                            <IconChevronRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary transition-colors" />
                                         </div>
                                     </Link>
                                 </motion.div>
@@ -487,7 +539,7 @@ function DashboardPage() {
                         })}
                     </div>
                 )}
-            </div>
+            </section>
 
             {/* Free plan usage nudge */}
             {plan === "free" && interviewCount >= 2 && (
