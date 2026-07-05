@@ -197,74 +197,76 @@ function AccountPage() {
             <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mb-8"
+                className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
             >
-                <h1 className="font-heading text-2xl lg:text-3xl font-bold text-foreground">
-                    Account
-                </h1>
-                <p className="text-muted-foreground text-sm mt-1">
-                    Manage your profile and subscription
-                </p>
+                <div>
+                    <h1 className="font-heading text-2xl lg:text-3xl font-bold text-foreground">
+                        Account
+                    </h1>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                        Keep your interview profile accurate and your plan ready
+                        for practice.
+                    </p>
+                </div>
+                <div className="inline-flex w-fit items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground">
+                    <IconUser className="h-3.5 w-3.5" />
+                    {session?.user.email}
+                </div>
             </motion.div>
 
-            <div className="space-y-6">
+            <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
                 {/* Profile card */}
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.05 }}
-                    className="bg-card border border-border rounded-xl overflow-hidden"
+                    className="overflow-hidden rounded-2xl border border-border bg-card"
                 >
                     {/* Profile header */}
-                    <div className="px-6 py-5 border-b border-border">
-                        <div className="flex items-center gap-4">
-                            <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center shrink-0 ring-2 ring-primary/10 ring-offset-2 ring-offset-card">
-                                {session?.user.image ? (
-                                    <img
-                                        src={session.user.image}
-                                        alt={session.user.name || ""}
-                                        className="w-14 h-14 rounded-full object-cover"
-                                    />
-                                ) : (
-                                    <IconUser className="w-6 h-6 text-primary" />
-                                )}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <h2 className="font-heading text-lg font-semibold text-foreground truncate">
-                                    {session?.user.name || "User"}
-                                </h2>
-                                <div className="flex items-center gap-2 mt-0.5">
-                                    <IconMail className="w-3.5 h-3.5 text-muted-foreground" />
-                                    <span className="text-sm text-muted-foreground truncate">
-                                        {session?.user.email}
-                                    </span>
+                    <div className="border-b border-border bg-muted/25 px-6 py-6">
+                        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="flex min-w-0 items-center gap-4">
+                                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-primary/15">
+                                    {session?.user.image ? (
+                                        <img
+                                            src={session.user.image}
+                                            alt={session.user.name || ""}
+                                            className="h-16 w-16 rounded-2xl object-cover"
+                                        />
+                                    ) : (
+                                        <IconUser className="h-7 w-7 text-primary" />
+                                    )}
+                                </div>
+                                <div className="min-w-0">
+                                    <div className="mb-1.5 flex flex-wrap items-center gap-2">
+                                        <h2 className="font-heading text-xl font-semibold text-foreground">
+                                            {session?.user.name}
+                                        </h2>
+                                        <span
+                                            className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
+                                                isPro
+                                                    ? "bg-primary/10 text-primary"
+                                                    : "bg-muted text-muted-foreground"
+                                            }`}
+                                        >
+                                            {planLabel}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                        <IconMail className="h-4 w-4" />
+                                        <span className="truncate">
+                                            {session?.user.email}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
-                            <span
-                                className={`px-3 py-1 rounded-lg text-xs font-semibold shrink-0 ${
-                                    isPro
-                                        ? "bg-primary/10 text-primary"
-                                        : "bg-muted text-muted-foreground"
-                                }`}
-                            >
-                                {planLabel}
-                            </span>
-                        </div>
-                    </div>
-
-                    {/* Profile details */}
-                    <div className="px-6 py-5">
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-sm font-semibold text-foreground">
-                                Professional Details
-                            </h3>
                             {!editing ? (
                                 <button
                                     onClick={() => setEditing(true)}
-                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors cursor-pointer"
+                                    className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 py-2 text-sm font-semibold text-foreground transition-all hover:bg-accent"
                                 >
-                                    <IconEdit className="w-3.5 h-3.5" />
-                                    Edit
+                                    <IconEdit className="h-4 w-4" />
+                                    Edit Profile
                                 </button>
                             ) : (
                                 <div className="flex items-center gap-2">
@@ -274,24 +276,37 @@ function AccountPage() {
                                             if (profile)
                                                 populateEditFields(profile);
                                         }}
-                                        className="px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors cursor-pointer"
+                                        className="cursor-pointer rounded-xl px-4 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         onClick={handleSave}
                                         disabled={saving}
-                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:opacity-90 transition-all cursor-pointer disabled:opacity-50"
+                                        className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                                     >
                                         {saving ? (
-                                            <IconLoader className="w-3.5 h-3.5 animate-spin" />
+                                            <IconLoader className="h-4 w-4 animate-spin" />
                                         ) : (
-                                            <IconDeviceFloppy className="w-3.5 h-3.5" />
+                                            <IconDeviceFloppy className="h-4 w-4" />
                                         )}
-                                        Save
+                                        Save Changes
                                     </button>
                                 </div>
                             )}
+                        </div>
+                    </div>
+
+                    {/* Profile details */}
+                    <div className="px-6 py-6">
+                        <div className="mb-5">
+                            <h3 className="text-sm font-semibold text-foreground">
+                                Professional profile
+                            </h3>
+                            <p className="mt-1 text-sm text-muted-foreground">
+                                Used to tune role context, seniority, and
+                                follow-up pressure in mock interviews.
+                            </p>
                         </div>
 
                         {editing ? (
@@ -417,7 +432,7 @@ function AccountPage() {
                                 </div>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8">
+                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                 <DetailRow
                                     icon={IconBuilding}
                                     label="Industry"
@@ -444,15 +459,15 @@ function AccountPage() {
                                 />
                                 {profile?.skills &&
                                     profile.skills.length > 0 && (
-                                        <div className="sm:col-span-2">
-                                            <p className="text-xs text-muted-foreground mb-1.5">
+                                        <div className="rounded-xl bg-muted/35 p-4 sm:col-span-2">
+                                            <p className="mb-2 text-xs font-medium text-muted-foreground">
                                                 Skills
                                             </p>
-                                            <div className="flex flex-wrap gap-1.5">
+                                            <div className="flex flex-wrap gap-2">
                                                 {profile.skills.map((skill) => (
                                                     <span
                                                         key={skill}
-                                                        className="px-2.5 py-1 rounded-md bg-muted text-xs text-foreground font-medium"
+                                                        className="rounded-lg bg-background px-2.5 py-1 text-xs font-medium text-foreground"
                                                     >
                                                         {skill}
                                                     </span>
@@ -462,18 +477,18 @@ function AccountPage() {
                                     )}
                                 {profile?.targetCompanies &&
                                     profile.targetCompanies.length > 0 && (
-                                        <div className="sm:col-span-2">
-                                            <p className="text-xs text-muted-foreground mb-1.5">
+                                        <div className="rounded-xl bg-muted/35 p-4 sm:col-span-2">
+                                            <p className="mb-2 text-xs font-medium text-muted-foreground">
                                                 Target Companies
                                             </p>
-                                            <div className="flex flex-wrap gap-1.5">
+                                            <div className="flex flex-wrap gap-2">
                                                 {profile.targetCompanies.map(
                                                     (company) => (
                                                         <span
                                                             key={company}
-                                                            className="px-2.5 py-1 rounded-md bg-primary/10 text-xs text-primary font-medium flex items-center gap-1"
+                                                            className="flex items-center gap-1.5 rounded-lg bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary"
                                                         >
-                                                            <IconTarget className="w-3 h-3" />
+                                                            <IconTarget className="h-3 w-3" />
                                                             {company}
                                                         </span>
                                                     ),
@@ -482,11 +497,11 @@ function AccountPage() {
                                         </div>
                                     )}
                                 {profile?.careerGoal && (
-                                    <div className="sm:col-span-2">
-                                        <p className="text-xs text-muted-foreground mb-1">
+                                    <div className="rounded-xl bg-muted/35 p-4 sm:col-span-2">
+                                        <p className="mb-2 text-xs font-medium text-muted-foreground">
                                             Career Goal
                                         </p>
-                                        <p className="text-sm text-foreground">
+                                        <p className="text-sm leading-6 text-foreground">
                                             {profile.careerGoal}
                                         </p>
                                     </div>
@@ -501,24 +516,27 @@ function AccountPage() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="bg-card border border-border rounded-xl overflow-hidden"
+                    className="overflow-hidden rounded-2xl border border-border bg-card"
                 >
-                    <div className="px-6 py-5 border-b border-border">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
+                    <div className="border-b border-border bg-muted/25 px-6 py-6">
+                        <div className="flex items-start justify-between gap-4">
+                            <div className="flex items-start gap-3">
                                 <div
-                                    className={`w-10 h-10 rounded-lg flex items-center justify-center ${isPro ? "bg-primary/10" : "bg-muted"}`}
+                                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${isPro ? "bg-primary/10" : "bg-muted"}`}
                                 >
                                     <IconCrown
-                                        className={`w-5 h-5 ${isPro ? "text-primary" : "text-muted-foreground"}`}
+                                        className={`h-5 w-5 ${isPro ? "text-primary" : "text-muted-foreground"}`}
                                     />
                                 </div>
-                                <div>
-                                    <h3 className="text-sm font-semibold text-foreground">
+                                <div className="min-w-0">
+                                    <p className="text-xs font-medium text-muted-foreground">
+                                        Current plan
+                                    </p>
+                                    <h3 className="mt-1 font-heading text-lg font-semibold text-foreground">
                                         {planFullLabel}
                                     </h3>
                                     {isPro && currentPeriodEnd && (
-                                        <p className="text-xs text-muted-foreground">
+                                        <p className="mt-1 text-xs text-muted-foreground">
                                             Expires{" "}
                                             {new Date(
                                                 currentPeriodEnd,
@@ -530,7 +548,7 @@ function AccountPage() {
                                         </p>
                                     )}
                                     {!isPro && (
-                                        <p className="text-xs text-muted-foreground">
+                                        <p className="mt-1 text-xs text-muted-foreground">
                                             One-time free trial
                                         </p>
                                     )}
@@ -539,46 +557,46 @@ function AccountPage() {
                             {!isPro && (
                                 <Link
                                     to="/pricing"
-                                    className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:opacity-90 transition-all"
+                                    className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground transition-all hover:opacity-90"
                                 >
-                                    <IconCrown className="w-3.5 h-3.5" />
+                                    <IconCrown className="h-3.5 w-3.5" />
                                     Upgrade
                                 </Link>
                             )}
                             {isPro && (
                                 <Link
                                     to="/billing"
-                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                                    className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-background px-3 py-2 text-xs font-semibold text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                                 >
                                     Manage Plan
-                                    <IconExternalLink className="w-3 h-3" />
+                                    <IconExternalLink className="h-3 w-3" />
                                 </Link>
                             )}
                         </div>
                     </div>
 
-                    <div className="px-6 py-5">
+                    <div className="px-6 py-6">
                         {/* Usage */}
                         {!isPro && (
-                            <div className="mb-5">
-                                <div className="flex items-center justify-between mb-2">
-                                    <p className="text-xs font-medium text-muted-foreground">
+                            <div className="mb-6 rounded-xl bg-muted/35 p-4">
+                                <div className="mb-2 flex items-center justify-between">
+                                    <p className="text-xs font-semibold text-foreground">
                                         Interviews Used
                                     </p>
-                                    <p className="text-xs font-semibold text-foreground">
+                                    <p className="text-xs font-medium text-muted-foreground">
                                         {freeUsageUsed} / {maxInterviews}
                                     </p>
                                 </div>
-                                <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                                <div className="h-2 w-full overflow-hidden rounded-full bg-background">
                                     <div
-                                        className="h-full bg-primary rounded-full transition-all duration-500"
+                                        className="h-full rounded-full bg-primary transition-all duration-500"
                                         style={{
                                             width: `${Math.min(freeUsagePercent, 100)}%`,
                                         }}
                                     />
                                 </div>
                                 {interviewCount >= maxInterviews && (
-                                    <p className="mt-2 text-xs text-muted-foreground">
+                                    <p className="mt-3 text-xs leading-5 text-muted-foreground">
                                         Free usage is exhausted permanently for
                                         this account.
                                     </p>
@@ -587,24 +605,15 @@ function AccountPage() {
                         )}
 
                         {/* Features */}
-                        <div className="space-y-2.5">
+                        <div className="space-y-2">
                             {planFeatures.map((feature) => (
                                 <div
                                     key={feature.label}
-                                    className="flex items-center gap-3"
+                                    className="flex items-center justify-between gap-3 rounded-xl bg-muted/35 px-3 py-3"
                                 >
-                                    {feature.enabled ? (
-                                        <div className="w-5 h-5 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
-                                            <IconCheck className="w-3 h-3 text-emerald-500" />
-                                        </div>
-                                    ) : (
-                                        <div className="w-5 h-5 rounded-full bg-muted flex items-center justify-center shrink-0">
-                                            <IconX className="w-3 h-3 text-muted-foreground/50" />
-                                        </div>
-                                    )}
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex min-w-0 items-center gap-2.5">
                                         <feature.icon
-                                            className={`w-3.5 h-3.5 ${feature.enabled ? "text-foreground" : "text-muted-foreground/50"}`}
+                                            className={`h-4 w-4 ${feature.enabled ? "text-foreground" : "text-muted-foreground/50"}`}
                                         />
                                         <span
                                             className={`text-sm ${feature.enabled ? "text-foreground" : "text-muted-foreground/60"}`}
@@ -612,6 +621,15 @@ function AccountPage() {
                                             {feature.label}
                                         </span>
                                     </div>
+                                    {feature.enabled ? (
+                                        <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/10">
+                                            <IconCheck className="h-3 w-3 text-emerald-500" />
+                                        </div>
+                                    ) : (
+                                        <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-background">
+                                            <IconX className="h-3 w-3 text-muted-foreground/50" />
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                         </div>
@@ -623,22 +641,22 @@ function AccountPage() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.15 }}
-                    className="bg-card border border-border rounded-xl px-6 py-5"
+                    className="rounded-2xl border border-border bg-card px-6 py-5"
                 >
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <h3 className="text-sm font-semibold text-foreground">
                                 Sign Out
                             </h3>
-                            <p className="text-xs text-muted-foreground mt-0.5">
-                                Sign out of your PrepPilot account
+                            <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                                End this browser session and return to login.
                             </p>
                         </div>
                         <button
                             onClick={handleSignOut}
-                            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-sm font-medium text-foreground hover:text-destructive hover:border-destructive/30 hover:bg-destructive/5 transition-all cursor-pointer"
+                            className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-border px-4 py-2 text-sm font-semibold text-foreground transition-all hover:border-destructive/30 hover:bg-destructive/5 hover:text-destructive"
                         >
-                            <IconLogout className="w-4 h-4" />
+                            <IconLogout className="h-4 w-4" />
                             Sign Out
                         </button>
                     </div>
@@ -658,11 +676,15 @@ function DetailRow({
     value?: string;
 }) {
     return (
-        <div className="flex items-start gap-2.5">
-            <Icon className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
-            <div>
-                <p className="text-xs text-muted-foreground">{label}</p>
-                <p className="text-sm text-foreground font-medium">
+        <div className="flex items-start gap-3 rounded-xl bg-muted/35 p-4">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-background">
+                <Icon className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <div className="min-w-0">
+                <p className="text-xs font-medium text-muted-foreground">
+                    {label}
+                </p>
+                <p className="mt-1 truncate text-sm font-semibold text-foreground">
                     {value || "—"}
                 </p>
             </div>
