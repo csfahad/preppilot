@@ -220,18 +220,7 @@ function LiveInterviewRoom() {
             const blob = await stopRecording();
             if (blob && blob.size > 0) {
                 try {
-                    const uploadRes = await api.getRecordingUploadUrl(
-                        interviewId,
-                        "video/webm",
-                    );
-                    const uploadUrl = uploadRes.data?.uploadUrl;
-                    if (uploadUrl) {
-                        await fetch(uploadUrl, {
-                            method: "PUT",
-                            body: blob,
-                            headers: { "Content-Type": "video/webm" },
-                        });
-                    }
+                    await api.uploadRecording(interviewId, blob, "video/webm");
                 } catch (uploadErr) {
                     console.error("Recording upload failed:", uploadErr);
                     // Non-critical, continue
