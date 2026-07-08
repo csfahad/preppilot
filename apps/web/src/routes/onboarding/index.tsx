@@ -117,16 +117,9 @@ function OnboardingWizard() {
             // upload resume if provided
             let resumeUrl: string | undefined;
             if (resumeFile) {
-                const { data } = await api.getUploadUrl(
-                    resumeFile.name,
-                    resumeFile.type,
-                    "resumes",
-                );
-                await fetch(data.uploadUrl, {
-                    method: "PUT",
-                    body: resumeFile,
-                    headers: { "Content-Type": resumeFile.type },
-                });
+                const { data } = await api.uploadFile(resumeFile, "resumes");
+                if (!data)
+                    throw new Error("Resume upload did not return a URL");
                 resumeUrl = data.fileUrl;
             }
 
