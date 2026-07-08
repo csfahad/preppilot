@@ -41,6 +41,28 @@ async function request<T = any>(
     return response.json();
 }
 
+async function uploadRequest<T = any>(
+    endpoint: string,
+    file: Blob,
+    headers: Record<string, string>,
+): Promise<ApiResponse<T>> {
+    const response = await fetch(`${API_URL}${endpoint}`, {
+        method: "POST",
+        credentials: "include",
+        headers,
+        body: file,
+    });
+
+    if (!response.ok) {
+        const error = await response
+            .json()
+            .catch(() => ({ error: { message: "Upload failed" } }));
+        throw new Error(error.error?.message || `HTTP ${response.status}`);
+    }
+
+    return response.json();
+}
+
 export const api = {
     getProfile: () => request("/api/profiles/me"),
     createProfile: (data: any) =>
@@ -94,6 +116,16 @@ export const api = {
             method: "POST",
             body: { filename, contentType, folder },
         }),
+    uploadFile: (file: File, folder = "resumes") =>
+        uploadRequest<{ fileUrl: string; key: string }>(
+            "/api/upload/file",
+            file,
+            {
+                "Content-Type": file.type || "application/octet-stream",
+                "X-Filename": encodeURIComponent(file.name),
+                "X-Folder": folder,
+            },
+        ),
 
     // Teams (enterprise)
     getTeam: () => request("/api/teams/me"),
@@ -125,6 +157,15 @@ export const api = {
             method: "POST",
             body: { interviewId, contentType },
         }),
+    uploadRecording: (interviewId: string, blob: Blob, contentType: string) =>
+        uploadRequest<{ fileUrl: string; key: string }>(
+            "/api/upload/recording",
+            blob,
+            {
+                "Content-Type": contentType,
+                "X-Interview-Id": interviewId,
+            },
+        ),
 
     // Credits
     getCredits: () => request("/api/payments/credits"),
