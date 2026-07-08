@@ -5,6 +5,7 @@ import {
     DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import type { Readable } from "node:stream";
 
 const r2Client = new S3Client({
     region: "auto",
@@ -54,11 +55,21 @@ export async function uploadBuffer(
     body: Buffer | Uint8Array,
     contentType: string,
 ): Promise<string> {
+    return uploadObject(key, body, contentType);
+}
+
+export async function uploadObject(
+    key: string,
+    body: Buffer | Uint8Array | Readable,
+    contentType: string,
+    contentLength?: number,
+): Promise<string> {
     const command = new PutObjectCommand({
         Bucket: BUCKET,
         Key: key,
         Body: body,
         ContentType: contentType,
+        ContentLength: contentLength,
     });
 
     await r2Client.send(command);
