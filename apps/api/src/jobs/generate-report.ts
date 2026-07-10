@@ -13,9 +13,9 @@ import {
     buildReportSummaryPrompt,
     buildEvaluationPrompt,
 } from "../ai/prompts.js";
-import { sendFeedbackReadyEmail } from "../lib/email.js";
 import { createRedisConnection } from "../lib/redis.js";
 import { processRealtimeTranscript } from "../realtime/transcript-collector.js";
+import { enqueueEmail } from "./send-email.js";
 
 const QUEUE_NAME = "generate-report";
 
@@ -271,9 +271,13 @@ export async function generateInterviewReport(data: GenerateReportJobData) {
 
     // send email notification
     try {
-        await sendFeedbackReadyEmail(userEmail, userName, interviewId);
+        await enqueueEmail("feedback_ready", {
+            to: userEmail,
+            name: userName,
+            interviewId,
+        });
     } catch (emailErr) {
-        console.error("[Report] Failed to send email:", emailErr);
+        console.error("[Report] Failed to enqueue feedback email:", emailErr);
     }
 
     console.log(`[Report] Report generated for interview ${interviewId}`);
