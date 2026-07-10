@@ -16,6 +16,26 @@ export const emailQueue = new Queue(QUEUE_NAME, {
     connection: createRedisConnection(),
 });
 
+export function enqueueEmail(
+    type: string,
+    data: Record<string, unknown>,
+    options: Parameters<typeof emailQueue.add>[2] = {},
+) {
+    return emailQueue.add(
+        type,
+        { type, ...data },
+        {
+            attempts: 3,
+            backoff: { type: "exponential", delay: 5_000 },
+            removeOnComplete: true,
+            removeOnFail: {
+                age: 7 * 24 * 60 * 60,
+            },
+            ...options,
+        },
+    );
+}
+
 export function startEmailWorker() {
     const worker = new Worker(
         QUEUE_NAME,
@@ -74,7 +94,7 @@ export function startEmailWorker() {
     });
 
     worker.on("failed", (job, err) => {
-        console.error(`[EmailWorker] Job ${job?.id} failed:`, err.message);
+        console.error(`[EmailWorker] Job ${job?.id} failed:`, err);
     });
 
     return worker;
