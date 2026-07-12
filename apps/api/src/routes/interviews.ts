@@ -20,11 +20,13 @@ import {
     conversationTurns,
 } from "../db/schema.js";
 import { enqueueReportGeneration } from "../jobs/generate-report.js";
+import { enqueueEmail } from "../jobs/send-email.js";
 import {
     createConvAISession,
     endConvAISession,
 } from "../realtime/convai-session.js";
 import { buildInterviewerSystemPrompt } from "../realtime/interview-prompt.js";
+import { PLAN_LIMITS } from "@repo/shared/constants/taxonomy";
 
 const router = Router();
 
@@ -143,6 +145,25 @@ router.post(
                 experienceYears: profile?.experienceYears,
                 consumePackCredit: String(req.user!.plan).endsWith("_pack"),
             });
+
+            const interviewsUsed = req.user!.interviewCount + 1;
+            if (
+                req.user!.plan === "free" &&
+                interviewsUsed >= PLAN_LIMITS.free.maxInterviews
+            ) {
+                try {
+                    await enqueueEmail("trial_ending", {
+                        to: req.user!.email,
+                        name: req.user!.name,
+                        interviewsUsed,
+                    });
+                } catch (emailErr) {
+                    console.error(
+                        "[Interviews] Failed to enqueue trial ending email:",
+                        emailErr,
+                    );
+                }
+            }
 
             res.status(201).json({ success: true, data: interview });
         } catch (error) {
