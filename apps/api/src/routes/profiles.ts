@@ -3,6 +3,7 @@ import { db } from "../db/index.js";
 import { profiles, users } from "../db/schema.js";
 import { eq } from "drizzle-orm";
 import { requireAuth } from "../middleware/auth.js";
+import { enqueueEmail } from "../jobs/send-email.js";
 
 const router = Router();
 
@@ -102,6 +103,18 @@ router.post("/", requireAuth, async (req, res) => {
             .update(users)
             .set({ onboardingCompleted: true, updatedAt: new Date() })
             .where(eq(users.id, req.user!.id));
+
+        try {
+            await enqueueEmail("welcome", {
+                to: req.user!.email,
+                name: req.user!.name,
+            });
+        } catch (emailErr) {
+            console.error(
+                "[Profiles] Failed to enqueue welcome email:",
+                emailErr,
+            );
+        }
 
         res.status(201).json({ success: true, data: profile });
     } catch (error) {
