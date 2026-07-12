@@ -3,7 +3,7 @@ import { db } from "../db/index.js";
 import { teams, teamMembers, teamInvitations, users } from "../db/schema.js";
 import { eq, and } from "drizzle-orm";
 import { requireAuth } from "../middleware/auth.js";
-import { emailQueue } from "../jobs/send-email.js";
+import { enqueueEmail } from "../jobs/send-email.js";
 import crypto from "crypto";
 
 const router = Router();
@@ -205,21 +205,12 @@ router.post("/invite", async (req, res) => {
             })
             .returning();
 
-        await emailQueue.add(
-            "team_invitation",
-            {
-                type: "team_invitation",
-                to: email,
-                inviterName: req.user!.name || req.user!.email,
-                teamName: team[0]?.name || "your team",
-                inviteUrl,
-            },
-            {
-                attempts: 3,
-                backoff: { type: "exponential", delay: 5000 },
-                removeOnComplete: true,
-            },
-        );
+        await enqueueEmail("team_invitation", {
+            to: email,
+            inviterName: req.user!.name || req.user!.email,
+            teamName: team[0]?.name,
+            inviteUrl,
+        });
 
         res.status(201).json({
             success: true,
