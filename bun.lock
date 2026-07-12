@@ -72,6 +72,7 @@
                 "date-fns": "^4.1.0",
                 "drizzle-orm": "^0.44.0",
                 "embla-carousel-react": "^8.6.0",
+                "fix-webm-duration": "^1.0.6",
                 "input-otp": "^1.4.2",
                 "lucide-react": "^0.545.0",
                 "motion": "^12.38.0",
@@ -9114,6 +9115,13 @@
             "",
             {},
             "sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==",
+        ],
+
+        "fix-webm-duration": [
+            "fix-webm-duration@1.0.6",
+            "",
+            {},
+            "sha512-zVAqi4gE+8ywxJuAyV/rlJVX6CMtvyapEbQx6jyoeX9TMjdqAlt/FdG5d7rXSSkDVzTvS0H7CtwzHcH/vh4FPA==",
         ],
 
         "input-otp": [

@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import fixWebmDuration from "fix-webm-duration";
 
 interface UseMediaRecorderOptions {
     onDataAvailable?: (blob: Blob) => void;
@@ -27,6 +28,8 @@ export function useMediaRecorder(options: UseMediaRecorderOptions = {}) {
     const chunksRef = useRef<Blob[]>([]);
     const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const mimeTypeRef = useRef<string>("");
+    const durationRef = useRef(0);
+    const startedAtRef = useRef<number | null>(null);
 
     // Stable callback ref
     const onDataAvailableRef = useRef(options.onDataAvailable);
@@ -89,8 +92,14 @@ export function useMediaRecorder(options: UseMediaRecorderOptions = {}) {
 
             // Duration timer
             setDuration(0);
+            durationRef.current = 0;
+            startedAtRef.current = Date.now();
             timerRef.current = setInterval(() => {
-                setDuration((d) => d + 1);
+                setDuration((d) => {
+                    const nextDuration = d + 1;
+                    durationRef.current = nextDuration;
+                    return nextDuration;
+                });
             }, 1000);
 
             setIsRecording(true);
@@ -113,16 +122,36 @@ export function useMediaRecorder(options: UseMediaRecorderOptions = {}) {
 
         // Return a promise-resolved blob via collected chunks
         return new Promise<Blob | null>((resolve) => {
-            recorder.onstop = () => {
-                const blob =
+            recorder.onstop = async () => {
+                const rawBlob =
                     chunksRef.current.length > 0
                         ? new Blob(chunksRef.current, {
                               type: mimeTypeRef.current,
                           })
                         : null;
+                const durationMs = startedAtRef.current
+                    ? Date.now() - startedAtRef.current
+                    : durationRef.current * 1000;
+
+                let blob = rawBlob;
+                if (
+                    rawBlob &&
+                    durationMs > 0 &&
+                    mimeTypeRef.current.includes("webm")
+                ) {
+                    try {
+                        blob = await fixWebmDuration(rawBlob, durationMs);
+                    } catch (err) {
+                        console.warn(
+                            "Failed to write WebM duration metadata:",
+                            err,
+                        );
+                    }
+                }
 
                 chunksRef.current = [];
                 mediaRecorderRef.current = null;
+                startedAtRef.current = null;
                 cleanupStream();
                 setIsRecording(false);
                 resolve(blob);
