@@ -157,13 +157,21 @@ export const api = {
             method: "POST",
             body: { interviewId, contentType },
         }),
-    uploadRecording: (interviewId: string, blob: Blob, contentType: string) =>
+    uploadRecording: (
+        interviewId: string,
+        blob: Blob,
+        contentType: string,
+        durationSeconds?: number,
+    ) =>
         uploadRequest<{ fileUrl: string; key: string }>(
             "/api/upload/recording",
             blob,
             {
                 "Content-Type": contentType,
                 "X-Interview-Id": interviewId,
+                ...(durationSeconds
+                    ? { "X-Duration-Seconds": String(durationSeconds) }
+                    : {}),
             },
         ),
 
