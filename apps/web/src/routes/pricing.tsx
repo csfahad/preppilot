@@ -79,6 +79,7 @@ const PACKS: Pack[] = [
         features: [
             { text: "3 interviews × 15 min each", included: true },
             { text: "Full AI scoring", included: true },
+            { text: "Interview recording playback", included: true },
             { text: "Model answers included", included: true },
             { text: "Detailed improvement tips", included: false },
             { text: "Priority support", included: false },
@@ -101,6 +102,7 @@ const PACKS: Pack[] = [
         features: [
             { text: "5 interviews × 30 min each", included: true },
             { text: "Full AI scoring + detailed feedback", included: true },
+            { text: "Interview recording playback", included: true },
             { text: "Model answers included", included: true },
             { text: "Improvement tips & action items", included: true },
             { text: "Priority support", included: false },
@@ -123,6 +125,7 @@ const PACKS: Pack[] = [
         features: [
             { text: "10 interviews × 45 min each", included: true },
             { text: "Full AI scoring + detailed feedback", included: true },
+            { text: "Interview recording playback", included: true },
             { text: "Model answers included", included: true },
             { text: "Improvement tips & action items", included: true },
             { text: "Priority support", included: true },
@@ -159,6 +162,13 @@ const COMPARISON_ROWS = [
     },
     {
         feature: "Model answers",
+        free: false,
+        mini: true,
+        standard: true,
+        premium: true,
+    },
+    {
+        feature: "Interview recording playback",
         free: false,
         mini: true,
         standard: true,
