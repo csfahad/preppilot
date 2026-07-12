@@ -29,6 +29,14 @@ function getContentLength(value: string | undefined): number | undefined {
     return Number.isSafeInteger(length) && length >= 0 ? length : undefined;
 }
 
+function getPositiveInteger(value: string | string[] | undefined) {
+    const headerValue = getHeaderValue(value);
+    if (!headerValue) return undefined;
+
+    const parsed = Number(headerValue);
+    return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : undefined;
+}
+
 function decodeHeaderValue(value: string): string {
     try {
         return decodeURIComponent(value);
@@ -284,6 +292,9 @@ router.post("/recording", requireAuth, async (req, res) => {
         }
 
         const key = `recordings/${req.user!.id}/${interviewId}/session.webm`;
+        const durationSeconds = getPositiveInteger(
+            req.headers["x-duration-seconds"],
+        );
         const body = await readRequestBuffer(req);
         const fileUrl = await uploadBuffer(key, body, contentType);
 
@@ -294,6 +305,7 @@ router.post("/recording", requireAuth, async (req, res) => {
                 userId: req.user!.id,
                 videoUrl: contentType === "video/webm" ? fileUrl : null,
                 audioUrl: contentType === "audio/webm" ? fileUrl : null,
+                durationSeconds,
                 fileSizeBytes: getContentLength(req.headers["content-length"]),
             })
             .onConflictDoUpdate({
@@ -303,6 +315,7 @@ router.post("/recording", requireAuth, async (req, res) => {
                         contentType === "video/webm" ? fileUrl : undefined,
                     audioUrl:
                         contentType === "audio/webm" ? fileUrl : undefined,
+                    durationSeconds,
                     fileSizeBytes: getContentLength(
                         req.headers["content-length"],
                     ),
