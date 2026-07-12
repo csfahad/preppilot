@@ -29,6 +29,7 @@ import {
     IconVolume,
     IconVolumeOff,
     IconMaximize,
+    IconMinimize,
     IconBrandLinkedin,
     IconBrandX,
     IconBrandReddit,
@@ -352,6 +353,7 @@ function ReportPage() {
                         <RecordingPlayer
                             src={recordingUrl}
                             type={recording.videoUrl ? "video" : "audio"}
+                            durationHint={recording.durationSeconds}
                         />
                     </div>
                 </motion.section>
@@ -674,19 +676,68 @@ function formatMediaTime(seconds: number) {
 function RecordingPlayer({
     src,
     type,
+    durationHint,
 }: {
     src: string;
     type: "video" | "audio";
+    durationHint?: number | null;
 }) {
     const mediaRef = useRef<HTMLVideoElement | HTMLAudioElement>(null);
     const shellRef = useRef<HTMLDivElement>(null);
+    const previewSeekRef = useRef(false);
     const [isPlaying, setIsPlaying] = useState(false);
     const [isMuted, setIsMuted] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
-    const [duration, setDuration] = useState(0);
+    const [duration, setDuration] = useState(
+        Number.isFinite(durationHint) && durationHint ? durationHint : 0,
+    );
     const [volume, setVolume] = useState(0.85);
+    const [isFullscreen, setIsFullscreen] = useState(false);
 
-    const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+    const effectiveDuration =
+        duration > 0
+            ? duration
+            : Number.isFinite(durationHint) && durationHint
+              ? durationHint
+              : 0;
+    const progress =
+        effectiveDuration > 0
+            ? Math.min((currentTime / effectiveDuration) * 100, 100)
+            : 0;
+
+    useEffect(() => {
+        if (Number.isFinite(durationHint) && durationHint) {
+            setDuration((current) => (current > 0 ? current : durationHint));
+        }
+    }, [durationHint]);
+
+    useEffect(() => {
+        const handleFullscreenChange = () => {
+            setIsFullscreen(document.fullscreenElement === shellRef.current);
+        };
+
+        document.addEventListener("fullscreenchange", handleFullscreenChange);
+        return () => {
+            document.removeEventListener(
+                "fullscreenchange",
+                handleFullscreenChange,
+            );
+        };
+    }, []);
+
+    const syncDuration = () => {
+        const media = mediaRef.current;
+        if (!media) return;
+
+        if (Number.isFinite(media.duration) && media.duration > 0) {
+            setDuration(media.duration);
+            return;
+        }
+
+        if (Number.isFinite(durationHint) && durationHint) {
+            setDuration(durationHint);
+        }
+    };
 
     const togglePlayback = async () => {
         const media = mediaRef.current;
@@ -711,29 +762,40 @@ function RecordingPlayer({
         const media = mediaRef.current;
         if (!media) return;
 
-        media.volume = value;
+        const nextVolume = Math.min(Math.max(value, 0), 1);
+        media.volume = nextVolume;
         media.muted = value === 0;
-        setVolume(value);
+        setVolume(nextVolume);
         setIsMuted(media.muted);
     };
 
     const seek = (value: number) => {
         const media = mediaRef.current;
-        if (!media || !duration) return;
+        if (!media || !effectiveDuration) return;
 
-        media.currentTime = (value / 100) * duration;
+        const nextTime = (value / 100) * effectiveDuration;
+        if ("fastSeek" in media && typeof media.fastSeek === "function") {
+            media.fastSeek(nextTime);
+        } else {
+            media.currentTime = nextTime;
+        }
         setCurrentTime(media.currentTime);
     };
 
-    const openFullscreen = () => {
+    const toggleFullscreen = () => {
         if (type === "audio") return;
+        if (document.fullscreenElement) {
+            void document.exitFullscreen();
+            return;
+        }
+
         void shellRef.current?.requestFullscreen();
     };
 
     const sharedMediaProps = {
         ref: mediaRef as any,
         src,
-        preload: "metadata",
+        preload: "auto",
         onPlay: () => setIsPlaying(true),
         onPause: () => setIsPlaying(false),
         onEnded: () => setIsPlaying(false),
@@ -741,12 +803,36 @@ function RecordingPlayer({
             const media = mediaRef.current;
             if (!media) return;
             media.volume = volume;
-            setDuration(media.duration);
+            syncDuration();
+
+            if (
+                type === "video" &&
+                !previewSeekRef.current &&
+                media.currentTime === 0
+            ) {
+                previewSeekRef.current = true;
+                const previewTime = effectiveDuration
+                    ? Math.min(1, Math.max(0.1, effectiveDuration * 0.02))
+                    : 0.1;
+                media.currentTime = previewTime;
+            }
+        },
+        onDurationChange: syncDuration,
+        onSeeked: () => {
+            const media = mediaRef.current;
+            if (!media) return;
+            setCurrentTime(media.currentTime);
         },
         onTimeUpdate: () => {
             const media = mediaRef.current;
             if (!media) return;
             setCurrentTime(media.currentTime);
+        },
+        onVolumeChange: () => {
+            const media = mediaRef.current;
+            if (!media) return;
+            setVolume(media.volume);
+            setIsMuted(media.muted || media.volume === 0);
         },
     };
 
@@ -788,9 +874,11 @@ function RecordingPlayer({
                     min={0}
                     max={100}
                     value={progress}
+                    onInput={(event) => seek(Number(event.currentTarget.value))}
                     onChange={(event) => seek(Number(event.target.value))}
+                    disabled={!effectiveDuration}
                     aria-label="Seek recording"
-                    className="h-1.5 w-full cursor-pointer accent-primary"
+                    className="h-1.5 w-full cursor-pointer accent-primary disabled:cursor-not-allowed disabled:opacity-50"
                 />
                 <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
@@ -810,7 +898,7 @@ function RecordingPlayer({
                         </button>
                         <span className="min-w-24 text-xs font-medium text-white/75">
                             {formatMediaTime(currentTime)} /{" "}
-                            {formatMediaTime(duration)}
+                            {formatMediaTime(effectiveDuration)}
                         </span>
                     </div>
 
@@ -831,8 +919,11 @@ function RecordingPlayer({
                             type="range"
                             min={0}
                             max={1}
-                            step={0.05}
+                            step={0.01}
                             value={isMuted ? 0 : volume}
+                            onInput={(event) =>
+                                changeVolume(Number(event.currentTarget.value))
+                            }
                             onChange={(event) =>
                                 changeVolume(Number(event.target.value))
                             }
@@ -842,11 +933,19 @@ function RecordingPlayer({
                         {type === "video" && (
                             <button
                                 type="button"
-                                onClick={openFullscreen}
-                                aria-label="Open fullscreen"
+                                onClick={toggleFullscreen}
+                                aria-label={
+                                    isFullscreen
+                                        ? "Exit fullscreen"
+                                        : "Open fullscreen"
+                                }
                                 className="flex h-9 w-9 items-center justify-center rounded-lg text-white/70 transition-colors hover:bg-white/10 hover:text-white"
                             >
-                                <IconMaximize className="h-4 w-4" />
+                                {isFullscreen ? (
+                                    <IconMinimize className="h-4 w-4" />
+                                ) : (
+                                    <IconMaximize className="h-4 w-4" />
+                                )}
                             </button>
                         )}
                     </div>
