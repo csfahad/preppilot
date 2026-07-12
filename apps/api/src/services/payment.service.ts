@@ -4,6 +4,7 @@ import { db } from "../db/index.js";
 import { subscriptions, users, interviewCredits } from "../db/schema.js";
 import { eq, desc, and, gt, sql, ne, or, isNull } from "drizzle-orm";
 import type { UserPlan } from "@repo/shared/constants/taxonomy";
+import { enqueueEmail } from "../jobs/send-email.js";
 
 const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID!,
@@ -188,6 +189,27 @@ export async function activatePackPurchase(
         .update(users)
         .set({ plan: pack.plan, updatedAt: now })
         .where(eq(users.id, userId));
+
+    const [user] = await db
+        .select({ email: users.email, name: users.name })
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1);
+
+    if (user) {
+        try {
+            await enqueueEmail("subscription_confirmation", {
+                to: user.email,
+                name: user.name,
+                planName: pack.label,
+            });
+        } catch (emailErr) {
+            console.error(
+                "[Payments] Failed to enqueue subscription email:",
+                emailErr,
+            );
+        }
+    }
 }
 
 export async function handleWebhook(event: string, payload: any) {
@@ -473,9 +495,7 @@ export async function cancelPlanWithinWindow(userId: string) {
 
     return {
         refundAmount,
-        refundAmountFormatted: `₹${(refundAmount / 100).toLocaleString(
-            "en-IN",
-        )}`,
+        refundAmountFormatted: `₹${(refundAmount / 100).toLocaleString("en-IN")}`,
         remainingCredits,
     };
 }
