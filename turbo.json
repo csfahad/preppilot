@@ -5,7 +5,13 @@
         "build": {
             "dependsOn": ["^build"],
             "inputs": ["$TURBO_DEFAULT$", ".env*"],
-            "outputs": [".next/**", "!.next/cache/**", ".output/**", "dist/**"],
+            "outputs": [
+                ".next/**",
+                "!.next/cache/**",
+                ".output/**",
+                "dist/**",
+                ".tanstack/**"
+            ],
             "env": ["NODE_ENV"]
         },
         "lint": {
