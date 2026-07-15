@@ -16,10 +16,24 @@ const MAX_UPLOAD_BYTES = Number.parseInt(
     process.env.UPLOAD_MAX_BYTES ?? String(512 * 1024 * 1024),
     10,
 );
+const recordingContentTypes = ["video/webm", "audio/webm"] as const;
+type RecordingContentType = (typeof recordingContentTypes)[number];
 
 function getHeaderValue(value: string | string[] | undefined): string | null {
     if (Array.isArray(value)) return value[0] || null;
     return value || null;
+}
+
+function normalizeRecordingContentType(
+    value: unknown,
+): RecordingContentType | null {
+    if (typeof value !== "string") return null;
+
+    const mediaType = value.split(";", 1)[0]?.trim().toLowerCase();
+    if (!mediaType) return null;
+    return recordingContentTypes.includes(mediaType as RecordingContentType)
+        ? (mediaType as RecordingContentType)
+        : null;
 }
 
 function getContentLength(value: string | undefined): number | undefined {
@@ -177,13 +191,13 @@ router.post("/recording-url", requireAuth, async (req, res) => {
             return;
         }
 
-        const validTypes = ["video/webm", "audio/webm"];
-        if (!validTypes.includes(contentType)) {
+        const recordingContentType = normalizeRecordingContentType(contentType);
+        if (!recordingContentType) {
             res.status(400).json({
                 success: false,
                 error: {
                     code: "VALIDATION_ERROR",
-                    message: `contentType must be one of: ${validTypes.join(", ")}`,
+                    message: `contentType must be one of: ${recordingContentTypes.join(", ")}`,
                 },
             });
             return;
@@ -208,7 +222,7 @@ router.post("/recording-url", requireAuth, async (req, res) => {
         const key = `recordings/${req.user!.id}/${interviewId}/session.webm`;
         const { uploadUrl, fileUrl } = await getUploadPresignedUrl(
             key,
-            contentType,
+            recordingContentType,
             3600, // 1 hour expiration for the upload URL
         );
 
@@ -218,16 +232,22 @@ router.post("/recording-url", requireAuth, async (req, res) => {
             .values({
                 interviewId,
                 userId: req.user!.id,
-                videoUrl: contentType === "video/webm" ? fileUrl : null,
-                audioUrl: contentType === "audio/webm" ? fileUrl : null,
+                videoUrl:
+                    recordingContentType === "video/webm" ? fileUrl : null,
+                audioUrl:
+                    recordingContentType === "audio/webm" ? fileUrl : null,
             })
             .onConflictDoUpdate({
                 target: interviewRecordings.interviewId,
                 set: {
                     videoUrl:
-                        contentType === "video/webm" ? fileUrl : undefined,
+                        recordingContentType === "video/webm"
+                            ? fileUrl
+                            : undefined,
                     audioUrl:
-                        contentType === "audio/webm" ? fileUrl : undefined,
+                        recordingContentType === "audio/webm"
+                            ? fileUrl
+                            : undefined,
                 },
             });
 
@@ -250,9 +270,9 @@ router.post("/recording-url", requireAuth, async (req, res) => {
 router.post("/recording", requireAuth, async (req, res) => {
     try {
         const interviewId = getHeaderValue(req.headers["x-interview-id"]);
-        const contentType = req.headers["content-type"];
+        const contentTypeHeader = getHeaderValue(req.headers["content-type"]);
 
-        if (!interviewId || !contentType) {
+        if (!interviewId || !contentTypeHeader) {
             res.status(400).json({
                 success: false,
                 error: {
@@ -264,13 +284,13 @@ router.post("/recording", requireAuth, async (req, res) => {
             return;
         }
 
-        const validTypes = ["video/webm", "audio/webm"];
-        if (!validTypes.includes(contentType)) {
+        const contentType = normalizeRecordingContentType(contentTypeHeader);
+        if (!contentType) {
             res.status(400).json({
                 success: false,
                 error: {
                     code: "VALIDATION_ERROR",
-                    message: `Content-Type must be one of: ${validTypes.join(", ")}`,
+                    message: `Content-Type must be one of: ${recordingContentTypes.join(", ")}`,
                 },
             });
             return;
