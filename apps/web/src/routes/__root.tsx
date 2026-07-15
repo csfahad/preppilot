@@ -21,6 +21,7 @@ import {
     IconSearch,
 } from "@tabler/icons-react";
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 import appCss from "../styles.css?url";
 
@@ -93,6 +94,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
                 />
                 <Scripts />
                 <Analytics />
+                <SpeedInsights />
             </body>
         </html>
     );
