@@ -30,9 +30,9 @@ export async function sendWelcomeEmail(to: string, name: string) {
         <p>You've taken the first step toward acing your next interview.</p>
         <p>Here's what you can do right now:</p>
         <ul style="${FEATURE_LIST_STYLE}">
-          ${featureItem("Complete your profile to get personalized questions")}
-          ${featureItem("Start your first mock interview")}
-          ${featureItem("Get detailed feedback on every answer")}
+          ${featureItem("One 15-minute camera-on AI mock interview")}
+          ${featureItem("Questions tailored to your completed profile")}
+          ${featureItem("A basic score in your interview report")}
         </ul>
         <a href="${process.env.WEB_URL}/dashboard" 
            style="display:inline-block;padding:12px 24px;background:#7CD037;color:#fff;text-decoration:none;border-radius:8px;margin-top:16px;">
@@ -58,7 +58,13 @@ export async function sendFeedbackReadyEmail(
         html: `
       <div style="font-family: 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto;">
         <h1 style="color: #7CD037;">Your feedback is in, ${name}!</h1>
-        <p>We've analyzed your interview answers and prepared detailed feedback.</p>
+        <p>We've analyzed your interview answers and prepared your interview report.</p>
+        <ul style="${FEATURE_LIST_STYLE}">
+          ${featureItem("Your interview score and report summary")}
+          ${featureItem("A transcript of the conversation")}
+          ${featureItem("Recording playback when it is included with your pack")}
+          ${featureItem("Detailed feedback and action items on eligible paid packs")}
+        </ul>
         <a href="${process.env.WEB_URL}/interview/${interviewId}/report" 
            style="display:inline-block;padding:12px 24px;background:#7CD037;color:#fff;text-decoration:none;border-radius:8px;margin-top:16px;">
           View Your Report →
@@ -83,10 +89,10 @@ export async function sendTrialEndingEmail(
         <p>You've completed ${interviewsUsed} interviews and built real momentum. Don't stop now!</p>
         <p>Buy an interview pack for:</p>
         <ul style="${FEATURE_LIST_STYLE}">
-          ${featureItem("More camera-on interview sessions")}
-          ${featureItem("Saved interview recordings")}
-          ${featureItem("Model answers for every question")}
-          ${featureItem("Detailed feedback and improvement tips on eligible packs")}
+          ${featureItem("More camera-on AI interview sessions")}
+          ${featureItem("Playback for recordings from paid interview sessions")}
+          ${featureItem("Role-specific model answers")}
+          ${featureItem("Detailed feedback and action items on Standard and Premium packs")}
         </ul>
         <a href="${process.env.WEB_URL}/pricing" 
            style="display:inline-block;padding:12px 24px;background:#7CD037;color:#fff;text-decoration:none;border-radius:8px;margin-top:16px;">
@@ -113,10 +119,10 @@ export async function sendTeamInvitationEmail(
         <p><strong>${inviterName}</strong> has invited you to their team on PrepPilot.</p>
         <p>As a team member, you'll get:</p>
         <ul style="${FEATURE_LIST_STYLE}">
-          ${featureItem("Enterprise plan features")}
-          ${featureItem("Team analytics & leaderboard")}
-          ${featureItem("Unlimited mock interviews")}
-          ${featureItem("Voice mode with 6 accents")}
+          ${featureItem("A shared workspace for interview practice")}
+          ${featureItem("Team analytics for completed interviews")}
+          ${featureItem("Role-based member and admin access")}
+          ${featureItem("Interview reports, transcripts, and recording review")}
         </ul>
         <a href="${inviteUrl}" 
            style="display:inline-block;padding:12px 24px;background:#7CD037;color:#fff;text-decoration:none;border-radius:8px;margin-top:16px;">
@@ -190,9 +196,9 @@ export async function sendInterviewReminderEmail(
         <p>It's been <strong>${daysSinceLastInterview} days</strong> since your last practice interview.</p>
         <p>Consistency is key — even 15 minutes of practice can make a real difference:</p>
         <ul style="${FEATURE_LIST_STYLE}">
-          ${featureItem("Keep your answers sharp and structured")}
-          ${featureItem("Build confidence through repetition")}
-          ${featureItem("Track your improvement over time")}
+          ${featureItem("Practice camera-on with an AI interviewer")}
+          ${featureItem("Review interview reports and transcripts after each session")}
+          ${featureItem("Use role-specific model answers with a paid pack")}
         </ul>
         <a href="${process.env.WEB_URL}/interview/new" 
            style="display:inline-block;padding:12px 24px;background:#7CD037;color:#fff;text-decoration:none;border-radius:8px;margin-top:16px;">
@@ -217,10 +223,10 @@ export async function sendSubscriptionConfirmationEmail(
         <h1 style="color: #7CD037;">Your ${planName} is active!</h1>
         <p>Thanks for purchasing, ${name}. Your interview credits are ready to use.</p>
         <ul style="${FEATURE_LIST_STYLE}">
-          ${featureItem("Camera-on AI mock interviews")}
-          ${featureItem("Saved interview recordings")}
-          ${featureItem("Model answers on paid packs")}
-          ${featureItem("Report review from your dashboard")}
+          ${featureItem("The interview credits included with your pack")}
+          ${featureItem("Camera-on AI mock interview sessions")}
+          ${featureItem("Recording playback for completed paid sessions")}
+          ${featureItem("Role-specific model answers and report review")}
         </ul>
         <a href="${process.env.WEB_URL}/interview/new" 
            style="display:inline-block;padding:12px 24px;background:#7CD037;color:#fff;text-decoration:none;border-radius:8px;margin-top:16px;">
