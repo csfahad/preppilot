@@ -579,21 +579,33 @@ router.post("/:id/realtime/start", requireAuth, async (req, res) => {
             roleTitle: interview.roleTitle,
         });
 
-        // save session record in DB
+        const startedAt = new Date();
+
+        // Retrying the live page must refresh the existing one-to-one session,
+        // rather than failing on realtime_sessions.interview_id's unique key.
         const [session] = await db
             .insert(realtimeSessions)
             .values({
                 interviewId,
                 convaiAgentId: agentId,
                 status: "active",
-                startedAt: new Date(),
+                startedAt,
+            })
+            .onConflictDoUpdate({
+                target: realtimeSessions.interviewId,
+                set: {
+                    convaiAgentId: agentId,
+                    status: "active",
+                    startedAt,
+                    endedAt: null,
+                },
             })
             .returning();
 
         // update interview status to active
         await db
             .update(interviews)
-            .set({ status: "active", startedAt: new Date() })
+            .set({ status: "active", startedAt })
             .where(eq(interviews.id, interviewId));
 
         res.json({
