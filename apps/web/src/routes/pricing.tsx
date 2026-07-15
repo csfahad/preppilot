@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { api } from "@/lib/api-client";
@@ -268,6 +268,7 @@ function FaqItem({ q, a, index }: { q: string; a: string; index: number }) {
 
 function PricingPage() {
     const { data: session, isPending } = useSession();
+    const navigate = useNavigate();
     const [loadingPack, setLoadingPack] = useState<string | null>(null);
     const [confirmingPayment, setConfirmingPayment] = useState(false);
     const { plan: currentPlan, fetchPlan, hasFetched } = useSubscriptionStore();
@@ -278,8 +279,18 @@ function PricingPage() {
         }
     }, [session, fetchPlan]);
 
+    useEffect(() => {
+        if (session?.user && hasFetched && currentPlan !== "free") {
+            navigate({ to: "/dashboard", replace: true });
+        }
+    }, [currentPlan, hasFetched, navigate, session?.user]);
+
     if (isPending) {
         return <AppLoader label="Loading packs" />;
+    }
+
+    if (session?.user && (!hasFetched || currentPlan !== "free")) {
+        return <AppLoader label="Checking your active pack" />;
     }
 
     const handlePurchase = async (packId: string) => {
