@@ -9,7 +9,7 @@ import tailwindcss from "@tailwindcss/vite";
 const config = defineConfig({
     envDir: "../..",
     resolve: { tsconfigPaths: true },
-    plugins: [tanstackStart(), tailwindcss(), nitro(), devtools(), viteReact()],
+    plugins: [tanstackStart(), nitro(), tailwindcss(), devtools(), viteReact()],
 });
 
 export default config;
