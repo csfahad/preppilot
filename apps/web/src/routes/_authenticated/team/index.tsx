@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { api } from "@/lib/api-client";
 import { AppLoader } from "@/components/app-loader";
+import { toast } from "sonner";
 import {
     IconPlus,
     IconTrash,
@@ -75,10 +76,20 @@ function TeamPage() {
         setInviting(true);
         try {
             await api.inviteTeamMember(inviteEmail, inviteRole);
+            const invitedEmail = inviteEmail.trim();
             setInviteEmail("");
             await loadTeam();
+            toast.success("Invitation sent", {
+                description: `An invitation was sent to ${invitedEmail}.`,
+            });
         } catch (err) {
             console.error("Invite error:", err);
+            toast.error("Invitation failed", {
+                description:
+                    err instanceof Error
+                        ? err.message
+                        : "We could not send the invitation. Please try again.",
+            });
         } finally {
             setInviting(false);
         }
