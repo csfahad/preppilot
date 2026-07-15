@@ -12,20 +12,41 @@ interface UseConvaiSessionOptions {
     } | null;
     onTranscript?: (entry: TranscriptEntry) => void;
     onAISpeakingChange?: (speaking: boolean) => void;
+    onRecordingAudioStream?: (source: {
+        stream: MediaStream;
+        context: AudioContext;
+    }) => void;
 }
 
 interface ConvaiSessionState {
     isConnected: boolean;
     isAISpeaking: boolean;
+    aiAudioLevel: number;
+    userAudioLevel: number;
     error: string | null;
 }
 
+type VoiceConversation = Conversation & {
+    output?: {
+        context: AudioContext;
+        gain: GainNode;
+    };
+};
+
 export function useConvaiSession(options: UseConvaiSessionOptions) {
-    const { signedUrl, overrides, onTranscript, onAISpeakingChange } = options;
+    const {
+        signedUrl,
+        overrides,
+        onTranscript,
+        onAISpeakingChange,
+        onRecordingAudioStream,
+    } = options;
 
     const [state, setState] = useState<ConvaiSessionState>({
         isConnected: false,
         isAISpeaking: false,
+        aiAudioLevel: 0,
+        userAudioLevel: 0,
         error: null,
     });
 
@@ -35,12 +56,19 @@ export function useConvaiSession(options: UseConvaiSessionOptions) {
     const isMounted = useCallback(() => mountedRef.current, []);
     // Track if disconnect was intentional (user/cleanup) vs server-initiated
     const intentionalCloseRef = useRef(false);
+    const audioMeterRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const recordingDestinationRef = useRef<{
+        gain: GainNode;
+        destination: MediaStreamAudioDestinationNode;
+    } | null>(null);
 
     // Stable callback refs (no re-renders when these change)
     const onTranscriptRef = useRef(onTranscript);
     onTranscriptRef.current = onTranscript;
     const onAISpeakingChangeRef = useRef(onAISpeakingChange);
     onAISpeakingChangeRef.current = onAISpeakingChange;
+    const onRecordingAudioStreamRef = useRef(onRecordingAudioStream);
+    onRecordingAudioStreamRef.current = onRecordingAudioStream;
 
     // Store overrides in a ref so connect() always has the latest value
     // without needing to be in its dependency array
@@ -50,6 +78,24 @@ export function useConvaiSession(options: UseConvaiSessionOptions) {
     // Store signedUrl in a ref for the same reason
     const signedUrlRef = useRef(signedUrl);
     signedUrlRef.current = signedUrl;
+
+    const stopAudioMeter = useCallback(() => {
+        if (audioMeterRef.current) {
+            clearInterval(audioMeterRef.current);
+            audioMeterRef.current = null;
+        }
+    }, []);
+
+    const detachRecordingAudio = useCallback(() => {
+        const recordingDestination = recordingDestinationRef.current;
+        if (!recordingDestination) return;
+
+        recordingDestination.gain.disconnect(recordingDestination.destination);
+        recordingDestination.destination.stream
+            .getTracks()
+            .forEach((track) => track.stop());
+        recordingDestinationRef.current = null;
+    }, []);
 
     // Connect
     const connect = useCallback(async () => {
@@ -66,7 +112,13 @@ export function useConvaiSession(options: UseConvaiSessionOptions) {
         }
 
         intentionalCloseRef.current = false;
-        setState({ isConnected: false, isAISpeaking: false, error: null });
+        setState({
+            isConnected: false,
+            isAISpeaking: false,
+            aiAudioLevel: 0,
+            userAudioLevel: 0,
+            error: null,
+        });
 
         try {
             // Request mic permission (required by the SDK)
@@ -106,6 +158,8 @@ export function useConvaiSession(options: UseConvaiSessionOptions) {
                         ")",
                     );
                     conversationRef.current = null;
+                    stopAudioMeter();
+                    detachRecordingAudio();
 
                     if (isMounted()) {
                         setState((s) => ({
@@ -212,6 +266,29 @@ export function useConvaiSession(options: UseConvaiSessionOptions) {
             }
 
             conversationRef.current = conversation;
+            const voiceConversation = conversation as VoiceConversation;
+            if (voiceConversation.output) {
+                const destination =
+                    voiceConversation.output.context.createMediaStreamDestination();
+                voiceConversation.output.gain.connect(destination);
+                recordingDestinationRef.current = {
+                    gain: voiceConversation.output.gain,
+                    destination,
+                };
+                onRecordingAudioStreamRef.current?.({
+                    stream: destination.stream,
+                    context: voiceConversation.output.context,
+                });
+            }
+
+            audioMeterRef.current = setInterval(() => {
+                if (!isMounted() || !conversationRef.current) return;
+                setState((current) => ({
+                    ...current,
+                    aiAudioLevel: conversationRef.current!.getOutputVolume(),
+                    userAudioLevel: conversationRef.current!.getInputVolume(),
+                }));
+            }, 100);
             console.log("[ConvAI] Session started successfully");
         } catch (err) {
             const msg =
@@ -225,7 +302,7 @@ export function useConvaiSession(options: UseConvaiSessionOptions) {
                 }));
             }
         }
-    }, [isMounted]);
+    }, [detachRecordingAudio, isMounted, stopAudioMeter]);
 
     // Disconnect (user-initiated)
     const disconnect = useCallback(async () => {
@@ -240,14 +317,23 @@ export function useConvaiSession(options: UseConvaiSessionOptions) {
             conversationRef.current = null;
         }
 
+        stopAudioMeter();
+        detachRecordingAudio();
+
         if (isMounted()) {
             setState({
                 isConnected: false,
                 isAISpeaking: false,
+                aiAudioLevel: 0,
+                userAudioLevel: 0,
                 error: null,
             });
         }
-    }, [isMounted]);
+    }, [detachRecordingAudio, isMounted, stopAudioMeter]);
+
+    const setMicMuted = useCallback((isMuted: boolean) => {
+        conversationRef.current?.setMicMuted(isMuted);
+    }, []);
 
     // Track mount status
     useEffect(() => {
@@ -260,16 +346,19 @@ export function useConvaiSession(options: UseConvaiSessionOptions) {
                 conversationRef.current.endSession().catch(() => {});
                 conversationRef.current = null;
             }
+            stopAudioMeter();
+            detachRecordingAudio();
         };
-    }, []);
+    }, [detachRecordingAudio, stopAudioMeter]);
 
     return {
         isConnected: state.isConnected,
         isAISpeaking: state.isAISpeaking,
-        aiAudioLevel: 0,
-        userAudioLevel: 0,
+        aiAudioLevel: state.aiAudioLevel,
+        userAudioLevel: state.userAudioLevel,
         error: state.error,
         connect,
         disconnect,
+        setMicMuted,
     };
 }
