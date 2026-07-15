@@ -11,6 +11,7 @@ import { useEffect } from "react";
 import { initAnalytics } from "@/lib/analytics";
 import { initErrorMonitoring } from "@/lib/error-monitoring";
 import { initTheme } from "@/components/theme-toggle";
+import { AppToaster } from "@/components/app-toaster";
 import PublicHeader from "@/components/public-header";
 import PublicFooter from "@/components/public-footer";
 import {
@@ -19,6 +20,7 @@ import {
     IconDashboard,
     IconSearch,
 } from "@tabler/icons-react";
+import { Analytics } from "@vercel/analytics/react";
 
 import appCss from "../styles.css?url";
 
@@ -77,6 +79,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             </head>
             <body>
                 {children}
+                <AppToaster />
                 <TanStackDevtools
                     config={{
                         position: "bottom-right",
@@ -89,6 +92,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
                     ]}
                 />
                 <Scripts />
+                <Analytics />
             </body>
         </html>
     );
