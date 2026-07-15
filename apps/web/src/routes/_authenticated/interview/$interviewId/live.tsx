@@ -57,9 +57,37 @@ function LiveInterviewRoom() {
 
     const [elapsedTime, setElapsedTime] = useState(0);
     const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const elapsedTimeRef = useRef(0);
+    const recordingStartedRef = useRef(false);
 
-    const { isRecording, startRecording, stopRecording, getStream } =
-        useMediaRecorder();
+    const {
+        isRecording,
+        startRecording,
+        stopRecording,
+        getStream,
+        setMicrophoneEnabled,
+    } = useMediaRecorder();
+
+    const handleRecordingAudioStream = useCallback(
+        async (aiAudioSource: {
+            stream: MediaStream;
+            context: AudioContext;
+        }) => {
+            if (recordingStartedRef.current) return;
+
+            recordingStartedRef.current = true;
+            try {
+                await startRecording(aiAudioSource);
+            } catch (recordingError) {
+                recordingStartedRef.current = false;
+                console.warn(
+                    "Camera permission denied, continuing without recording",
+                    recordingError,
+                );
+            }
+        },
+        [startRecording],
+    );
 
     // ConvAI session
     const handleTranscript = useCallback(
@@ -81,6 +109,7 @@ function LiveInterviewRoom() {
         overrides: sessionOverrides,
         onTranscript: handleTranscript,
         onAISpeakingChange: handleAISpeakingChange,
+        onRecordingAudioStream: handleRecordingAudioStream,
     });
 
     // Init: Load interview data and start session
@@ -102,19 +131,8 @@ function LiveInterviewRoom() {
                     durationMinutes: data.durationMinutes || 30,
                 });
 
-                // 2. Request camera (optional — audio is handled by ElevenLabs SDK)
-                setPhase("permission");
-                try {
-                    await startRecording();
-                } catch {
-                    console.warn(
-                        "Camera permission denied, continuing without recording",
-                    );
-                }
-
-                if (isAborted()) return;
-
-                // 3. Get signed URL from server
+                // 2. Get signed URL from server. Recording starts after the
+                // AI output stream is available so both sides are captured.
                 setPhase("connecting");
                 const sessionRes = await api.startRealtimeSession(interviewId);
                 if (isAborted()) return;
@@ -125,18 +143,22 @@ function LiveInterviewRoom() {
                     throw new Error("No signed URL returned from server");
                 }
 
-                // 4. Store session data and update overrides
+                // 3. Store session data and update overrides
                 if (overrides) {
                     setSessionOverrides(overrides);
                 }
                 store.setSession(signedUrl);
 
-                // 5. Mark as active and start timer
+                // 4. Mark as active and start timer
                 setPhase("active");
                 store.setRecording(true);
 
                 timerRef.current = setInterval(() => {
-                    setElapsedTime((prev) => prev + 1);
+                    setElapsedTime((previous) => {
+                        const next = previous + 1;
+                        elapsedTimeRef.current = next;
+                        return next;
+                    });
                 }, 1000);
             } catch (err) {
                 if (isAborted()) return;
@@ -181,14 +203,11 @@ function LiveInterviewRoom() {
 
     // Mute handling
     const handleToggleMute = useCallback(() => {
-        const stream = getStream();
-        if (stream) {
-            stream.getAudioTracks().forEach((track) => {
-                track.enabled = isMuted; // toggle: if was muted, enable
-            });
-        }
+        const nextMuted = !isMuted;
+        setMicrophoneEnabled(!nextMuted);
+        convai.setMicMuted(nextMuted);
         setIsMuted((prev) => !prev);
-    }, [isMuted, getStream]);
+    }, [convai, isMuted, setMicrophoneEnabled]);
 
     // Camera handling
     const handleToggleCamera = useCallback(() => {
@@ -213,24 +232,24 @@ function LiveInterviewRoom() {
         }
 
         try {
-            // 1. Disconnect ConvAI
-            convai.disconnect();
-
-            // 2. Stop recording & upload
+            // 1. Stop recording while the AI audio stream is still attached.
             const blob = await stopRecording();
             if (blob && blob.size > 0) {
                 try {
                     await api.uploadRecording(
                         interviewId,
                         blob,
-                        "video/webm",
-                        elapsedTime,
+                        blob.type || "video/webm",
+                        elapsedTimeRef.current,
                     );
                 } catch (uploadErr) {
                     console.error("Recording upload failed:", uploadErr);
                     // Non-critical, continue
                 }
             }
+
+            // 2. Disconnect the conversation after its final audio is saved.
+            await convai.disconnect();
 
             // 3. End session on backend
             await api.endRealtimeSession(interviewId);
