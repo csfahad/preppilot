@@ -63,6 +63,14 @@ async function uploadRequest<T = any>(
     return response.json();
 }
 
+function normalizeRecordingContentType(
+    contentType: string,
+): "video/webm" | "audio/webm" {
+    return contentType.split(";", 1)[0].trim().toLowerCase() === "audio/webm"
+        ? "audio/webm"
+        : "video/webm";
+}
+
 export const api = {
     getProfile: () => request("/api/profiles/me"),
     createProfile: (data: any) =>
@@ -162,18 +170,21 @@ export const api = {
         blob: Blob,
         contentType: string,
         durationSeconds?: number,
-    ) =>
-        uploadRequest<{ fileUrl: string; key: string }>(
+    ) => {
+        const recordingContentType = normalizeRecordingContentType(contentType);
+
+        return uploadRequest<{ fileUrl: string; key: string }>(
             "/api/upload/recording",
             blob,
             {
-                "Content-Type": contentType,
+                "Content-Type": recordingContentType,
                 "X-Interview-Id": interviewId,
                 ...(durationSeconds
                     ? { "X-Duration-Seconds": String(durationSeconds) }
                     : {}),
             },
-        ),
+        );
+    },
 
     // Credits
     getCredits: () => request("/api/payments/credits"),
