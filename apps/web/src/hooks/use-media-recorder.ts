@@ -38,7 +38,7 @@ async function repairWebmDuration(
     // This package is CommonJS and only requires browser APIs. Loading it when a
     // recording ends keeps it out of the application's startup path.
     const { default: fixWebmDuration } = await import("fix-webm-duration");
-    return fixWebmDuration(blob, durationMs);
+    return fixWebmDuration(blob, durationMs, { logger: false });
 }
 
 export function useMediaRecorder(options: UseMediaRecorderOptions = {}) {
