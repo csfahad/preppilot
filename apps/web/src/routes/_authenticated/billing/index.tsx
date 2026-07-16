@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "motion/react";
+import { toast } from "sonner";
 import { api } from "@/lib/api-client";
 import { useSession } from "@/lib/auth-client";
 import { getPlanFullLabel } from "@/lib/plans";
@@ -106,6 +107,7 @@ function BillingPage() {
     const [loadingPack, setLoadingPack] = useState<string | null>(null);
     const [confirmingPayment, setConfirmingPayment] = useState(false);
     const [message, setMessage] = useState<string | null>(null);
+    const paymentHandledRef = useRef(false);
 
     useEffect(() => {
         async function loadBilling() {
@@ -215,6 +217,7 @@ function BillingPage() {
         if (!canBuyPack || loadingPack) return;
 
         setLoadingPack(packId);
+        paymentHandledRef.current = false;
         setMessage(null);
         try {
             const res = await api.purchasePack(packId);
@@ -228,8 +231,11 @@ function BillingPage() {
                 description: packLabel,
                 prefill: { email: userEmail },
                 handler: async (response: any) => {
+                    paymentHandledRef.current = true;
                     setConfirmingPayment(true);
                     try {
+                        let activatedPlan: string | null = null;
+
                         if (isDev) {
                             await api.verifyPayment({
                                 razorpayOrderId: response.razorpay_order_id,
@@ -237,31 +243,85 @@ function BillingPage() {
                                 razorpaySignature: response.razorpay_signature,
                                 packType: packId,
                             });
+                            const planRes = await api.getUserPlan();
+                            activatedPlan = planRes.data?.plan ?? null;
+                        } else {
+                            const maxAttempts = 15;
+                            const pollInterval = 2000;
+
+                            for (let i = 0; i < maxAttempts; i++) {
+                                await new Promise((resolve) =>
+                                    setTimeout(resolve, pollInterval),
+                                );
+                                const planRes = await api.getUserPlan();
+                                if (
+                                    planRes.data &&
+                                    planRes.data.plan !== "free"
+                                ) {
+                                    activatedPlan = planRes.data.plan;
+                                    break;
+                                }
+                            }
                         }
+
+                        if (!activatedPlan || activatedPlan === "free") {
+                            throw new Error(
+                                "Payment completed, but pack activation could not be confirmed yet.",
+                            );
+                        }
+
                         await fetchPlan();
                         await reloadBilling();
                         setMessage(
                             "New pack activated. Your credits are ready.",
                         );
+                        toast.success("Pack activated", {
+                            description: "Your interview credits are ready.",
+                        });
                     } catch (err) {
-                        setMessage(
+                        const errorMessage =
                             err instanceof Error
                                 ? err.message
-                                : "Payment completed, but activation could not be confirmed. Refresh billing in a moment.",
-                        );
+                                : "Payment completed, but activation could not be confirmed. Refresh billing in a moment.";
+                        setMessage(errorMessage);
+                        toast.error("Pack activation failed", {
+                            description: errorMessage,
+                        });
                     } finally {
                         setConfirmingPayment(false);
                     }
                 },
+                modal: {
+                    ondismiss: () => {
+                        if (paymentHandledRef.current) return;
+                        toast.error("Payment not completed", {
+                            description:
+                                "Checkout was closed before the pack could be activated.",
+                        });
+                    },
+                },
                 theme: { color: "#65a30d" },
+            });
+            rzp.on("payment.failed", (response: any) => {
+                paymentHandledRef.current = true;
+                const errorMessage =
+                    response?.error?.description ||
+                    "Your pack was not activated. Please try again.";
+                setMessage(errorMessage);
+                toast.error("Payment failed", {
+                    description: errorMessage,
+                });
             });
             rzp.open();
         } catch (err) {
-            setMessage(
+            const errorMessage =
                 err instanceof Error
                     ? err.message
-                    : "Unable to start checkout right now.",
-            );
+                    : "Unable to start checkout right now.";
+            setMessage(errorMessage);
+            toast.error("Checkout failed", {
+                description: errorMessage,
+            });
         } finally {
             setLoadingPack(null);
         }

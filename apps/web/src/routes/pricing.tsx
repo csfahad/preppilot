@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "motion/react";
+import { toast } from "sonner";
 import { api } from "@/lib/api-client";
 import { useSession } from "@/lib/auth-client";
 import { useSubscriptionStore } from "@/stores/subscription";
@@ -271,6 +272,7 @@ function PricingPage() {
     const navigate = useNavigate();
     const [loadingPack, setLoadingPack] = useState<string | null>(null);
     const [confirmingPayment, setConfirmingPayment] = useState(false);
+    const paymentHandledRef = useRef(false);
     const { plan: currentPlan, fetchPlan, hasFetched } = useSubscriptionStore();
 
     useEffect(() => {
@@ -301,6 +303,7 @@ function PricingPage() {
         }
 
         setLoadingPack(packId);
+        paymentHandledRef.current = false;
         try {
             const res = await api.purchasePack(packId);
             const { orderId, razorpayKeyId, userEmail, packLabel } = res.data;
@@ -316,8 +319,11 @@ function PricingPage() {
                     email: userEmail,
                 },
                 handler: async (response: any) => {
+                    paymentHandledRef.current = true;
                     setConfirmingPayment(true);
                     try {
+                        let activatedPlan: string | null = null;
+
                         if (isDev) {
                             await api.verifyPayment({
                                 razorpayOrderId: response.razorpay_order_id,
@@ -325,6 +331,8 @@ function PricingPage() {
                                 razorpaySignature: response.razorpay_signature,
                                 packType: packId,
                             });
+                            const planRes = await api.getUserPlan();
+                            activatedPlan = planRes.data?.plan ?? null;
                         } else {
                             // Production: webhook handles activation.
                             // Poll until credits appear, then redirect.
@@ -340,25 +348,64 @@ function PricingPage() {
                                     planRes.data &&
                                     planRes.data.plan !== "free"
                                 ) {
+                                    activatedPlan = planRes.data.plan;
                                     break;
                                 }
                             }
                         }
 
+                        if (!activatedPlan || activatedPlan === "free") {
+                            throw new Error(
+                                "Payment completed, but pack activation could not be confirmed yet.",
+                            );
+                        }
+
                         await fetchPlan();
-                        window.location.href = "/dashboard";
+                        toast.success("Pack activated", {
+                            description: "Your interview credits are ready.",
+                        });
+                        navigate({ to: "/dashboard", replace: true });
                     } catch (err) {
                         console.error("Payment confirmation error:", err);
+                        toast.error("Pack activation failed", {
+                            description:
+                                err instanceof Error
+                                    ? err.message
+                                    : "Payment completed, but activation could not be confirmed. Refresh billing in a moment.",
+                        });
                         setConfirmingPayment(false);
                     }
+                },
+                modal: {
+                    ondismiss: () => {
+                        if (paymentHandledRef.current) return;
+                        toast.error("Payment not completed", {
+                            description:
+                                "Checkout was closed before the pack could be activated.",
+                        });
+                    },
                 },
                 theme: { color: "#65a30d" },
             };
 
             const rzp = new (window as any).Razorpay(options);
+            rzp.on("payment.failed", (response: any) => {
+                paymentHandledRef.current = true;
+                toast.error("Payment failed", {
+                    description:
+                        response?.error?.description ||
+                        "Your pack was not activated. Please try again.",
+                });
+            });
             rzp.open();
         } catch (err) {
             console.error("Purchase error:", err);
+            toast.error("Checkout failed", {
+                description:
+                    err instanceof Error
+                        ? err.message
+                        : "Unable to start checkout right now.",
+            });
         } finally {
             setLoadingPack(null);
         }
