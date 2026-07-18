@@ -369,27 +369,27 @@ function LiveInterviewRoom() {
     return (
         <>
             {/* Full-screen overlay to escape the sidebar layout */}
-            <div className="fixed inset-0 z-50 bg-background flex flex-col">
+            <div className="fixed inset-0 z-50 flex min-h-dvh flex-col bg-background">
                 {/* Top bar */}
-                <div className="h-14 border-b border-border bg-card/80 backdrop-blur-sm flex items-center justify-between px-5 shrink-0">
-                    <div className="flex items-center gap-3">
+                <div className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-border bg-card/80 px-4 backdrop-blur-sm sm:px-5">
+                    <div className="flex min-w-0 items-center gap-3">
                         <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
                             <IconVideo className="w-4 h-4 text-primary" />
                         </div>
-                        <div>
-                            <h1 className="text-sm font-semibold text-foreground leading-tight">
+                        <div className="min-w-0">
+                            <h1 className="truncate text-sm font-semibold text-foreground leading-tight">
                                 {interviewData?.roleTitle || "Live Interview"}
                             </h1>
-                            <p className="text-[11px] text-muted-foreground leading-tight">
+                            <p className="truncate text-[11px] text-muted-foreground leading-tight">
                                 {interviewData?.seniority} •{" "}
                                 {interviewData?.interviewerTone} tone
                             </p>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex shrink-0 items-center gap-2 sm:gap-3">
                         {/* Duration indicator */}
-                        <div className="px-2.5 py-1 rounded-md bg-muted text-xs text-muted-foreground">
+                        <div className="rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground sm:px-2.5">
                             {elapsedTime > 0
                                 ? `${Math.floor(elapsedTime / 60)}m`
                                 : "0m"}{" "}
@@ -405,7 +405,7 @@ function LiveInterviewRoom() {
                                         : "bg-yellow-500 animate-pulse"
                                 }`}
                             />
-                            <span className="text-[11px] text-muted-foreground">
+                            <span className="hidden text-[11px] text-muted-foreground min-[390px]:inline">
                                 {convai.isConnected ? "Live" : "Reconnecting"}
                             </span>
                         </div>
@@ -413,9 +413,9 @@ function LiveInterviewRoom() {
                 </div>
 
                 {/* Main content area */}
-                <div className="flex-1 flex overflow-hidden">
+                <div className="flex min-h-0 flex-1 flex-col overflow-y-auto bg-muted/10 md:flex-row md:overflow-hidden">
                     {/* AI interviewer (60%) */}
-                    <div className="flex-3 flex items-center justify-center p-6 bg-linear-to-br from-background to-muted/20">
+                    <div className="flex min-h-80 flex-3 items-center justify-center bg-linear-to-br from-background to-muted/20 p-4 sm:min-h-92 sm:p-6 md:min-h-0">
                         <div className="w-full max-w-lg">
                             <AIAvatar
                                 name={getInterviewerName(
@@ -440,7 +440,7 @@ function LiveInterviewRoom() {
                     </div>
 
                     {/* User camera (40%) */}
-                    <div className="flex-2 p-4">
+                    <div className="h-[clamp(11rem,34vh,18rem)] w-full shrink-0 p-3 sm:h-[clamp(12rem,36vh,20rem)] sm:p-4 md:h-auto md:w-[min(40%,32rem)] md:self-stretch">
                         <UserCamera
                             stream={getStream()}
                             isMuted={isMuted}

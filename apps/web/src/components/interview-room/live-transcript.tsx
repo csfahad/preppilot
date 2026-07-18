@@ -49,11 +49,14 @@ export function LiveTranscript({
             {/* Toggle bar */}
             <button
                 onClick={onToggle}
-                className="w-full flex items-center justify-between px-5 py-2.5 hover:bg-accent/50 transition-colors cursor-pointer"
+                className="flex w-full items-center justify-between px-4 py-2.5 transition-colors hover:bg-accent/50 sm:px-5 cursor-pointer"
             >
                 <div className="flex items-center gap-2 min-w-0 flex-1">
-                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider shrink-0">
-                        Live Transcript
+                    <span className="shrink-0 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                        <span className="hidden sm:inline">
+                            Live Transcript
+                        </span>
+                        <span className="sm:hidden">Transcript</span>
                     </span>
                     {!isExpanded && collapsedEntry ? (
                         <span className="text-xs text-muted-foreground truncate">
@@ -98,7 +101,7 @@ export function LiveTranscript({
                     >
                         <div
                             ref={scrollRef}
-                            className="h-[200px] overflow-y-auto px-5 py-3 space-y-3"
+                            className="h-[min(200px,35dvh)] space-y-3 overflow-y-auto px-4 py-3 sm:px-5"
                         >
                             {safeEntries.length === 0 && (
                                 <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
