@@ -122,23 +122,23 @@ function TeamPage() {
     }
 
     return (
-        <main className="flex-1 px-6 lg:px-10 py-8 max-w-[1400px] mx-auto w-full">
+        <main className="mx-auto w-full max-w-[1400px] flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-10">
             {!team ? (
                 /* Create Team */
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-card border border-border rounded-2xl p-12 text-center"
+                    className="border border-border bg-card p-6 text-center sm:rounded-2xl sm:p-10 lg:p-12"
                 >
-                    <IconUsers className="w-16 h-16 text-muted-foreground mx-auto mb-6" />
-                    <h1 className="font-heading text-3xl font-bold text-foreground mb-3">
+                    <IconUsers className="mx-auto mb-5 h-12 w-12 text-muted-foreground sm:mb-6 sm:h-16 sm:w-16" />
+                    <h1 className="mb-3 text-2xl font-bold text-foreground font-heading sm:text-3xl">
                         Create Your Team
                     </h1>
-                    <p className="text-muted-foreground mb-8 max-w-md mx-auto">
+                    <p className="mx-auto mb-7 max-w-md text-pretty text-muted-foreground sm:mb-8">
                         Set up a team to manage interview prep for your whole
                         organization. All members get enterprise access.
                     </p>
-                    <div className="flex items-center gap-3 max-w-sm mx-auto">
+                    <div className="mx-auto flex w-full max-w-md flex-col gap-3 sm:flex-row sm:items-center">
                         <input
                             type="text"
                             value={createName}
@@ -147,12 +147,12 @@ function TeamPage() {
                             onKeyDown={(e) =>
                                 e.key === "Enter" && handleCreateTeam()
                             }
-                            className="flex-1 px-4 py-3 rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                            className="min-w-0 flex-1 rounded-xl border border-border bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground transition-all focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
                         />
                         <button
                             onClick={handleCreateTeam}
                             disabled={!createName.trim() || creating}
-                            className="px-6 py-3 rounded-xl bg-primary text-primary-foreground font-medium hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
+                            className="min-h-11 w-full rounded-xl bg-primary px-6 py-3 font-medium text-primary-foreground transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto cursor-pointer"
                         >
                             {creating ? "Creating..." : "Create"}
                         </button>
@@ -165,9 +165,9 @@ function TeamPage() {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                     >
-                        <div className="flex items-center justify-between mb-8">
-                            <div>
-                                <h1 className="font-heading text-3xl font-bold text-foreground">
+                        <div className="mb-8 flex flex-wrap items-start justify-between gap-3">
+                            <div className="min-w-0">
+                                <h1 className="truncate text-2xl font-bold text-foreground font-heading sm:text-3xl">
                                     {team.name}
                                 </h1>
                                 <p className="text-muted-foreground mt-1">
@@ -189,13 +189,13 @@ function TeamPage() {
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.1 }}
-                            className="bg-card border border-border rounded-2xl p-6 mb-6"
+                            className="mb-6 border border-border bg-card p-4 sm:rounded-2xl sm:p-6"
                         >
                             <h2 className="font-heading text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
                                 <IconMail className="w-5 h-5 text-primary" />{" "}
                                 Invite Members
                             </h2>
-                            <div className="flex items-center gap-3">
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                                 <input
                                     type="email"
                                     value={inviteEmail}
@@ -203,14 +203,14 @@ function TeamPage() {
                                         setInviteEmail(e.target.value)
                                     }
                                     placeholder="colleague@company.com"
-                                    className="flex-1 px-4 py-2.5 rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                                    className="min-w-0 flex-1 rounded-xl border border-border bg-background px-4 py-2.5 text-foreground placeholder:text-muted-foreground transition-all focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
                                 />
                                 <select
                                     value={inviteRole}
                                     onChange={(e) =>
                                         setInviteRole(e.target.value as any)
                                     }
-                                    className="px-3 py-2.5 rounded-xl border border-border bg-background text-foreground text-sm cursor-pointer"
+                                    className="rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground cursor-pointer"
                                 >
                                     <option value="member">Member</option>
                                     <option value="admin">Admin</option>
@@ -218,7 +218,7 @@ function TeamPage() {
                                 <button
                                     onClick={handleInvite}
                                     disabled={!inviteEmail.trim() || inviting}
-                                    className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
+                                    className="flex min-h-11 items-center justify-center gap-1.5 rounded-xl bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 sm:justify-start cursor-pointer"
                                 >
                                     <IconPlus className="w-4 h-4" />{" "}
                                     {inviting ? "Sending..." : "Invite"}
@@ -242,11 +242,11 @@ function TeamPage() {
                                 {team.invitations.map((inv: any) => (
                                     <div
                                         key={inv.id}
-                                        className="flex items-center justify-between bg-card border border-border rounded-xl p-4"
+                                        className="flex items-start justify-between gap-3 rounded-xl border border-border bg-card p-4 sm:items-center"
                                     >
-                                        <div className="flex items-center gap-3">
-                                            <IconMail className="w-4 h-4 text-muted-foreground" />
-                                            <span className="text-sm text-foreground">
+                                        <div className="flex min-w-0 items-center gap-3">
+                                            <IconMail className="h-4 w-4 shrink-0 text-muted-foreground" />
+                                            <span className="truncate text-sm text-foreground">
                                                 {inv.email}
                                             </span>
                                             <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-500/10 text-yellow-600">
@@ -337,7 +337,7 @@ function TeamPage() {
                                                 (member: any) => (
                                                     <div
                                                         key={member.userId}
-                                                        className="flex items-center justify-between gap-4 p-4 border-b border-border last:border-b-0"
+                                                        className="flex items-center justify-between gap-4 border-b border-border p-4 last:border-b-0"
                                                     >
                                                         <div className="min-w-0">
                                                             <p className="text-sm font-medium text-foreground truncate">
@@ -380,9 +380,9 @@ function TeamPage() {
                             {team.members?.map((member: any) => (
                                 <div
                                     key={member.id}
-                                    className="flex items-center justify-between bg-card border border-border rounded-xl p-4 hover:border-primary/20 transition-colors"
+                                    className="flex items-start justify-between gap-3 rounded-xl border border-border bg-card p-4 transition-colors hover:border-primary/20 sm:items-center"
                                 >
-                                    <div className="flex items-center gap-4">
+                                    <div className="flex min-w-0 items-center gap-3 sm:gap-4">
                                         <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                                             {member.avatarUrl ? (
                                                 <img
@@ -394,18 +394,18 @@ function TeamPage() {
                                                 <IconUser className="w-5 h-5 text-primary" />
                                             )}
                                         </div>
-                                        <div>
-                                            <p className="text-sm font-medium text-foreground flex items-center gap-2">
+                                        <div className="min-w-0">
+                                            <p className="flex items-center gap-2 text-sm font-medium text-foreground">
                                                 {member.name}
                                                 {roleIcon(member.role)}
                                             </p>
-                                            <p className="text-xs text-muted-foreground">
+                                            <p className="truncate text-xs text-muted-foreground">
                                                 {member.email}
                                             </p>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-3">
-                                        <span className="text-xs text-muted-foreground capitalize">
+                                    <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+                                        <span className="hidden text-xs capitalize text-muted-foreground sm:inline">
                                             {member.role}
                                         </span>
                                         {["owner", "admin"].includes(
