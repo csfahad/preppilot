@@ -34,9 +34,9 @@ export function ControlsBar({
     onEndInterview,
 }: ControlsBarProps) {
     return (
-        <div className="w-full h-20 border-t border-border bg-card/80 backdrop-blur-xl flex items-center justify-between px-6">
+        <div className="grid min-h-20 w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 border-t border-border bg-card/80 px-4 py-3 backdrop-blur-xl sm:px-6">
             {/* Left: connection status */}
-            <div className="flex items-center gap-2 w-40">
+            <div className="flex min-w-0 items-center gap-1.5 sm:gap-2">
                 <div
                     className={`w-2.5 h-2.5 rounded-full ${
                         isConnected
@@ -44,16 +44,16 @@ export function ControlsBar({
                             : "bg-yellow-500 animate-pulse"
                     }`}
                 />
-                <span className="text-xs font-medium text-muted-foreground">
+                <span className="hidden truncate text-xs font-medium text-muted-foreground min-[390px]:inline">
                     {isConnected ? "Connected" : "Connecting..."}
                 </span>
                 {isConnected && (
-                    <IconWifi className="w-3.5 h-3.5 text-emerald-500" />
+                    <IconWifi className="hidden h-3.5 w-3.5 shrink-0 text-emerald-500 sm:block" />
                 )}
             </div>
 
             {/* Center: controls */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
                 {/* Mute toggle */}
                 <motion.button
                     whileHover={{ scale: 1.08 }}
@@ -105,8 +105,8 @@ export function ControlsBar({
             </div>
 
             {/* Right: elapsed time */}
-            <div className="flex items-center justify-end w-40">
-                <div className="px-3 py-1.5 rounded-lg bg-muted text-sm font-mono font-medium text-foreground tabular-nums">
+            <div className="flex min-w-0 items-center justify-end">
+                <div className="rounded-lg bg-muted px-2 py-1.5 text-sm font-mono font-medium tabular-nums text-foreground sm:px-3">
                     {formatElapsed(elapsedTime)}
                 </div>
             </div>

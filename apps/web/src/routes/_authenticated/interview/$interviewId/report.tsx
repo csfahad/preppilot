@@ -713,7 +713,13 @@ function RecordingPlayer({
 
     useEffect(() => {
         const handleFullscreenChange = () => {
-            setIsFullscreen(document.fullscreenElement === shellRef.current);
+            const nextIsFullscreen =
+                document.fullscreenElement === shellRef.current;
+            setIsFullscreen(nextIsFullscreen);
+
+            if (!nextIsFullscreen && screen.orientation?.unlock) {
+                screen.orientation.unlock();
+            }
         };
 
         document.addEventListener("fullscreenchange", handleFullscreenChange);
@@ -722,6 +728,9 @@ function RecordingPlayer({
                 "fullscreenchange",
                 handleFullscreenChange,
             );
+            if (screen.orientation?.unlock) {
+                screen.orientation.unlock();
+            }
         };
     }, []);
 
@@ -782,14 +791,19 @@ function RecordingPlayer({
         setCurrentTime(media.currentTime);
     };
 
-    const toggleFullscreen = () => {
+    const toggleFullscreen = async () => {
         if (type === "audio") return;
         if (document.fullscreenElement) {
-            void document.exitFullscreen();
+            await document.exitFullscreen();
             return;
         }
 
-        void shellRef.current?.requestFullscreen();
+        try {
+            await shellRef.current?.requestFullscreen();
+            await screen.orientation?.lock?.("landscape");
+        } catch (error) {
+            console.warn("Unable to enter landscape fullscreen", error);
+        }
     };
 
     const sharedMediaProps = {
@@ -839,18 +853,21 @@ function RecordingPlayer({
     return (
         <div
             ref={shellRef}
-            className="mx-auto w-full max-w-4xl overflow-hidden rounded-xl border border-border bg-zinc-950 shadow-lg shadow-black/10"
+            className={`recording-player mx-auto w-full max-w-4xl overflow-hidden rounded-xl border border-border bg-zinc-950 shadow-lg shadow-black/10 ${
+                isFullscreen ? "recording-player--fullscreen" : ""
+            }`}
         >
             <div
                 className={
                     type === "video"
-                        ? "relative aspect-video bg-black"
+                        ? "recording-player__stage relative aspect-video bg-black"
                         : "relative flex min-h-52 items-center justify-center bg-[linear-gradient(135deg,#0a0a0a,#1f2937)]"
                 }
             >
                 {type === "video" ? (
                     <video
                         {...sharedMediaProps}
+                        playsInline
                         className="h-full w-full object-contain"
                     />
                 ) : (
@@ -868,7 +885,7 @@ function RecordingPlayer({
                 )}
             </div>
 
-            <div className="bg-zinc-950 px-4 py-3 text-white">
+            <div className="recording-player__toolbar bg-zinc-950 px-3 py-3 text-white sm:px-4">
                 <input
                     type="range"
                     min={0}
@@ -880,7 +897,7 @@ function RecordingPlayer({
                     aria-label="Seek recording"
                     className="h-1.5 w-full cursor-pointer accent-primary disabled:cursor-not-allowed disabled:opacity-50"
                 />
-                <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+                <div className="mt-3 flex items-center justify-between gap-2 sm:gap-3">
                     <div className="flex items-center gap-3">
                         <button
                             type="button"
@@ -896,13 +913,13 @@ function RecordingPlayer({
                                 <IconPlayerPlay className="h-5 w-5" />
                             )}
                         </button>
-                        <span className="min-w-24 text-xs font-medium text-white/75">
+                        <span className="min-w-20 text-xs font-medium text-white/75 sm:min-w-24">
                             {formatMediaTime(currentTime)} /{" "}
                             {formatMediaTime(effectiveDuration)}
                         </span>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex shrink-0 items-center gap-1 sm:gap-2">
                         <button
                             type="button"
                             onClick={toggleMute}
@@ -928,7 +945,7 @@ function RecordingPlayer({
                                 changeVolume(Number(event.target.value))
                             }
                             aria-label="Volume"
-                            className="h-1.5 w-24 cursor-pointer accent-primary"
+                            className="hidden h-1.5 w-24 cursor-pointer accent-primary sm:block"
                         />
                         {type === "video" && (
                             <button

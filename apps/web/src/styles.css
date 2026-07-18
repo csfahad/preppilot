@@ -163,3 +163,42 @@ body {
 .no-transition *::after {
     transition: none !important;
 }
+
+/* A fullscreen element does not automatically stretch its children. Give the
+   recording a real playback canvas so mobile fullscreen never leaves the video
+   pinned to the top of an otherwise empty screen. */
+.recording-player:fullscreen,
+.recording-player--fullscreen {
+    display: flex;
+    width: 100vw;
+    max-width: none;
+    height: 100dvh;
+    flex-direction: column;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.recording-player:fullscreen .recording-player__stage,
+.recording-player--fullscreen .recording-player__stage {
+    min-height: 0;
+    flex: 1 1 auto;
+    aspect-ratio: auto;
+}
+
+.recording-player:fullscreen .recording-player__toolbar,
+.recording-player--fullscreen .recording-player__toolbar {
+    flex: 0 0 auto;
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+    }
+}

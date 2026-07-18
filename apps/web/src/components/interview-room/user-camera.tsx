@@ -38,10 +38,10 @@ export function UserCamera({
         : "You";
 
     return (
-        <div className="relative w-full h-full rounded-2xl overflow-hidden bg-card border border-border">
+        <div className="relative h-full w-full overflow-hidden rounded-xl border border-border bg-card sm:rounded-2xl">
             {/* Audio level glow border */}
             <motion.div
-                className="absolute inset-0 rounded-2xl z-10 pointer-events-none"
+                className="pointer-events-none absolute inset-0 z-10 rounded-xl sm:rounded-2xl"
                 animate={{
                     boxShadow: `inset 0 0 0 ${2 + audioLevel * 3}px oklch(0.768 0.233 130.85 / ${0.1 + audioLevel * 0.4})`,
                 }}
