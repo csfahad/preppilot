@@ -150,10 +150,6 @@ function LandingExperience() {
                         transition={{ duration: 0.6 }}
                         className="max-w-2xl"
                     >
-                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary/20 bg-primary/10 text-primary text-sm font-semibold mb-6">
-                            <IconSparkles className="w-4 h-4" />
-                            Realtime video interview practice
-                        </div>
                         <h1 className="font-heading text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.02] text-foreground">
                             PrepPilot
                         </h1>
