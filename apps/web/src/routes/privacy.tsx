@@ -52,7 +52,7 @@ const PRIVACY_SECTIONS = [
         body: [
             "Completed reports and interview history remain available unless deletion is required or requested through support.",
             "Expired credits no longer allow new interviews, but related billing and usage records may remain for accounting, compliance, and abuse prevention.",
-            "You can contact support@preppilot.ai to request account, recording, or profile-data deletion, subject to legal and operational retention needs.",
+            "You can contact support@preppilot.csfahad.me to request account, recording, or profile-data deletion, subject to legal and operational retention needs.",
         ],
     },
     {

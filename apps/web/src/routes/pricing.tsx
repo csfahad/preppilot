@@ -220,7 +220,7 @@ const FAQS = [
     },
     {
         q: "Can I get a refund?",
-        a: "We offer a full refund within 24 hours of purchase if you haven't used any credits from the pack. After using even one credit, refunds are prorated based on remaining unused credits. Contact support@preppilot.ai for assistance.",
+        a: "We offer a full refund within 24 hours of purchase if you haven't used any credits from the pack. After using even one credit, refunds are prorated based on remaining unused credits. Contact support@preppilot.csfahad.me for assistance.",
     },
 ];
 
@@ -487,7 +487,7 @@ function PricingPage() {
                                     Popular
                                 </div>
                             ) : (
-                                <div className="h-[33px]" />
+                                <div className="h-8.25" />
                             )}
 
                             {/* Card top */}
@@ -507,7 +507,7 @@ function PricingPage() {
                                 </div>
 
                                 {/* Description */}
-                                <p className="text-sm text-muted-foreground min-h-[20px]">
+                                <p className="text-sm text-muted-foreground min-h-5">
                                     {pack.description}
                                 </p>
                             </div>
@@ -612,10 +612,10 @@ function PricingPage() {
                     </p>
 
                     <div className="overflow-x-auto -mx-4 px-4">
-                        <table className="w-full min-w-[640px] border-collapse">
+                        <table className="w-full min-w-160 border-collapse">
                             <thead>
                                 <tr className="border-b border-border">
-                                    <th className="text-left py-4 pr-4 text-sm font-medium text-muted-foreground w-[200px]">
+                                    <th className="text-left py-4 pr-4 text-sm font-medium text-muted-foreground w-50">
                                         Feature
                                     </th>
                                     {PACKS.map((p) => (

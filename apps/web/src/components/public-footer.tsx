@@ -21,7 +21,7 @@ const FOOTER_GROUPS = [
     {
         title: "Company",
         links: [
-            { label: "Contact", href: "mailto:support@preppilot.ai" },
+            { label: "Contact", href: "mailto:support@preppilot.csfahad.me" },
             { label: "Privacy Policy", to: "/privacy" },
             { label: "Terms of Service", to: "/terms" },
         ],
@@ -69,7 +69,7 @@ export default function PublicFooter() {
                                 <IconArrowRight className="h-4 w-4" />
                             </Link>
                             <a
-                                href="mailto:support@preppilot.ai"
+                                href="mailto:support@preppilot.csfahad.me"
                                 className="inline-flex items-center gap-2 rounded-xl border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-accent"
                             >
                                 <IconMail className="h-4 w-4" />
