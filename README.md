@@ -1,159 +1,71 @@
-# Turborepo starter
+<p align="center">
+  <img src="./assets/images/product-logo.png" alt="PrepPilot" width="199" />
+</p>
 
-This Turborepo starter is maintained by the Turborepo core team.
+<p align="center">Interview preparation, built around the way you want to be hired.</p>
 
-## Using this example
+<p align="center">
+  <img src="https://img.shields.io/badge/product-AI%20interview%20practice-7ED321?style=flat-square" alt="Product: AI interview practice" />
+  <img src="https://img.shields.io/badge/status-private-1F2937?style=flat-square" alt="Status: Private" />
+  <img src="https://img.shields.io/badge/license-proprietary-7ED321?style=flat-square" alt="License: Proprietary" />
+</p>
 
-Run the following command:
+<p align="center">
+  <img src="./assets/images/Hero1.png" alt="PrepPilot product overview" width="100%" />
+</p>
 
-```sh
-npx create-turbo@latest
-```
+## Purpose
 
-## What's inside?
+PrepPilot helps candidates turn interview preparation into deliberate practice. It replaces generic question lists and unstructured rehearsal with tailored interview sessions, immediate feedback, and a clear view of what to improve next.
 
-This Turborepo includes the following packages/apps:
+The product is designed for people preparing for high-stakes career conversations: individual candidates refining their approach, career teams supporting talent at scale, and organizations that need a more consistent way to develop interview readiness.
 
-### Apps and Packages
+## What PrepPilot solves
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+Preparing for an interview is often fragmented. Candidates search for questions, practice without pressure, and receive feedback too late—or not at all. PrepPilot brings those moments together in a single experience.
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+- Practice against the role, seniority, company context, and interview format that matter.
+- Rehearse in a live, conversational setting instead of relying on static prompts.
+- Build confidence answering behavioral, technical, domain, leadership, and situational questions.
+- Receive structured feedback that makes strengths, gaps, and next actions clear.
+- Track progress across sessions rather than treating preparation as a one-off event.
 
-### Utilities
+## The PrepPilot experience
 
-This Turborepo has some additional tools already setup for you:
+### Configure the session
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+Start with the context of the opportunity: role, interview focus, target company, duration, interviewer style, and voice preference. PrepPilot uses that context to create a practice session that feels relevant—not generic.
 
-### Build
+### Practice under realistic conditions
 
-To build all apps and packages, run the following command:
+Take part in a guided interview designed to keep the conversation moving. Questions can probe beyond the first answer, helping candidates practice the judgment, clarity, and composure that interviews demand.
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
+<p align="center">
+  <img src="./assets/images/Hero2.png" alt="PrepPilot live interview session" width="100%" />
+</p>
 
-```sh
-cd my-turborepo
-turbo build
-```
+### Review what matters
 
-Without global `turbo`, use your package manager:
+After each session, PrepPilot turns performance into an actionable review. Candidates can identify where their answers were strongest, where their story lost focus, and what to work on before the next interview.
 
-```sh
-cd my-turborepo
-npx turbo build
-bun dlx turbo build
-bun exec turbo build
-```
+## Product capabilities
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+| Capability                  | What it enables                                                                                 |
+| --------------------------- | ----------------------------------------------------------------------------------------------- |
+| Tailored interview setup    | Practice sessions shaped around role, experience level, interview type, and target opportunity. |
+| Live AI interviewer         | A responsive interview format that supports natural spoken practice.                            |
+| Adaptive questioning        | Follow-up questions that encourage deeper, more complete answers.                               |
+| Interview evaluation        | Feedback across answer quality, structure, relevance, confidence, and depth.                    |
+| Session reports             | A consolidated view of strengths, improvement areas, and overall performance.                   |
+| Resume-informed preparation | Practice grounded in a candidate’s experience and career direction.                             |
+| Team experience             | Shared visibility for organizations supporting cohorts or career-development programs.          |
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
+## Built for meaningful preparation
 
-```sh
-turbo build --filter=docs
-```
+PrepPilot is intentionally more demanding than a prompt generator. It combines role-specific context, conversation flow, response evaluation, and progress review so preparation can mirror the complexity of a real interview while still giving candidates a focused path forward.
 
-Without global `turbo`:
+The result is a repeatable practice loop: prepare with context, perform under pressure, review with intent, and return sharper.
 
-```sh
-npx turbo build --filter=docs
-bun exec turbo build --filter=docs
-bun exec turbo build --filter=docs
-```
+## Confidentiality
 
-### Develop
-
-To develop all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo dev
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo dev
-bun exec turbo dev
-bun exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo dev --filter=web
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo dev --filter=web
-bun exec turbo dev --filter=web
-bun exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo login
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo login
-bun exec turbo login
-bun exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo link
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo link
-bun exec turbo link
-bun exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+PrepPilot is proprietary, closed-source software. This repository and its contents are confidential and intended solely for authorized personnel. It is not licensed for public use, redistribution, external contribution, or disclosure.
