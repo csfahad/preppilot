@@ -1,5 +1,7 @@
 <p align="center">
-  <img width="562" height="189" alt="product-logo" src="https://github.com/user-attachments/assets/f3d25592-ee7f-419f-aff2-ac215ebb5049" />
+  <a href="https://preppilot.csfahad.me" target="_blank" rel="noopener noreferrer">
+    <img width="562" height="189" alt="product-logo" src="https://github.com/user-attachments/assets/f3d25592-ee7f-419f-aff2-ac215ebb5049" />
+  </a>
 </p>
 
 <p align="center">Interview preparation, built around the way you want to be hired.</p>
