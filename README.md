@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://preppilot.csfahad.me" target="_blank" rel="noopener noreferrer">
+  <a href="https://preppilot.csfahad.me">
     <img width="562" height="189" alt="product-logo" src="https://github.com/user-attachments/assets/f3d25592-ee7f-419f-aff2-ac215ebb5049" />
   </a>
 </p>
