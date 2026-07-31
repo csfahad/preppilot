@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./assets/images/product-logo.png" alt="PrepPilot" width="199" />
+  <img width="562" height="189" alt="product-logo" src="https://github.com/user-attachments/assets/f3d25592-ee7f-419f-aff2-ac215ebb5049" />
 </p>
 
 <p align="center">Interview preparation, built around the way you want to be hired.</p>
@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <img src="./assets/images/Hero1.png" alt="PrepPilot product overview" width="100%" />
+  <img width="1440" height="777" alt="Hero1" src="https://github.com/user-attachments/assets/76a8b353-7e7c-4a59-8e15-eb47976b4b74" />
 </p>
 
 ## Purpose
@@ -41,7 +41,7 @@ Start with the context of the opportunity: role, interview focus, target company
 Take part in a guided interview designed to keep the conversation moving. Questions can probe beyond the first answer, helping candidates practice the judgment, clarity, and composure that interviews demand.
 
 <p align="center">
-  <img src="./assets/images/Hero2.png" alt="PrepPilot live interview session" width="100%" />
+  <img width="1440" height="777" alt="Hero2" src="https://github.com/user-attachments/assets/c266fc3c-3079-42cd-b8e5-f86a883a329c" />
 </p>
 
 ### Review what matters
