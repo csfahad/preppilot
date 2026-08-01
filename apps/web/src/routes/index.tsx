@@ -18,7 +18,6 @@ import {
     IconMicrophone,
     IconPlayerPlay,
     IconShieldCheck,
-    IconSparkles,
     IconTarget,
     IconUsers,
     IconVideo,
@@ -127,7 +126,7 @@ function Home() {
         }
     }, [session, isPending, navigate]);
 
-    if (isPending || session) {
+    if (session) {
         return <AppLoader label="Preparing your workspace" />;
     }
 
