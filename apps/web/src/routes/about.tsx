@@ -57,9 +57,12 @@ function AboutPage() {
                                 About PrepPilot
                             </p>
                             <h1 className="mt-4 text-balance font-heading text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-                                PrepPilot is AI-powered mock interview practice
-                                for real opportunities.
+                                PrepPilot
                             </h1>
+                            <h2 className="mt-4 max-w-2xl text-balance font-heading text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+                                AI-powered mock interview practice for real
+                                opportunities.
+                            </h2>
                             <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
                                 PrepPilot helps job seekers prepare through
                                 camera-on interview sessions with an AI
