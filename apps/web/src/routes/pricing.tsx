@@ -220,7 +220,7 @@ const FAQS = [
     },
     {
         q: "Can I get a refund?",
-        a: "We offer a full refund within 24 hours of purchase if you haven't used any credits from the pack. After using even one credit, refunds are prorated based on remaining unused credits. Contact support@preppilot.csfahad.me for assistance.",
+        a: "We offer a full refund within 24 hours of purchase if you haven't used any credits from the pack. After using even one credit, refunds are prorated based on remaining unused credits. Contact support@preppilot.csfahad.in for assistance.",
     },
 ];
 
