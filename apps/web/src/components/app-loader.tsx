@@ -32,11 +32,9 @@ export function AppLoader({
                             repeat: Infinity,
                         }}
                     />
-                    <img
-                        src="/preppilot-logo.png"
-                        alt=""
-                        className="relative h-9 w-10.5 rounded-md object-cover"
-                    />
+                    <div className="relative font-heading text-xl font-bold tracking-tight">
+                        P<span className="text-primary">P</span>
+                    </div>
                 </div>
                 <p className="relative font-heading text-lg font-semibold text-foreground">
                     Prep<span className="text-primary">Pilot</span>
