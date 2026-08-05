@@ -8,7 +8,9 @@ import {
     IconMicrophone,
     IconChartBar,
 } from "@tabler/icons-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+
+type OAuthProvider = "google" | "github";
 
 export const Route = createFileRoute("/auth/login")({
     component: LoginPage,
@@ -21,6 +23,8 @@ function LoginPage() {
     const { data: session, isPending } = useSession();
     const navigate = useNavigate();
     const { error } = Route.useSearch();
+    const [pendingProvider, setPendingProvider] =
+        useState<OAuthProvider | null>(null);
 
     useEffect(() => {
         if (session && !isPending) {
@@ -34,12 +38,17 @@ function LoginPage() {
             : "http://localhost:3000";
     const authCallbackURL = `${webOrigin}/auth/callback`;
 
-    const handleGoogleSignIn = () => {
-        signIn.social({ provider: "google", callbackURL: authCallbackURL });
-    };
+    const handleSocialSignIn = async (provider: OAuthProvider) => {
+        if (pendingProvider) return;
 
-    const handleGithubSignIn = () => {
-        signIn.social({ provider: "github", callbackURL: authCallbackURL });
+        setPendingProvider(provider);
+
+        try {
+            await signIn.social({ provider, callbackURL: authCallbackURL });
+        } catch {
+            // If the provider window cannot open, restore the controls so the user can retry.
+            setPendingProvider(null);
+        }
     };
 
     return (
@@ -175,21 +184,75 @@ function LoginPage() {
                             </div>
                         )}
                         <button
-                            onClick={handleGoogleSignIn}
+                            type="button"
+                            onClick={() => handleSocialSignIn("google")}
                             id="google-sign-in"
-                            className="w-full flex items-center justify-center gap-3 px-6 py-3.5 rounded-xl border border-border bg-card hover:bg-accent transition-all duration-200 text-foreground font-medium shadow-sm hover:shadow-md cursor-pointer"
+                            disabled={pendingProvider !== null}
+                            aria-busy={pendingProvider === "google"}
+                            aria-label={
+                                pendingProvider === "google"
+                                    ? "Connecting to Google"
+                                    : "Continue with Google"
+                            }
+                            className="w-full flex items-center justify-center gap-3 px-6 py-3.5 rounded-xl border border-border bg-card text-foreground font-medium cursor-pointer transition-[background-color,border-color,color,opacity] duration-200 ease-out hover:bg-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-wait disabled:border-primary/40 disabled:bg-primary/5 disabled:text-foreground disabled:opacity-100"
                         >
-                            <IconBrandGoogle className="w-5 h-5" />
-                            Continue with Google
+                            <span className="relative flex size-5 shrink-0 items-center justify-center">
+                                <IconBrandGoogle
+                                    className={`size-5 transition-opacity duration-150 ${
+                                        pendingProvider === "google"
+                                            ? "opacity-35"
+                                            : "opacity-100"
+                                    }`}
+                                    aria-hidden="true"
+                                />
+                                {pendingProvider === "google" ? (
+                                    <span
+                                        className="absolute inset-0 rounded-full border-2 border-primary border-t-transparent motion-safe:animate-spin"
+                                        aria-hidden="true"
+                                    />
+                                ) : null}
+                            </span>
+                            <span>
+                                {pendingProvider === "google"
+                                    ? "Connecting to Google…"
+                                    : "Continue with Google"}
+                            </span>
                         </button>
 
                         <button
-                            onClick={handleGithubSignIn}
+                            type="button"
+                            onClick={() => handleSocialSignIn("github")}
                             id="github-sign-in"
-                            className="w-full flex items-center justify-center gap-3 px-6 py-3.5 rounded-xl border border-border bg-card hover:bg-accent transition-all duration-200 text-foreground font-medium shadow-sm hover:shadow-md cursor-pointer"
+                            disabled={pendingProvider !== null}
+                            aria-busy={pendingProvider === "github"}
+                            aria-label={
+                                pendingProvider === "github"
+                                    ? "Connecting to GitHub"
+                                    : "Continue with GitHub"
+                            }
+                            className="w-full flex items-center justify-center gap-3 px-6 py-3.5 rounded-xl border border-border bg-card text-foreground font-medium cursor-pointer transition-[background-color,border-color,color,opacity] duration-200 ease-out hover:bg-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-wait disabled:border-primary/40 disabled:bg-primary/5 disabled:text-foreground disabled:opacity-100"
                         >
-                            <IconBrandGithub className="w-5 h-5" />
-                            Continue with GitHub
+                            <span className="relative flex size-5 shrink-0 items-center justify-center">
+                                <IconBrandGithub
+                                    className={`size-5 transition-opacity duration-150 ${
+                                        pendingProvider === "github"
+                                            ? "opacity-35"
+                                            : "opacity-100"
+                                    }`}
+                                    aria-hidden="true"
+                                />
+                                {pendingProvider === "github" ? (
+                                    <span
+                                        className="absolute inset-0 rounded-full border-2 border-primary border-t-transparent motion-safe:animate-spin"
+                                        aria-hidden="true"
+                                    />
+                                ) : null}
+                            </span>
+                            <span>
+                                {pendingProvider === "github"
+                                    ? "Connecting to GitHub…"
+                                    : "Continue with GitHub"}
+                            </span>
                         </button>
                     </div>
 
